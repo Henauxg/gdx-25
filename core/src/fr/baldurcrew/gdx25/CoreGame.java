@@ -15,6 +15,7 @@ import fr.baldurcrew.gdx25.water.WaterSimulation;
 public class CoreGame extends ApplicationAdapter {
 
     private static final Color CLEAR_COLOR = new Color(0.5f, 0.898f, 1, 1);
+    public static boolean debugMode = true;
 
     World world;
     private OrthographicCamera camera;
@@ -73,6 +74,6 @@ public class CoreGame extends ApplicationAdapter {
 
     @Override
     public void dispose() {
-
+        water.dispose();
     }
 }
