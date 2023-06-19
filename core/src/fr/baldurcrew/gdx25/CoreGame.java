@@ -8,6 +8,7 @@ import com.badlogic.gdx.physics.box2d.Box2D;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.ScreenUtils;
+import fr.baldurcrew.gdx25.water.WaterSimulation;
 
 
 public class CoreGame extends ApplicationAdapter {
@@ -18,6 +19,8 @@ public class CoreGame extends ApplicationAdapter {
 
     private float accumulator = 0;
 
+    private WaterSimulation water;
+
     @Override
     public void create() {
         camera = new OrthographicCamera();
@@ -26,15 +29,32 @@ public class CoreGame extends ApplicationAdapter {
         Box2D.init();
         world = new World(new Vector2(0, -Constants.GRAVITY_VALUE), true);
         debugRenderer = new Box2DDebugRenderer();
+
+        water = new WaterSimulation(80, -0.25f * Constants.VIEWPORT_WIDTH, 1.25f * Constants.VIEWPORT_WIDTH);
     }
 
     @Override
     public void render() {
         float deltaTime = Gdx.graphics.getDeltaTime();
-        ScreenUtils.clear(1, 0, 0, 1);
+        ScreenUtils.clear(0.5f, 0.898f, 1, 1);
 
         debugRenderer.render(world, camera.combined);
+
         doPhysicsStep(deltaTime);
+
+        water.render(camera);
+        handleInputs(camera);
+
+        // camera.update();
+    }
+
+    public void handleInputs(OrthographicCamera camera) {
+        if (Gdx.input.justTouched()) {
+            float xViewportPercent = (float) Gdx.input.getX() / (float) Gdx.graphics.getWidth();
+            float xWorld = xViewportPercent * Constants.VIEWPORT_WIDTH;
+
+            water.handleInput(xWorld);
+        }
     }
 
     private void doPhysicsStep(float deltaTime) {
@@ -44,6 +64,7 @@ public class CoreGame extends ApplicationAdapter {
         accumulator += frameTime;
         while (accumulator >= Constants.TIME_STEP) {
             world.step(Constants.TIME_STEP, Constants.VELOCITY_ITERATIONS, Constants.POSITION_ITERATIONS);
+            water.update();
             accumulator -= Constants.TIME_STEP;
         }
     }
