@@ -2,6 +2,7 @@ package fr.baldurcrew.gdx25;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Box2D;
@@ -12,6 +13,8 @@ import fr.baldurcrew.gdx25.water.WaterSimulation;
 
 
 public class CoreGame extends ApplicationAdapter {
+
+    private static final Color CLEAR_COLOR = new Color(0.5f, 0.898f, 1, 1);
 
     World world;
     private OrthographicCamera camera;
@@ -36,15 +39,14 @@ public class CoreGame extends ApplicationAdapter {
     @Override
     public void render() {
         float deltaTime = Gdx.graphics.getDeltaTime();
-        ScreenUtils.clear(0.5f, 0.898f, 1, 1);
-
-        debugRenderer.render(world, camera.combined);
+        ScreenUtils.clear(CLEAR_COLOR);
 
         doPhysicsStep(deltaTime);
 
+        debugRenderer.render(world, camera.combined);
         water.render(camera);
-        handleInputs(camera);
 
+        handleInputs(camera);
         // camera.update();
     }
 
