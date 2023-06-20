@@ -10,6 +10,8 @@ import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.ScreenUtils;
 import fr.baldurcrew.gdx25.boat.Boat;
+import fr.baldurcrew.gdx25.character.Character;
+import fr.baldurcrew.gdx25.character.CharacterResources;
 import fr.baldurcrew.gdx25.physics.WorldContactListener;
 import fr.baldurcrew.gdx25.water.WaterSimulation;
 
@@ -39,8 +41,11 @@ public class CoreGame extends ApplicationAdapter {
         world.setContactListener(contactListener);
         debugRenderer = new Box2DDebugRenderer();
 
-        character = new Character(2);
-        water = new WaterSimulation(world, 80, -0.25f * Constants.VIEWPORT_WIDTH, 1.25f * Constants.VIEWPORT_WIDTH);
+        CharacterResources.getInstance();
+
+        character = new Character(CharacterResources.GREEN, world);
+
+        water = new WaterSimulation(world,80, -0.25f * Constants.VIEWPORT_WIDTH, 1.25f * Constants.VIEWPORT_WIDTH);
         boat = new Boat(world, Constants.VIEWPORT_WIDTH / 2f, water.getWaterLevel() + 1f);
 
         contactListener.addListener(water);
@@ -64,10 +69,13 @@ public class CoreGame extends ApplicationAdapter {
 
         boat.render(camera);
         water.render(camera);
-        character.render();
+        character.render(camera);
     }
 
     public void handleInputs(OrthographicCamera camera) {
+
+        character.handleInputs();
+
         if (Gdx.input.justTouched()) {
             float xViewportPercent = (float) Gdx.input.getX() / (float) Gdx.graphics.getWidth();
             float xWorld = xViewportPercent * Constants.VIEWPORT_WIDTH;

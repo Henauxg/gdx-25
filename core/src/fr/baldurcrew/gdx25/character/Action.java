@@ -1,4 +1,4 @@
-package fr.baldurcrew.gdx25;
+package fr.baldurcrew.gdx25.character;
 
 import java.util.Arrays;
 import java.util.List;
@@ -17,6 +17,8 @@ import java.util.stream.IntStream;
 
 
 public enum Action {
+
+    IDLE(3),
     CLIMB(0,1),
     JUMP(6,5,2),
     SWIM(7,8),
