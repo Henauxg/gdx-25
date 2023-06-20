@@ -10,6 +10,7 @@ import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.ScreenUtils;
 import fr.baldurcrew.gdx25.boat.Boat;
+import fr.baldurcrew.gdx25.physics.WorldContactListener;
 import fr.baldurcrew.gdx25.water.WaterSimulation;
 
 
@@ -34,11 +35,15 @@ public class CoreGame extends ApplicationAdapter {
 
         Box2D.init();
         world = new World(new Vector2(0, Constants.GRAVITY_VALUE), true);
+        final var contactListener = new WorldContactListener();
+        world.setContactListener(contactListener);
         debugRenderer = new Box2DDebugRenderer();
         character = new Character(2, world);
 
         water = new WaterSimulation(80, -0.25f * Constants.VIEWPORT_WIDTH, 1.25f * Constants.VIEWPORT_WIDTH);
         boat = new Boat(world, Constants.VIEWPORT_WIDTH / 2f, water.getWaterLevel() + 1f);
+
+        contactListener.addListener(water);
     }
 
     @Override
@@ -79,7 +84,6 @@ public class CoreGame extends ApplicationAdapter {
         while (accumulator >= Constants.TIME_STEP) {
             world.step(Constants.TIME_STEP, Constants.VELOCITY_ITERATIONS, Constants.POSITION_ITERATIONS);
             water.update();
-            //character.move();
             accumulator -= Constants.TIME_STEP;
         }
     }
