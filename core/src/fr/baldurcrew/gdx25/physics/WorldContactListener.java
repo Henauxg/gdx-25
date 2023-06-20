@@ -1,4 +1,4 @@
-package fr.baldurcrew.gdx25;
+package fr.baldurcrew.gdx25.physics;
 
 import com.badlogic.gdx.physics.box2d.*;
 
@@ -16,15 +16,16 @@ public class WorldContactListener implements ContactListener {
     public void beginContact(Contact contact) {
         Fixture fixtureA = contact.getFixtureA();
         Fixture fixtureB = contact.getFixtureB();
+        final var status = ContactStatus.Begin;
 
         final var handlerA = contactHandlers.get(fixtureA.getUserData());
         if (handlerA != null) {
-            handlerA.handleContact(new ContactUpdate(fixtureA, fixtureB, ContactStatus.Begin));
+            handlerA.handleContact(status, new FixtureContact(fixtureA, fixtureB));
         }
 
         final var handlerB = contactHandlers.get(fixtureB.getUserData());
         if (handlerB != null) {
-            handlerB.handleContact(new ContactUpdate(fixtureB, fixtureA, ContactStatus.Begin));
+            handlerB.handleContact(status, new FixtureContact(fixtureB, fixtureA));
         }
     }
 
@@ -32,15 +33,16 @@ public class WorldContactListener implements ContactListener {
     public void endContact(Contact contact) {
         Fixture fixtureA = contact.getFixtureA();
         Fixture fixtureB = contact.getFixtureB();
+        final var status = ContactStatus.End;
 
         final var handlerA = contactHandlers.get(fixtureA.getUserData());
         if (handlerA != null) {
-            handlerA.handleContact(new ContactUpdate(fixtureA, fixtureB, ContactStatus.End));
+            handlerA.handleContact(status, new FixtureContact(fixtureA, fixtureB));
         }
 
         final var handlerB = contactHandlers.get(fixtureB.getUserData());
         if (handlerB != null) {
-            handlerB.handleContact(new ContactUpdate(fixtureB, fixtureA, ContactStatus.End));
+            handlerB.handleContact(status, new FixtureContact(fixtureB, fixtureA));
         }
     }
 
@@ -54,14 +56,6 @@ public class WorldContactListener implements ContactListener {
 
     }
 
-    public enum ContactStatus {
-        Begin, End,
-    }
 
-    public interface ContactHandler {
-        public void handleContact(WorldContactListener.ContactUpdate contact);
-    }
-
-    public record ContactUpdate(Fixture fixtureA, Fixture fixtureB, ContactStatus status) {
-    }
 }
+

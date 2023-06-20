@@ -10,6 +10,7 @@ import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.ScreenUtils;
 import fr.baldurcrew.gdx25.boat.Boat;
+import fr.baldurcrew.gdx25.physics.WorldContactListener;
 import fr.baldurcrew.gdx25.water.WaterSimulation;
 
 

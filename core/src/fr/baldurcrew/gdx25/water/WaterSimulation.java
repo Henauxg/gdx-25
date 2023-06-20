@@ -8,15 +8,20 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Disposable;
 import fr.baldurcrew.gdx25.CoreGame;
-import fr.baldurcrew.gdx25.WorldContactListener;
+import fr.baldurcrew.gdx25.physics.ContactHandler;
+import fr.baldurcrew.gdx25.physics.ContactStatus;
+import fr.baldurcrew.gdx25.physics.FixtureContact;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
-public class WaterSimulation implements Disposable, WorldContactListener.ContactHandler {
+public class WaterSimulation implements Disposable, ContactHandler {
 
     private final static String PROJECTION_MATRIX_UNIFORM_NAME = "u_projTrans";
     private final float fromX, toX;
     private final ArrayList<Spring> springs;
+    private final Set<FixtureContact> fixtureContacts;
     private final ShapeRenderer debugShapeBatch;
     private final ShaderProgram waterShaderProgram;
     private final MeshAndBuffers waterMeshAndBuffers;
@@ -34,6 +39,7 @@ public class WaterSimulation implements Disposable, WorldContactListener.Contact
         this.fromX = fromX;
         this.toX = toX;
         this.springs = new ArrayList<>(springsCount);
+        this.fixtureContacts = new HashSet<>();
 
         final var totalLength = toX - fromX;
         final var springPlacementStep = totalLength / (springsCount - 1);
@@ -113,8 +119,8 @@ public class WaterSimulation implements Disposable, WorldContactListener.Contact
         return body;
     }
 
-    public void handleContact(WorldContactListener.ContactUpdate contact) {
-        switch (contact.status()) {
+    public void handleContact(ContactStatus status, FixtureContact contact) {
+        switch (status) {
             case Begin -> {
 
             }
