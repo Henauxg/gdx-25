@@ -1,9 +1,11 @@
 package fr.baldurcrew.gdx25.water;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.math.GeometryUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Disposable;
+import fr.baldurcrew.gdx25.Utils;
 import fr.baldurcrew.gdx25.physics.ContactHandler;
 import fr.baldurcrew.gdx25.physics.ContactStatus;
 import fr.baldurcrew.gdx25.physics.FixtureContact;
@@ -45,7 +47,6 @@ public class WaterSimulation implements Disposable, ContactHandler {
         waterBody = createWaterBody(world, fromX, toX);
     }
 
-    // TODO Optimization: Create water fixtures for waves only under the boat
     private Body createWaterBody(World world, float fromX, float toX) {
         final var halfWidth = (toX - fromX) / 2f;
         final var halfHeight = baseWaterLevel / 2f;
@@ -53,19 +54,22 @@ public class WaterSimulation implements Disposable, ContactHandler {
         final var centerY = halfHeight;
 
         final var bodyDef = new BodyDef();
-        bodyDef.type = BodyDef.BodyType.DynamicBody;
+        bodyDef.type = BodyDef.BodyType.DynamicBody; // TODO Check
         bodyDef.position.set(centerX, centerY);
+        bodyDef.gravityScale = 0; // TODO Check
 
         final var body = world.createBody(bodyDef);
-        // TODO May need user data
+        body.setUserData(this);
 
         final var waterPolygon = new PolygonShape();
-        // TODO generate vertices for the water body
+        // TODO generate fixtures/vertices for the water body
+        // TODO Optimization: Create water fixtures for waves only under the boat
         waterPolygon.setAsBox(halfWidth, halfHeight);
 
         final var fixtureDef = new FixtureDef();
         fixtureDef.shape = waterPolygon;
         fixtureDef.isSensor = true;
+        fixtureDef.density = 1f; // TODO
 
         body.createFixture(fixtureDef);
 
@@ -86,6 +90,38 @@ public class WaterSimulation implements Disposable, ContactHandler {
     }
 
     public void update() {
+        // TODO Timestep ?
+
+        updateSprings();
+        updateImmersedFixtures();
+    }
+
+    // TODO Should update fixtureContacts before this
+    private void updateImmersedFixtures() {
+        this.fixtureContacts.forEach(contact -> {
+            final var fixtureA = contact.fixtureA();
+            final var fixtureB = contact.fixtureB();
+
+            float fluidDensity = fixtureA.getDensity();
+
+            final var intersection = Utils.getIntersection(fixtureA, fixtureB);
+            if (intersection != null && !intersection.isEmpty()) {
+                final var world = fixtureB.getBody().getWorld();
+
+                final var polygon = Utils.getPolygon(intersection);
+                final float area = polygon.area();
+                final var centroid = GeometryUtils.polygonCentroid(polygon.getVertices(), 0, polygon.getVertices().length, new Vector2());
+
+                final var displacedMass = fluidDensity * area;
+                Vector2 buoyancyForce = new Vector2(displacedMass * -world.getGravity().x,
+                        displacedMass * -world.getGravity().y);
+
+                fixtureB.getBody().applyForce(buoyancyForce, centroid, true);
+            }
+        });
+    }
+
+    private void updateSprings() {
         for (var spring : this.springs) {
             spring.update(springsStiffness, springsDampeningFactor, baseWaterLevel);
         }
