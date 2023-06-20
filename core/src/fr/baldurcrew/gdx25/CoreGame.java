@@ -37,7 +37,7 @@ public class CoreGame extends ApplicationAdapter {
         debugRenderer = new Box2DDebugRenderer();
         character = new Character(2);
 
-        water = new WaterSimulation(80, -0.25f * Constants.VIEWPORT_WIDTH, 1.25f * Constants.VIEWPORT_WIDTH);
+        water = new WaterSimulation(world, 80, -0.25f * Constants.VIEWPORT_WIDTH, 1.25f * Constants.VIEWPORT_WIDTH);
         boat = new Boat(world, Constants.VIEWPORT_WIDTH / 2f, water.getWaterLevel() + 1f);
     }
 

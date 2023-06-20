@@ -7,8 +7,9 @@ public class Spring {
     private float height;
     private float velocity;
 
-    public Spring(float x) {
+    public Spring(float x, float initialHeight) {
         this.x = x;
+        height = initialHeight;
     }
 
     public void update(float stiffness, float dampening, float baseLevel) {
