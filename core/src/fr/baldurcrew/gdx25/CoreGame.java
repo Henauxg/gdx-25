@@ -35,7 +35,7 @@ public class CoreGame extends ApplicationAdapter {
         Box2D.init();
         world = new World(new Vector2(0, Constants.GRAVITY_VALUE), true);
         debugRenderer = new Box2DDebugRenderer();
-        character = new Character(2);
+        character = new Character(2, world);
 
         water = new WaterSimulation(80, -0.25f * Constants.VIEWPORT_WIDTH, 1.25f * Constants.VIEWPORT_WIDTH);
         boat = new Boat(world, Constants.VIEWPORT_WIDTH / 2f, water.getWaterLevel() + 1f);
@@ -59,7 +59,7 @@ public class CoreGame extends ApplicationAdapter {
 
         boat.render(camera);
         water.render(camera);
-        character.render();
+        character.render(camera);
     }
 
     public void handleInputs(OrthographicCamera camera) {
@@ -79,6 +79,7 @@ public class CoreGame extends ApplicationAdapter {
         while (accumulator >= Constants.TIME_STEP) {
             world.step(Constants.TIME_STEP, Constants.VELOCITY_ITERATIONS, Constants.POSITION_ITERATIONS);
             water.update();
+            //character.move();
             accumulator -= Constants.TIME_STEP;
         }
     }
