@@ -34,11 +34,15 @@ public class CoreGame extends ApplicationAdapter {
 
         Box2D.init();
         world = new World(new Vector2(0, Constants.GRAVITY_VALUE), true);
+        final var contactListener = new WorldContactListener();
+        world.setContactListener(contactListener);
         debugRenderer = new Box2DDebugRenderer();
-        character = new Character(2);
 
+        character = new Character(2);
         water = new WaterSimulation(world, 80, -0.25f * Constants.VIEWPORT_WIDTH, 1.25f * Constants.VIEWPORT_WIDTH);
         boat = new Boat(world, Constants.VIEWPORT_WIDTH / 2f, water.getWaterLevel() + 1f);
+
+        contactListener.addListener(water);
     }
 
     @Override

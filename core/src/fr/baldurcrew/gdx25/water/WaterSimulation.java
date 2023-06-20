@@ -8,10 +8,11 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Disposable;
 import fr.baldurcrew.gdx25.CoreGame;
+import fr.baldurcrew.gdx25.WorldContactListener;
 
 import java.util.ArrayList;
 
-public class WaterSimulation implements Disposable {
+public class WaterSimulation implements Disposable, WorldContactListener.ContactHandler {
 
     private final static String PROJECTION_MATRIX_UNIFORM_NAME = "u_projTrans";
     private final float fromX, toX;
@@ -20,6 +21,7 @@ public class WaterSimulation implements Disposable {
     private final ShaderProgram waterShaderProgram;
     private final MeshAndBuffers waterMeshAndBuffers;
     private final Body waterBody;
+
     private float wavesPropagationPasses = 4; // 8
     private float wavesPropagationSpreadFactor = 0.2f; // TODO Tweak
     private float springsStiffness = 0.025f;
@@ -82,6 +84,7 @@ public class WaterSimulation implements Disposable {
         return new MeshAndBuffers(waterMesh, valuesPerVertex, waterVertexIndices, waterVerticesWithColor);
     }
 
+    // TODO Create water fixtures for waves only under the boat
     private Body createWaterBody(World world, float fromX, float toX) {
         final var halfWidth = (toX - fromX) / 2f;
         final var halfHeight = baseWaterLevel / 2f;
@@ -108,6 +111,16 @@ public class WaterSimulation implements Disposable {
         waterPolygon.dispose();
 
         return body;
+    }
+
+    public void handleContact(WorldContactListener.ContactUpdate contact) {
+        switch (contact.status()) {
+            case Begin -> {
+
+            }
+            case End -> {
+            }
+        }
     }
 
     public void update() {
@@ -194,7 +207,7 @@ public class WaterSimulation implements Disposable {
     private void fillVertexArray(float[] vertexArray, Color color, float x, float y, int vertexOffsetInArray) {
         vertexArray[vertexOffsetInArray] = x;
         vertexArray[vertexOffsetInArray + 1] = y;
-        vertexArray[vertexOffsetInArray + 2] = 0; // z position (screen coordinates)
+        vertexArray[vertexOffsetInArray + 2] = 0; // z position
         vertexArray[vertexOffsetInArray + 3] = color.r;
         vertexArray[vertexOffsetInArray + 4] = color.g;
         vertexArray[vertexOffsetInArray + 5] = color.b;
@@ -203,6 +216,7 @@ public class WaterSimulation implements Disposable {
 
     public void handleInput(float xWorld) {
         if (xWorld >= fromX && xWorld <= toX) {
+            // TODO Debug only
             final float index = this.springs.size() * (xWorld - fromX) / (toX - fromX);
             this.disturbWater(Math.round(index), 5f);
         }
