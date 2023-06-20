@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Affine2;
@@ -15,35 +14,24 @@ import com.badlogic.gdx.utils.Disposable;
 import fr.baldurcrew.gdx25.Constants;
 
 public class Character extends Actor implements Disposable {
-    private final Animation<TextureRegion> animation;
-
-    public int MAX_X_MOVEMENT_VELOCITY = 2;
-    public int MAX_Y_MOVEMENT_VELOCITY = 2;
-
     private static final float CHARACTER_HEIGHT = 1f;
     private static final float ASPECT_RATIO = 0.76f;
     private static final float CHARACTER_WIDTH = ASPECT_RATIO * CHARACTER_HEIGHT;
-
-    private int colorRow;
+    private final Animation<TextureRegion> animation;
+    public int MAX_X_MOVEMENT_VELOCITY = 2;
+    public int MAX_Y_MOVEMENT_VELOCITY = 2;
     float stateTime;
     float time;
-
-    private float xVelocity = 0f;
-    private float yVelocity = 0f;
-
     boolean isFacingRight = true;
     boolean canJump = false;
-
+    float deltaTime = Gdx.graphics.getDeltaTime();
+    private int colorRow;
+    private float xVelocity = 0f;
+    private float yVelocity = 0f;
     private Body body;
     private CharacterAnimator characterAnimator;
     private SpriteBatch spriteBatch;
-    float deltaTime = Gdx.graphics.getDeltaTime();
     private TextureRegion currentFrame;
-
-    enum State {
-        EnteringIdle, Idle, Walking, Climbing, EnteringJumping, Jumping, Landing, Swimming;
-
-    }
 
     public Character(int colorRow, World world) {
         this.colorRow = colorRow;
@@ -102,8 +90,8 @@ public class Character extends Actor implements Disposable {
         System.out.println("rotation : " + rotation + "°");
         System.out.println("angle : " + body.getAngle());
         //TODO: Check if correct when rotated
-        final var renderX = bodyX - (CHARACTER_WIDTH / 2f) * Math.cos(body.getAngle());
-        final var renderY = bodyY - (CHARACTER_HEIGHT / 2f) * Math.sin(body.getAngle());
+        final var renderX = bodyX - (CHARACTER_WIDTH / 2f) * Math.cos(body.getAngle()) + (CHARACTER_WIDTH / 2f) * Math.sin(body.getAngle());
+        final var renderY = bodyY - (CHARACTER_HEIGHT / 2f) * Math.cos(body.getAngle()) - (CHARACTER_HEIGHT / 2f) * Math.sin(body.getAngle());
         //final var renderX = bodyX;
         //final var renderY = bodyY;
 
@@ -117,8 +105,8 @@ public class Character extends Actor implements Disposable {
         System.out.println("Body center  : " + body.getLocalCenter());
 
         spriteBatch.begin();
-        //spriteBatch.draw(currentFrame, CHARACTER_WIDTH, CHARACTER_HEIGHT, affine);
-        spriteBatch.draw(currentFrame, bodyX, bodyY, CHARACTER_WIDTH / 2f, CHARACTER_HEIGHT / 2f, CHARACTER_WIDTH, CHARACTER_HEIGHT, 1f, 1f, rotation, false);
+        spriteBatch.draw(currentFrame, CHARACTER_WIDTH, CHARACTER_HEIGHT, affine);
+        //spriteBatch.draw(currentFrame, bodyX, bodyY, CHARACTER_WIDTH / 2f, CHARACTER_HEIGHT / 2f, CHARACTER_WIDTH, CHARACTER_HEIGHT, 1f, 1f, rotation, false);
 
         spriteBatch.end();
     }
@@ -145,5 +133,10 @@ public class Character extends Actor implements Disposable {
     @Override
     public void dispose() {
         spriteBatch.dispose();
+    }
+
+    enum State {
+        EnteringIdle, Idle, Walking, Climbing, EnteringJumping, Jumping, Landing, Swimming;
+
     }
 }
