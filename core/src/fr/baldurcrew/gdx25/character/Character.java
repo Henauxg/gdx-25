@@ -121,13 +121,14 @@ public class Character extends Actor implements Disposable {
             //characterAnimator.
         }
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-            if (!currentFrame.isFlipX()) {
+            if (currentFrame.isFlipX()) {
                 currentFrame.flip(true, false);
             }
+            body.applyForceToCenter(new Vector2(MAX_X_MOVEMENT_VELOCITY, 0), true);
         }
 
         //TODO: Check wake parameters
-        body.applyForceToCenter(new Vector2(xVelocity, 0), true);
+//        body.applyForceToCenter(new Vector2(xVelocity, 0), true);
     }
 
     @Override
