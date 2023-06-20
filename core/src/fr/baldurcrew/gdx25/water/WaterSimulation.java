@@ -178,6 +178,10 @@ public class WaterSimulation implements Disposable {
         waterShaderProgram.dispose();
     }
 
+    public float getWaterLevel() {
+        return this.baseWaterLevel;
+    }
+
     private record MeshAndBuffers(Mesh mesh,
                                   int valuesPerVertex,
                                   short[] vertexIndices,
