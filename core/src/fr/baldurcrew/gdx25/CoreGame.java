@@ -33,12 +33,12 @@ public class CoreGame extends ApplicationAdapter {
         camera.setToOrtho(false, Constants.VIEWPORT_WIDTH, Constants.VIEWPORT_HEIGHT);
 
         Box2D.init();
-        world = new World(new Vector2(0, -Constants.GRAVITY_VALUE), true);
+        world = new World(new Vector2(0, Constants.GRAVITY_VALUE), true);
         debugRenderer = new Box2DDebugRenderer();
         character = new Character(2);
 
         water = new WaterSimulation(80, -0.25f * Constants.VIEWPORT_WIDTH, 1.25f * Constants.VIEWPORT_WIDTH);
-        boat = new Boat(Constants.VIEWPORT_WIDTH / 2f, water.getWaterLevel() + 1f);
+        boat = new Boat(world, Constants.VIEWPORT_WIDTH / 2f, water.getWaterLevel() + 1f);
     }
 
     @Override
@@ -52,7 +52,11 @@ public class CoreGame extends ApplicationAdapter {
         camera.update();
 
         ScreenUtils.clear(CLEAR_COLOR);
-        debugRenderer.render(world, camera.combined);
+
+        if (debugMode) {
+            debugRenderer.render(world, camera.combined);
+        }
+
         boat.render(camera);
         water.render(camera);
         character.render();
