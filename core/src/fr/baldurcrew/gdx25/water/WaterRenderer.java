@@ -37,7 +37,6 @@ public class WaterRenderer implements Disposable {
     }
 
     private MeshAndBuffers createWaterMeshAndBuffers(int rectCount) {
-//        final int rectCount = springs.size() - 1;
         final int verticesCount = 4 * rectCount;
         final int indicesCount = 6 * rectCount;
         final var vertexPositionAttribute = VertexAttribute.Position();
