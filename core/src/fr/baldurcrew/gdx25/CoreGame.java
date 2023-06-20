@@ -16,6 +16,9 @@ import fr.baldurcrew.gdx25.character.CharacterResources;
 import fr.baldurcrew.gdx25.physics.WorldContactListener;
 import fr.baldurcrew.gdx25.water.WaterSimulation;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class CoreGame extends ApplicationAdapter {
 
@@ -25,7 +28,7 @@ public class CoreGame extends ApplicationAdapter {
     World world;
     private OrthographicCamera camera;
     private Box2DDebugRenderer debugRenderer;
-    private Character character;
+    private List<Character> characters;
     private float accumulator = 0;
 
     private WaterSimulation water;
@@ -44,7 +47,12 @@ public class CoreGame extends ApplicationAdapter {
 
         CharacterResources.getInstance();
 
-        character = new Character(CharacterResources.GREEN, world);
+        characters = new ArrayList<>();
+        characters.add(new Character(CharacterResources.GREEN, world));
+        characters.add(new Character(CharacterResources.BEIGE, world));
+        characters.add(new Character(CharacterResources.BLUE, world));
+        characters.add(new Character(CharacterResources.PINK, world));
+        characters.add(new Character(CharacterResources.YELLOW, world));
 
         water = new WaterSimulation(world, 80, -0.25f * Constants.VIEWPORT_WIDTH, 1.25f * Constants.VIEWPORT_WIDTH);
         boat = new Boat(world, Constants.VIEWPORT_WIDTH / 2f, water.getWaterLevel() + 1f);
@@ -70,12 +78,11 @@ public class CoreGame extends ApplicationAdapter {
 
         boat.render(camera);
         water.render(camera);
-        character.render(camera);
+        characters.forEach(character -> character.render(camera));
     }
 
     public void handleInputs(OrthographicCamera camera) {
-
-        character.handleInputs();
+        characters.forEach(character -> character.handleInputs());
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.D)) {
             debugMode = !debugMode;

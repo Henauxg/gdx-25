@@ -5,6 +5,7 @@ import com.badlogic.gdx.math.GeometryUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Disposable;
+import fr.baldurcrew.gdx25.CoreGame;
 import fr.baldurcrew.gdx25.Utils;
 import fr.baldurcrew.gdx25.physics.ContactHandler;
 import fr.baldurcrew.gdx25.physics.ContactStatus;
@@ -163,10 +164,11 @@ public class WaterSimulation implements Disposable, ContactHandler {
     }
 
     public void handleInput(float xWorld) {
-        if (xWorld >= fromX && xWorld <= toX) {
-            // TODO Debug only
-            final float index = this.springs.size() * (xWorld - fromX) / (toX - fromX);
-            this.disturbWater(Math.round(index), 5f);
+        if (CoreGame.debugMode) {
+            if (xWorld >= fromX && xWorld <= toX) {
+                final float index = this.springs.size() * (xWorld - fromX) / (toX - fromX);
+                this.disturbWater(Math.round(index), 5f);
+            }
         }
     }
 
