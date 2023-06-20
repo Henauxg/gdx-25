@@ -44,7 +44,7 @@ public class Boat implements Disposable {
 
         final var boatPolygon = new PolygonShape();
         // TODO generate vertices for the boat body
-        boatPolygon.setAsBox(BOAT_WIDTH / 2f, BOAT_HEIGHT / 2f);
+        boatPolygon.setAsBox(BOAT_WIDTH / 2f, BOAT_HEIGHT / 5f); // TODO Adjust
 
         final var fixtureDef = new FixtureDef();
         fixtureDef.shape = boatPolygon;
@@ -65,7 +65,7 @@ public class Boat implements Disposable {
         float rotation = (float) Math.toDegrees(body.getAngle());
 
         final var renderX = bodyX - BOAT_WIDTH / 2f;
-        final var renderY = bodyY - BOAT_HEIGHT / 2f;
+        final var renderY = bodyY - BOAT_HEIGHT / 5f; // TODO Adjust
         boatSprite.setPosition(renderX, renderY);
         boatSprite.setRotation(rotation);
 
