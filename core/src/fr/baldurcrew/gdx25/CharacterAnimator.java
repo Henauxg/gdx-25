@@ -1,50 +1,64 @@
 package fr.baldurcrew.gdx25;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
+import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+
 public class CharacterAnimator {
+
 
     // Row & columns of the sprite sheet
     private static final int FRAME_COLS = 11, FRAME_ROWS = 5;
 
+    private static final TextureRegion[][] ALL_TEXTURE_REGIONS = loadAndSplitSpriteSheet("characters_sheet.png", FRAME_COLS, FRAME_ROWS);
+
     Animation<TextureRegion> walkAnimation;
-    Texture charactersSheet;
     SpriteBatch spriteBatch;
     float stateTime;
 
-    public void initialize() {
+    EnumMap<Action, TextureRegion[]> mapCharacterTextureRegion;
 
-        //load sheet
-        charactersSheet = new Texture(Gdx.files.internal("characters_sheet.png"));
 
-        //split sheet
-        TextureRegion[][] frames = TextureRegion.split(charactersSheet,
-                charactersSheet.getWidth() / FRAME_COLS,
-                charactersSheet.getHeight() / FRAME_ROWS);
-
-        TextureRegion[] walkingFrames = new TextureRegion[2];
-        walkingFrames[0] = frames[0][9];
-        walkingFrames[1] = frames[0][10];
-
-        walkAnimation = new Animation<TextureRegion>(0.125f, walkingFrames);
-
-        spriteBatch = new SpriteBatch();
-        stateTime = 0f;
+    public CharacterAnimator(int colorRow) {
+        initialize(colorRow);
     }
 
-    public void render(){
-            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT); // Clear screen
-            stateTime += Gdx.graphics.getDeltaTime(); // Accumulate elapsed animation time
+    public void initialize(int colorRow) {
 
-            // Get current frame of animation for the current stateTime
-            TextureRegion currentFrame = walkAnimation.getKeyFrame(stateTime, true);
-            spriteBatch.begin();
-            spriteBatch.draw(currentFrame, 50, 50); // Draw current frame at (50, 50)
-            spriteBatch.end();
+        mapCharacterTextureRegion = getCharTextureRegions(colorRow);
+
+    }
+
+    private EnumMap<Action, TextureRegion[]> getCharTextureRegions(int charRow) {
+        var charTextureRegions = ALL_TEXTURE_REGIONS[charRow];
+        var mapCharacterTextureRegion = Arrays.stream(Action.values()).collect(Collectors.toMap(Function.identity(), action -> getCharActionTextureRegions(action, charTextureRegions)));
+
+        return new EnumMap<>(mapCharacterTextureRegion);
+    }
+
+    private TextureRegion[] getCharActionTextureRegions(Action action, TextureRegion[] charTextureRegions) {
+        int framesCount = action.getFramesCount();
+        var actionTextureRegions = new TextureRegion[framesCount];
+        for (int i = 0; i < framesCount; i++) {
+            actionTextureRegions[i] = charTextureRegions[action.getFrame(i)];
+        }
+        return actionTextureRegions;
+    }
+
+    private static TextureRegion[][] loadAndSplitSpriteSheet(String imagePath, int frameCols, int frameRows) {
+        //load sheet
+        var charactersSheet = new Texture(Gdx.files.internal(imagePath));
+
+        //split sheet
+        TextureRegion[][] frames = TextureRegion.split(charactersSheet, charactersSheet.getWidth() / frameCols, charactersSheet.getHeight() / frameRows);
+        return frames;
     }
 }
