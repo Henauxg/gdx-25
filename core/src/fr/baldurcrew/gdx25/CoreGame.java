@@ -4,7 +4,6 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Box2D;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
@@ -17,7 +16,7 @@ import fr.baldurcrew.gdx25.water.WaterSimulation;
 public class CoreGame extends ApplicationAdapter {
 
     private static final Color CLEAR_COLOR = new Color(0.5f, 0.898f, 1, 1);
-    public static boolean debugMode = true;
+    public static boolean debugMode = false;
 
     World world;
     private OrthographicCamera camera;
@@ -39,9 +38,7 @@ public class CoreGame extends ApplicationAdapter {
         character = new Character(2);
 
         water = new WaterSimulation(80, -0.25f * Constants.VIEWPORT_WIDTH, 1.25f * Constants.VIEWPORT_WIDTH);
-
-        var boatTexture = new Texture("blue_boat.png");
-        boat = new Boat(boatTexture, Constants.VIEWPORT_WIDTH / 2f, water.getWaterLevel());
+        boat = new Boat(Constants.VIEWPORT_WIDTH / 2f, water.getWaterLevel() + 1f);
     }
 
     @Override
@@ -56,8 +53,8 @@ public class CoreGame extends ApplicationAdapter {
 
         ScreenUtils.clear(CLEAR_COLOR);
         debugRenderer.render(world, camera.combined);
-        water.render(camera);
         boat.render(camera);
+        water.render(camera);
         character.render();
     }
 
