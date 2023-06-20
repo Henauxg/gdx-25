@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Affine2;
@@ -20,7 +21,7 @@ public class Character extends Actor implements Disposable {
     public int MAX_Y_MOVEMENT_VELOCITY = 2;
 
     private static final float CHARACTER_HEIGHT = 1f;
-    private static final float ASPECT_RATIO = 0.5f;
+    private static final float ASPECT_RATIO = 0.76f;
     private static final float CHARACTER_WIDTH = ASPECT_RATIO * CHARACTER_HEIGHT;
 
     private int colorRow;
@@ -96,18 +97,28 @@ public class Character extends Actor implements Disposable {
         float bodyY = body.getPosition().y;
         float rotation = (float) Math.toDegrees(body.getAngle());
 
+        //Sprite feinte = animation.getKeyFrame().getTexture();
+
+        System.out.println("rotation : " + rotation + "°");
+        System.out.println("angle : " + body.getAngle());
         //TODO: Check if correct when rotated
-        final var renderX = bodyX - CHARACTER_WIDTH / 2f;
-        final var renderY = bodyY - CHARACTER_HEIGHT / 2f;
+        final var renderX = bodyX - (CHARACTER_WIDTH / 2f) * Math.cos(body.getAngle());
+        final var renderY = bodyY - (CHARACTER_HEIGHT / 2f) * Math.sin(body.getAngle());
+        //final var renderX = bodyX;
+        //final var renderY = bodyY;
 
         var affine = new Affine2();
         //TODO: Compute the scale elsewhere for better perf.
-        affine.setToTrnRotScl(renderX, renderY, rotation, 1, 1);
+        affine.setToTrnRotScl((float) renderX, (float) renderY, rotation, 1, 1);
 
         spriteBatch.setProjectionMatrix(camera.combined);
 
+        System.out.println("current region height : " + currentFrame.getRegionHeight() + "  current region width : " + currentFrame.getRegionWidth());
+        System.out.println("Body center  : " + body.getLocalCenter());
+
         spriteBatch.begin();
-        spriteBatch.draw(currentFrame, CHARACTER_WIDTH, CHARACTER_HEIGHT, affine);
+        //spriteBatch.draw(currentFrame, CHARACTER_WIDTH, CHARACTER_HEIGHT, affine);
+        spriteBatch.draw(currentFrame, bodyX, bodyY, CHARACTER_WIDTH / 2f, CHARACTER_HEIGHT / 2f, CHARACTER_WIDTH, CHARACTER_HEIGHT, 1f, 1f, rotation, false);
 
         spriteBatch.end();
     }
