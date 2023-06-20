@@ -1,5 +1,6 @@
 package fr.baldurcrew.gdx25.water;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -22,8 +23,8 @@ public class WaterSimulation implements Disposable {
     private float springsStiffness = 0.025f;
     private float springsDampeningFactor = 0.025f;
     private float baseWaterLevel = 5f;
-    private Color topWaterColor = new Color(0f, 1f, 0.8f, 0.8f);
-    private Color bottomWaterColor = new Color(0f, 0f, 0.4f, 0.8f);
+    private Color topWaterColor = new Color(0f, 1f, 0.8f, 0.7f);
+    private Color bottomWaterColor = new Color(0f, 0f, 0.4f, 1f);
 
     public WaterSimulation(int springsCount, float fromX, float toX) {
         this.fromX = fromX;
@@ -127,9 +128,12 @@ public class WaterSimulation implements Disposable {
         }
 
         generateWaterMesh(waterMeshAndBuffers);
+
+        Gdx.gl20.glEnable(GL20.GL_BLEND);
         waterShaderProgram.bind();
         waterShaderProgram.setUniformMatrix(PROJECTION_MATRIX_UNIFORM_NAME, camera.combined);
         waterMeshAndBuffers.mesh.render(waterShaderProgram, GL30.GL_TRIANGLES);
+        Gdx.gl20.glDisable(GL20.GL_BLEND);
     }
 
     private void generateWaterMesh(MeshAndBuffers waterMeshAndBuffers) {
