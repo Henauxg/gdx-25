@@ -104,9 +104,6 @@ public class Character extends Actor implements Disposable {
         //TODO: Compute the scale elsewhere for better perf.
         affine.setToTrnRotScl(renderX, renderY, rotation, 1, 1);
 
-
-        System.out.println("RenderX" + renderX + "   RenderY:" + renderY);
-
         spriteBatch.setProjectionMatrix(camera.combined);
 
         spriteBatch.begin();
