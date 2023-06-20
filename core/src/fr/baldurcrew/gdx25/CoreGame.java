@@ -20,7 +20,7 @@ public class CoreGame extends ApplicationAdapter {
     World world;
     private OrthographicCamera camera;
     private Box2DDebugRenderer debugRenderer;
-
+    private Character character;
     private float accumulator = 0;
 
     private WaterSimulation water;
@@ -33,6 +33,7 @@ public class CoreGame extends ApplicationAdapter {
         Box2D.init();
         world = new World(new Vector2(0, -Constants.GRAVITY_VALUE), true);
         debugRenderer = new Box2DDebugRenderer();
+        character = new Character(2);
 
         water = new WaterSimulation(80, -0.25f * Constants.VIEWPORT_WIDTH, 1.25f * Constants.VIEWPORT_WIDTH);
     }
@@ -44,10 +45,11 @@ public class CoreGame extends ApplicationAdapter {
 
         doPhysicsStep(deltaTime);
 
-        debugRenderer.render(world, camera.combined);
-        water.render(camera);
 
+        water.render(camera);
         handleInputs(camera);
+
+        character.render();
         // camera.update();
     }
 
