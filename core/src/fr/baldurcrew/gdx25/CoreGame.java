@@ -2,6 +2,7 @@ package fr.baldurcrew.gdx25;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Vector2;
@@ -19,7 +20,7 @@ import fr.baldurcrew.gdx25.water.WaterSimulation;
 public class CoreGame extends ApplicationAdapter {
 
     private static final Color CLEAR_COLOR = new Color(0.5f, 0.898f, 1, 1);
-    public static boolean debugMode = false;
+    public static boolean debugMode = true;
 
     World world;
     private OrthographicCamera camera;
@@ -45,7 +46,7 @@ public class CoreGame extends ApplicationAdapter {
 
         character = new Character(CharacterResources.GREEN, world);
 
-        water = new WaterSimulation(world,80, -0.25f * Constants.VIEWPORT_WIDTH, 1.25f * Constants.VIEWPORT_WIDTH);
+        water = new WaterSimulation(world, 80, -0.25f * Constants.VIEWPORT_WIDTH, 1.25f * Constants.VIEWPORT_WIDTH);
         boat = new Boat(world, Constants.VIEWPORT_WIDTH / 2f, water.getWaterLevel() + 1f);
 
         contactListener.addListener(water);
@@ -75,6 +76,10 @@ public class CoreGame extends ApplicationAdapter {
     public void handleInputs(OrthographicCamera camera) {
 
         character.handleInputs();
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.D)) {
+            debugMode = !debugMode;
+        }
 
         if (Gdx.input.justTouched()) {
             float xViewportPercent = (float) Gdx.input.getX() / (float) Gdx.graphics.getWidth();
