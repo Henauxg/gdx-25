@@ -4,11 +4,13 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Box2D;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.ScreenUtils;
+import fr.baldurcrew.gdx25.boat.Boat;
 import fr.baldurcrew.gdx25.water.WaterSimulation;
 
 
@@ -24,6 +26,7 @@ public class CoreGame extends ApplicationAdapter {
     private float accumulator = 0;
 
     private WaterSimulation water;
+    private Boat boat;
 
     @Override
     public void create() {
@@ -35,20 +38,25 @@ public class CoreGame extends ApplicationAdapter {
         debugRenderer = new Box2DDebugRenderer();
 
         water = new WaterSimulation(80, -0.25f * Constants.VIEWPORT_WIDTH, 1.25f * Constants.VIEWPORT_WIDTH);
+
+        var boatTexture = new Texture("blue_boat.png");
+        boat = new Boat(boatTexture, Constants.VIEWPORT_WIDTH / 2f, water.getWaterLevel());
     }
 
     @Override
     public void render() {
         float deltaTime = Gdx.graphics.getDeltaTime();
-        ScreenUtils.clear(CLEAR_COLOR);
+
+        handleInputs(camera);
 
         doPhysicsStep(deltaTime);
 
+        camera.update();
+
+        ScreenUtils.clear(CLEAR_COLOR);
         debugRenderer.render(world, camera.combined);
         water.render(camera);
-
-        handleInputs(camera);
-        // camera.update();
+        boat.render(camera);
     }
 
     public void handleInputs(OrthographicCamera camera) {
@@ -75,5 +83,6 @@ public class CoreGame extends ApplicationAdapter {
     @Override
     public void dispose() {
         water.dispose();
+        boat.dispose();
     }
 }
