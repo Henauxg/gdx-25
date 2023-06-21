@@ -11,15 +11,19 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.utils.Logger;
 import fr.baldurcrew.gdx25.Constants;
+
+import static com.badlogic.gdx.utils.Align.left;
+import static com.badlogic.gdx.utils.Align.right;
 
 public class Character extends Actor implements Disposable {
     private static final float CHARACTER_HEIGHT = 1f;
     private static final float ASPECT_RATIO = 0.76f;
     private static final float CHARACTER_WIDTH = ASPECT_RATIO * CHARACTER_HEIGHT;
     private final Animation<TextureRegion> animation;
-    public int MAX_X_MOVEMENT_VELOCITY = 2;
-    public int MAX_Y_MOVEMENT_VELOCITY = 2;
+    public float MAX_X_MOVEMENT_VELOCITY = 5f;
+    public float MAX_Y_MOVEMENT_VELOCITY = 2;
     float stateTime;
     //    float time;
 //    boolean isFacingRight = true;
@@ -37,11 +41,9 @@ public class Character extends Actor implements Disposable {
     public Character(int colorRow, World world) {
         this.colorRow = colorRow;
         this.animation = CharacterResources.getInstance().getAnimation(Action.IDLE, colorRow);
+        this.moveState = MoveState.IDLE;
+        this.body = createBody(world, Constants.VIEWPORT_WIDTH / 2, Constants.VIEWPORT_HEIGHT / 2 + 5);
 
-        this.body = createBody(world, Constants.VIEWPORT_WIDTH / 2, Constants.VIEWPORT_HEIGHT / 2 + 3);
-
-        // Instantiate a SpriteBatch for drawing and reset the elapsed animation
-        // time to 0
         spriteBatch = new SpriteBatch();
         stateTime = 0f;
     }
@@ -50,16 +52,19 @@ public class Character extends Actor implements Disposable {
         final var bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
         bodyDef.position.set(centerX, centerY);
+        bodyDef.linearDamping = 0f;
+        //bodyDef.angularDamping = 1f;
+        bodyDef.fixedRotation = true;
 
         final var body = world.createBody(bodyDef);
-
         final var characterPolygon = new PolygonShape();
+        final var fixtureDef = new FixtureDef();
+
         characterPolygon.setAsBox(CHARACTER_WIDTH / 2f, CHARACTER_HEIGHT / 2f);
 
-        final var fixtureDef = new FixtureDef();
         fixtureDef.shape = characterPolygon;
         fixtureDef.density = 0.5f;
-        fixtureDef.friction = 0.5f;
+        fixtureDef.friction = 1f;
         fixtureDef.restitution = 0.5f;
 
         body.createFixture(fixtureDef);
@@ -82,6 +87,7 @@ public class Character extends Actor implements Disposable {
             currentFrame.flip(true, false);
         }
 
+        var affine = new Affine2();
         float bodyX = body.getPosition().x;
         float bodyY = body.getPosition().y;
         float rotation = (float) Math.toDegrees(body.getAngle());
@@ -91,10 +97,7 @@ public class Character extends Actor implements Disposable {
         //TODO: Check if correct when rotated
         final var renderX = bodyX - (CHARACTER_WIDTH / 2f) * Math.cos(body.getAngle()) + (CHARACTER_WIDTH / 2f) * Math.sin(body.getAngle());
         final var renderY = bodyY - (CHARACTER_HEIGHT / 2f) * Math.cos(body.getAngle()) - (CHARACTER_HEIGHT / 2f) * Math.sin(body.getAngle());
-        //final var renderX = bodyX;
-        //final var renderY = bodyY;
 
-        var affine = new Affine2();
         //TODO: Compute the scale elsewhere for better perf.
         affine.setToTrnRotScl((float) renderX, (float) renderY, rotation, 1, 1);
 
@@ -102,28 +105,48 @@ public class Character extends Actor implements Disposable {
 
         spriteBatch.begin();
         spriteBatch.draw(currentFrame, CHARACTER_WIDTH, CHARACTER_HEIGHT, affine);
-        //spriteBatch.draw(currentFrame, bodyX, bodyY, CHARACTER_WIDTH / 2f, CHARACTER_HEIGHT / 2f, CHARACTER_WIDTH, CHARACTER_HEIGHT, 1f, 1f, rotation, false);
 
         spriteBatch.end();
     }
 
     public void handleInputs() {
+        moveState = MoveState.IDLE;
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
             if (!currentFrame.isFlipX()) {
                 currentFrame.flip(true, false);
             }
-            body.applyForceToCenter(new Vector2(-MAX_X_MOVEMENT_VELOCITY, 0), true);
-            //characterAnimator.
+            moveState = MoveState.LEFT;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
             if (currentFrame.isFlipX()) {
                 currentFrame.flip(true, false);
             }
-            body.applyForceToCenter(new Vector2(MAX_X_MOVEMENT_VELOCITY, 0), true);
+            moveState = MoveState.RIGHT;
+        }
+    }
+
+    public void update() {
+        var velocity = body.getLinearVelocity(); // TODO
+
+        float desiredVelX = 0f;
+        switch (moveState) {
+            case RIGHT:
+                desiredVelX = MAX_X_MOVEMENT_VELOCITY;
+                break;
+            case LEFT:
+                desiredVelX = -MAX_X_MOVEMENT_VELOCITY;
+                break;
+            case IDLE:
+                desiredVelX = 0f;
+                break;
+            default:
+                System.out.println("(╯°□°）╯︵ ┻━┻ ");
         }
 
-        //TODO: Check wake parameters
-//        body.applyForceToCenter(new Vector2(xVelocity, 0), true);
+        var deltaVelX = desiredVelX - velocity.x;
+        float impulseX = body.getMass() * deltaVelX;
+
+        body.applyLinearImpulse(new Vector2(impulseX, 0f), body.getWorldCenter(), true);
     }
 
     @Override
@@ -131,7 +154,7 @@ public class Character extends Actor implements Disposable {
         spriteBatch.dispose();
     }
 
-    enum State {
+    enum AnimationState {
         EnteringIdle, Idle, Walking, Climbing, EnteringJumping, Jumping, Landing, Swimming;
 
     }
