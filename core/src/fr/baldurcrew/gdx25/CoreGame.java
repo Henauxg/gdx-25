@@ -127,9 +127,10 @@ public class CoreGame extends ApplicationAdapter {
         float frameTime = Math.min(deltaTime, 0.25f);
         accumulator += frameTime;
         while (accumulator >= Constants.TIME_STEP) {
-            world.step(Constants.TIME_STEP, Constants.VELOCITY_ITERATIONS, Constants.POSITION_ITERATIONS);
+            characters.forEach(c -> c.update());
             waveEmitter.update();
             water.update();
+            world.step(Constants.TIME_STEP, Constants.VELOCITY_ITERATIONS, Constants.POSITION_ITERATIONS);
             accumulator -= Constants.TIME_STEP;
         }
     }

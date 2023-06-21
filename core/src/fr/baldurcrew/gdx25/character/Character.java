@@ -21,10 +21,10 @@ public class Character extends Actor implements Disposable {
     public int MAX_X_MOVEMENT_VELOCITY = 2;
     public int MAX_Y_MOVEMENT_VELOCITY = 2;
     float stateTime;
-    float time;
-    boolean isFacingRight = true;
-    boolean canJump = false;
-    float deltaTime = Gdx.graphics.getDeltaTime();
+    //    float time;
+//    boolean isFacingRight = true;
+//    boolean canJump = false;
+//    float deltaTime = Gdx.graphics.getDeltaTime();
     private int colorRow;
     private float xVelocity = 0f;
     private float yVelocity = 0f;
@@ -32,6 +32,7 @@ public class Character extends Actor implements Disposable {
     private CharacterAnimator characterAnimator;
     private SpriteBatch spriteBatch;
     private TextureRegion currentFrame;
+    private MoveState moveState;
 
     public Character(int colorRow, World world) {
         this.colorRow = colorRow;
@@ -133,5 +134,9 @@ public class Character extends Actor implements Disposable {
     enum State {
         EnteringIdle, Idle, Walking, Climbing, EnteringJumping, Jumping, Landing, Swimming;
 
+    }
+
+    enum MoveState {
+        RIGHT, IDLE, LEFT
     }
 }
