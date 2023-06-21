@@ -3,6 +3,7 @@ package fr.baldurcrew.gdx25.water;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import fr.baldurcrew.gdx25.Constants;
+import fr.baldurcrew.gdx25.CoreGame;
 
 public class WaveEmitter {
 
@@ -25,6 +26,8 @@ public class WaveEmitter {
 
 
     public void update() {
+        if (!CoreGame.debugEnableWaveGeneration) return;
+
         emitTimer += Constants.TIME_STEP;
         if (emitTimer >= nextWaveWaitTime) {
 

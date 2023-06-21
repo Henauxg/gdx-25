@@ -25,6 +25,8 @@ public class CoreGame extends ApplicationAdapter {
 
     private static final Color CLEAR_COLOR = new Color(0.5f, 0.898f, 1, 1);
     public static boolean debugMode = true;
+    public static boolean debugEnableWaterRendering = true;
+    public static boolean debugEnableWaveGeneration = true;
 
     World world;
     private OrthographicCamera camera;
@@ -87,8 +89,16 @@ public class CoreGame extends ApplicationAdapter {
     public void handleInputs(OrthographicCamera camera) {
         characters.forEach(character -> character.handleInputs());
 
-        if (Gdx.input.isKeyJustPressed(Input.Keys.D)) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F1)) {
             debugMode = !debugMode;
+        }
+        if (debugMode) {
+            if (Gdx.input.isKeyJustPressed(Input.Keys.F2)) {
+                debugEnableWaterRendering = !debugEnableWaterRendering;
+            }
+            if (Gdx.input.isKeyJustPressed(Input.Keys.F3)) {
+                debugEnableWaveGeneration = !debugEnableWaveGeneration;
+            }
         }
 
         if (Gdx.input.justTouched()) {

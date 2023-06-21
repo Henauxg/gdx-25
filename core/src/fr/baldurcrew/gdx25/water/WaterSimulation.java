@@ -63,7 +63,7 @@ public class WaterSimulation implements Disposable, ContactHandler {
         body.setUserData(this);
 
         final var waterPolygon = new PolygonShape();
-        // TODO generate fixtures/vertices for the water body
+        // TODO generate multiple fixtures for the water body
         // TODO Optimization: Create water fixtures for waves only under the boat
         waterPolygon.setAsBox(halfWidth, halfHeight);
 
@@ -96,7 +96,7 @@ public class WaterSimulation implements Disposable, ContactHandler {
         updateImmersedFixtures();
     }
 
-    // TODO Should update fixtureContacts before this
+    // TODO Check: Should update fixtureContacts before this
     private void updateImmersedFixtures() {
         this.fixtureContacts.forEach(contact -> {
             final var fixtureA = contact.fixtureA();
@@ -112,10 +112,10 @@ public class WaterSimulation implements Disposable, ContactHandler {
                 final float area = polygon.area();
                 final var centroid = GeometryUtils.polygonCentroid(polygon.getVertices(), 0, polygon.getVertices().length, new Vector2());
 
+                // Apply buoyancy
                 final var displacedMass = fluidDensity * area;
                 Vector2 buoyancyForce = new Vector2(displacedMass * -world.getGravity().x,
                         displacedMass * -world.getGravity().y);
-
                 fixtureB.getBody().applyForce(buoyancyForce, centroid, true);
             }
         });

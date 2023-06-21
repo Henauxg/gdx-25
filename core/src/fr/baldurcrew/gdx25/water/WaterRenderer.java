@@ -75,11 +75,13 @@ public class WaterRenderer implements Disposable {
 
         generateWaterMesh(waterMeshAndBuffers, springs);
 
-        Gdx.gl20.glEnable(GL20.GL_BLEND);
-        waterShaderProgram.bind();
-        waterShaderProgram.setUniformMatrix(PROJECTION_MATRIX_UNIFORM_NAME, camera.combined);
-        waterMeshAndBuffers.mesh.render(waterShaderProgram, GL30.GL_TRIANGLES);
-        Gdx.gl20.glDisable(GL20.GL_BLEND);
+        if (CoreGame.debugEnableWaterRendering) {
+            Gdx.gl20.glEnable(GL20.GL_BLEND);
+            waterShaderProgram.bind();
+            waterShaderProgram.setUniformMatrix(PROJECTION_MATRIX_UNIFORM_NAME, camera.combined);
+            waterMeshAndBuffers.mesh.render(waterShaderProgram, GL30.GL_TRIANGLES);
+            Gdx.gl20.glDisable(GL20.GL_BLEND);
+        }
     }
 
     private void generateWaterMesh(MeshAndBuffers waterMeshAndBuffers, List<Spring> springs) {
