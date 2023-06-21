@@ -87,8 +87,6 @@ public class Character extends Actor implements Disposable {
 
         //Sprite feinte = animation.getKeyFrame().getTexture();
 
-        System.out.println("rotation : " + rotation + "°");
-        System.out.println("angle : " + body.getAngle());
         //TODO: Check if correct when rotated
         final var renderX = bodyX - (CHARACTER_WIDTH / 2f) * Math.cos(body.getAngle()) + (CHARACTER_WIDTH / 2f) * Math.sin(body.getAngle());
         final var renderY = bodyY - (CHARACTER_HEIGHT / 2f) * Math.cos(body.getAngle()) - (CHARACTER_HEIGHT / 2f) * Math.sin(body.getAngle());
@@ -100,9 +98,6 @@ public class Character extends Actor implements Disposable {
         affine.setToTrnRotScl((float) renderX, (float) renderY, rotation, 1, 1);
 
         spriteBatch.setProjectionMatrix(camera.combined);
-
-        System.out.println("current region height : " + currentFrame.getRegionHeight() + "  current region width : " + currentFrame.getRegionWidth());
-        System.out.println("Body center  : " + body.getLocalCenter());
 
         spriteBatch.begin();
         spriteBatch.draw(currentFrame, CHARACTER_WIDTH, CHARACTER_HEIGHT, affine);
