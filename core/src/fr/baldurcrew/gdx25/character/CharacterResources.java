@@ -20,7 +20,7 @@ public class CharacterResources {
 
     private static CharacterResources instance;
     private final Map<Integer, Map<Action, Animation<TextureRegion>>> characterAnimations;
-    private static final TextureRegion[][] allTextureRegions = loadAndSplitSpriteSheet("characters_sheet_trim.png", FRAME_COLS, FRAME_ROWS);
+    private static final TextureRegion[][] allTextureRegions = loadAndSplitSpriteSheet("chars_sheet_trim.png", FRAME_COLS, FRAME_ROWS);
 
     public static CharacterResources getInstance() {
         if (instance == null) {
