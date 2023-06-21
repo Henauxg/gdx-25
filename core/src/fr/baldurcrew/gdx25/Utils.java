@@ -24,7 +24,6 @@ public class Utils {
         return new Vector2((n1 * dp.x - n2 * dc.x) * n3, (n1 * dp.y - n2 * dc.y) * n3);
     }
 
-
     /// Only handle polygons
     /// Original at https://www.iforce2d.net/b2dtut/
     public static ArrayList<Vector2> getIntersection(Fixture fixtureA, Fixture fixtureB) {

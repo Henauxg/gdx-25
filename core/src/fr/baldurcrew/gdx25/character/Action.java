@@ -19,10 +19,10 @@ import java.util.stream.IntStream;
 public enum Action {
 
     IDLE(3),
-    CLIMB(0,1),
-    JUMP(6,5,2),
-    SWIM(7,8),
-    WALK(9,10);
+    CLIMB(0, 1),
+    JUMP(6, 5, 2),
+    SWIM(7, 8),
+    WALK(9, 10);
 
     private int[] frames;
 
@@ -30,7 +30,7 @@ public enum Action {
         this.frames = frames;
     }
 
-    public int getFrame(int index){
+    public int getFrame(int index) {
         return frames[index];
     }
 
