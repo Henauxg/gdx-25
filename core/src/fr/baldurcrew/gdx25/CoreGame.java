@@ -44,12 +44,16 @@ public class CoreGame extends ApplicationAdapter {
         camera.setToOrtho(false, Constants.VIEWPORT_WIDTH, Constants.VIEWPORT_HEIGHT);
 
         Box2D.init();
+        debugRenderer = new Box2DDebugRenderer();
+        CharacterResources.getInstance();
+
+        createTestLevel();
+    }
+
+    public void createTestLevel() {
         world = new World(new Vector2(0, Constants.GRAVITY_VALUE), true);
         final var contactListener = new WorldContactListener();
         world.setContactListener(contactListener);
-        debugRenderer = new Box2DDebugRenderer();
-
-        CharacterResources.getInstance();
 
         characters = new ArrayList<>();
         characters.add(new Character(CharacterResources.GREEN, world));
@@ -99,6 +103,10 @@ public class CoreGame extends ApplicationAdapter {
             if (Gdx.input.isKeyJustPressed(Input.Keys.F3)) {
                 debugEnableWaveGeneration = !debugEnableWaveGeneration;
             }
+            if (Gdx.input.isKeyJustPressed(Input.Keys.F4)) {
+                disposeCurrentLevel();
+                createTestLevel();
+            }
         }
 
         if (Gdx.input.justTouched()) {
@@ -122,9 +130,15 @@ public class CoreGame extends ApplicationAdapter {
         }
     }
 
-    @Override
-    public void dispose() {
+    private void disposeCurrentLevel() {
         water.dispose();
         boat.dispose();
+        characters.forEach(c -> c.dispose());
+    }
+
+    @Override
+    public void dispose() {
+        debugRenderer.dispose();
+        disposeCurrentLevel();
     }
 }
