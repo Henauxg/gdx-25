@@ -55,9 +55,9 @@ public class WaterSimulation implements Disposable, ContactHandler {
         final var centerY = halfHeight;
 
         final var bodyDef = new BodyDef();
-        bodyDef.type = BodyDef.BodyType.DynamicBody; // TODO Check
+        bodyDef.type = BodyDef.BodyType.DynamicBody; // TODO Might just be static if not using fixtures for waves
         bodyDef.position.set(centerX, centerY);
-        bodyDef.gravityScale = 0; // TODO Check
+        bodyDef.gravityScale = 0;
 
         final var body = world.createBody(bodyDef);
         body.setUserData(this);
@@ -70,7 +70,7 @@ public class WaterSimulation implements Disposable, ContactHandler {
         final var fixtureDef = new FixtureDef();
         fixtureDef.shape = waterPolygon;
         fixtureDef.isSensor = true;
-        fixtureDef.density = 1f; // TODO
+        fixtureDef.density = 1.0f; // TODO Tweak ?
 
         body.createFixture(fixtureDef);
 
@@ -91,8 +91,7 @@ public class WaterSimulation implements Disposable, ContactHandler {
     }
 
     public void update() {
-        // TODO Timestep ?
-
+        // TODO Should depend on Constants.TIME_STEP
         updateSprings();
         updateImmersedFixtures();
     }

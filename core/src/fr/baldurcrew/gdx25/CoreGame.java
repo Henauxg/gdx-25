@@ -15,6 +15,7 @@ import fr.baldurcrew.gdx25.character.Character;
 import fr.baldurcrew.gdx25.character.CharacterResources;
 import fr.baldurcrew.gdx25.physics.WorldContactListener;
 import fr.baldurcrew.gdx25.water.WaterSimulation;
+import fr.baldurcrew.gdx25.water.WaveEmitter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +34,7 @@ public class CoreGame extends ApplicationAdapter {
 
     private WaterSimulation water;
     private Boat boat;
+    private WaveEmitter waveEmitter;
 
     @Override
     public void create() {
@@ -56,6 +58,7 @@ public class CoreGame extends ApplicationAdapter {
 
         water = new WaterSimulation(world, 80, -0.25f * Constants.VIEWPORT_WIDTH, 1.25f * Constants.VIEWPORT_WIDTH);
         boat = new Boat(world, Constants.VIEWPORT_WIDTH / 2f, water.getWaterLevel() + 1f);
+        waveEmitter = new WaveEmitter(water, new Vector2(0.5f, 1.5f), new Vector2(4f, 6.5f)); // TODO Evolve over time to increase the difficulty
 
         contactListener.addListener(water);
     }
@@ -103,6 +106,7 @@ public class CoreGame extends ApplicationAdapter {
         accumulator += frameTime;
         while (accumulator >= Constants.TIME_STEP) {
             world.step(Constants.TIME_STEP, Constants.VELOCITY_ITERATIONS, Constants.POSITION_ITERATIONS);
+            waveEmitter.update();
             water.update();
             accumulator -= Constants.TIME_STEP;
         }
