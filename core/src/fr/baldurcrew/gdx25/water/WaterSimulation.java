@@ -102,21 +102,49 @@ public class WaterSimulation implements Disposable, ContactHandler {
             final var fixtureA = contact.fixtureA();
             final var fixtureB = contact.fixtureB();
 
-            float fluidDensity = fixtureA.getDensity();
+            final float fluidDensity = fixtureA.getDensity();
 
-            final var intersection = Utils.getIntersection(fixtureA, fixtureB);
-            if (intersection != null && !intersection.isEmpty()) {
+            final var intersectionVertices = Utils.getIntersection(fixtureA, fixtureB);
+            if (intersectionVertices != null && !intersectionVertices.isEmpty()) {
                 final var world = fixtureB.getBody().getWorld();
 
-                final var polygon = Utils.getPolygon(intersection);
-                final float area = polygon.area();
-                final var centroid = GeometryUtils.polygonCentroid(polygon.getVertices(), 0, polygon.getVertices().length, new Vector2());
+                final var intersectionPolygon = Utils.getPolygon(intersectionVertices);
+                final float intersectionArea = intersectionPolygon.area();
+                final var intersectionCentroid = GeometryUtils.polygonCentroid(intersectionPolygon.getVertices(), 0, intersectionPolygon.getVertices().length, new Vector2());
 
                 // Apply buoyancy
-                final var displacedMass = fluidDensity * area;
+                final var displacedMass = fluidDensity * intersectionArea;
                 Vector2 buoyancyForce = new Vector2(displacedMass * -world.getGravity().x,
                         displacedMass * -world.getGravity().y);
-                fixtureB.getBody().applyForce(buoyancyForce, centroid, true);
+                fixtureB.getBody().applyForce(buoyancyForce, intersectionCentroid, true);
+
+                if (CoreGame.debugEnableWaterDrag) {
+                    // Apply drag separately for each polygon edge
+                    for (int i = 0; i < intersectionVertices.size(); i++) {
+                        final Vector2 v0 = intersectionVertices.get(i);
+                        final Vector2 v1 = intersectionVertices.get((i + 1) % intersectionVertices.size());
+                        final Vector2 midPoint = v0.cpy().add(v1).scl(0.5f);
+
+                        // Find relative velocity between object and fluid at edge midpoint
+                        final Vector2 velDir = fixtureB.getBody().getLinearVelocityFromWorldPoint(midPoint).sub(fixtureA.getBody().getLinearVelocityFromWorldPoint(midPoint)); // TODO In our sim, water velocity will probably always be 0
+                        final float vel = velDir.len();
+                        velDir.nor();
+
+                        final Vector2 edge = v1.cpy().sub(v0);
+                        final float edgeLength = edge.len();
+                        edge.nor();
+
+                        final Vector2 normal = new Vector2(edge.y, -edge.x);
+                        final float dragDot = normal.dot(velDir);
+
+                        if (dragDot >= 0f) {
+                            final float dragMag = dragDot * edgeLength * fluidDensity * vel * vel;
+                            Vector2 dragForce = velDir.cpy().scl(-dragMag);
+                            fixtureB.getBody().applyForce(dragForce, midPoint, true);
+                        }
+                    }
+                }
+
             }
         });
     }
