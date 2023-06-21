@@ -27,6 +27,7 @@ public class CoreGame extends ApplicationAdapter {
     public static boolean debugMode = true;
     public static boolean debugEnableWaterRendering = true;
     public static boolean debugEnableWaveGeneration = true;
+    public static boolean debugEnableWaterDrag = true;
 
     World world;
     private OrthographicCamera camera;
@@ -104,6 +105,9 @@ public class CoreGame extends ApplicationAdapter {
                 debugEnableWaveGeneration = !debugEnableWaveGeneration;
             }
             if (Gdx.input.isKeyJustPressed(Input.Keys.F4)) {
+                debugEnableWaterDrag = !debugEnableWaterDrag;
+            }
+            if (Gdx.input.isKeyJustPressed(Input.Keys.F12)) {
                 disposeCurrentLevel();
                 createTestLevel();
             }
