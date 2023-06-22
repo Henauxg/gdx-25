@@ -90,4 +90,15 @@ public class Utils {
         }
         return new Polygon(flattened);
     }
+
+    public static String secondsToDisplayString(float inputSeconds) {
+        final var minutes = String.format("%02d", Math.round(Math.floor(inputSeconds % 3600 / 60)));
+        final var seconds = String.format("%02d", Math.round(Math.floor(inputSeconds % 60)));
+
+        if (inputSeconds < 3600) return minutes + ':' + seconds;
+
+        final var hours = String.format("%02d", Math.round(Math.floor(inputSeconds / 3600)));
+        return hours + ':' + minutes + ':' + seconds;
+    }
+
 }

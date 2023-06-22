@@ -6,16 +6,20 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Box2D;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import fr.baldurcrew.gdx25.boat.Boat;
 import fr.baldurcrew.gdx25.character.Character;
 import fr.baldurcrew.gdx25.character.CharacterResources;
 import fr.baldurcrew.gdx25.physics.WorldContactListener;
 import fr.baldurcrew.gdx25.utils.Range;
+import fr.baldurcrew.gdx25.utils.Utils;
 import fr.baldurcrew.gdx25.water.WaterSimulation;
 import fr.baldurcrew.gdx25.water.WaveEmitter;
 
@@ -27,6 +31,7 @@ public class CoreGame extends ApplicationAdapter {
 
     private static final Color CLEAR_COLOR = new Color(0.5f, 0.898f, 1, 1);
     private static final Color DEBUG_CLEAR_COLOR = new Color(1f, 1f, 1f, 1f);
+
     public static boolean debugMode = true;
     public static boolean debugClearColor = false;
     public static boolean debugEnableWaterRendering = true;
@@ -34,7 +39,10 @@ public class CoreGame extends ApplicationAdapter {
     public static boolean debugEnableWaveGeneration = true;
     public static boolean debugEnableWaterDrag = true;
 
-    World world;
+    public SpriteBatch spriteBatch;
+    private BitmapFont font;
+
+    private World world;
     private OrthographicCamera camera;
     private Box2DDebugRenderer debugRenderer;
     private List<Character> characters;
@@ -44,6 +52,7 @@ public class CoreGame extends ApplicationAdapter {
     private Boat boat;
     private WaveEmitter waveEmitter;
     private Music waveSounds;
+    private float sailingTime;
 
     @Override
     public void create() {
@@ -53,6 +62,8 @@ public class CoreGame extends ApplicationAdapter {
         Box2D.init();
         debugRenderer = new Box2DDebugRenderer();
         CharacterResources.getInstance();
+        spriteBatch = new SpriteBatch();
+        font = new BitmapFont(); // libGDX's default Arial font
 
         createTestLevel();
     }
@@ -80,14 +91,17 @@ public class CoreGame extends ApplicationAdapter {
         final var waterPhysicsSimulationRange = waterSimulationRange.buildSubRange(waterSimulationRange.halfExtent - Boat.BOAT_WIDTH / 2f - physicSimulationMargin, Boat.BOAT_WIDTH + 2 * physicSimulationMargin);
         water = new WaterSimulation(world, 80, waterSimulationRange, waterPhysicsSimulationRange);
         boat = new Boat(world, Constants.VIEWPORT_WIDTH / 2f, water.getWaterLevel() + 1f);
-        waveEmitter = new WaveEmitter(water, new Vector2(0.5f, 1.5f), new Vector2(4f, 6.5f)); // TODO Evolve over time to increase the difficulty
+        waveEmitter = new WaveEmitter(water, Range.buildRange(0.5f, 1.5f), Range.buildRange(4f, 6.5f)); // TODO Evolve over time to increase the difficulty
 
         contactListener.addListener(water);
+
+        sailingTime = 0;
     }
 
     @Override
     public void render() {
         float deltaTime = Gdx.graphics.getDeltaTime();
+        sailingTime += deltaTime;
 
         handleInputs(camera);
 
@@ -109,6 +123,10 @@ public class CoreGame extends ApplicationAdapter {
         boat.render(camera);
         water.render(camera);
         characters.forEach(character -> character.render(camera));
+
+        spriteBatch.begin();
+        font.draw(spriteBatch, Utils.secondsToDisplayString(sailingTime), Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() - 10, 0, Align.center, false);
+        spriteBatch.end();
     }
 
     public void handleInputs(OrthographicCamera camera) {
