@@ -1,5 +1,7 @@
 package fr.baldurcrew.gdx25.utils;
 
+import com.badlogic.gdx.math.MathUtils;
+
 public class Range {
     public final float extent;
     public final float halfExtent;
@@ -53,5 +55,9 @@ public class Range {
         }
         final var subRangeFrom = this.from + fromOffset;
         return new Range(subRangeFrom, subRangeFrom + extent);
+    }
+
+    public float getRandom() {
+        return MathUtils.random(from, to);
     }
 }
