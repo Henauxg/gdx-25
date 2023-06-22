@@ -69,8 +69,8 @@ public class CoreGame extends ApplicationAdapter {
 
         final var waterSimulationRange = Range.buildRange(-0.25f * Constants.VIEWPORT_WIDTH, 1.25f * Constants.VIEWPORT_WIDTH);
         // Only simulate physics under the boat
-        final float physicSimualtinMargin = Boat.BOAT_WIDTH * 0.2f;
-        final var waterPhysicsSimulationRange = waterSimulationRange.buildSubRange(waterSimulationRange.halfExtent - Boat.BOAT_WIDTH / 2f - physicSimualtinMargin, Boat.BOAT_WIDTH + 2 * physicSimualtinMargin);
+        final float physicSimulationMargin = Boat.BOAT_WIDTH * 0.2f;
+        final var waterPhysicsSimulationRange = waterSimulationRange.buildSubRange(waterSimulationRange.halfExtent - Boat.BOAT_WIDTH / 2f - physicSimulationMargin, Boat.BOAT_WIDTH + 2 * physicSimulationMargin);
         water = new WaterSimulation(world, 80, waterSimulationRange, waterPhysicsSimulationRange);
         boat = new Boat(world, Constants.VIEWPORT_WIDTH / 2f, water.getWaterLevel() + 1f);
         waveEmitter = new WaveEmitter(water, new Vector2(0.5f, 1.5f), new Vector2(4f, 6.5f)); // TODO Evolve over time to increase the difficulty
