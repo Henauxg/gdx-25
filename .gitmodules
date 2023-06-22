@@ -1,0 +1,3 @@
+[submodule "assets"]
+	path = assets
+	url = https://github.com/Henauxg/gdx-25-assets.git
