@@ -3,6 +3,7 @@ package fr.baldurcrew.gdx25;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Vector2;
@@ -42,6 +43,7 @@ public class CoreGame extends ApplicationAdapter {
     private WaterSimulation water;
     private Boat boat;
     private WaveEmitter waveEmitter;
+    private Music waveSounds;
 
     @Override
     public void create() {
@@ -56,6 +58,11 @@ public class CoreGame extends ApplicationAdapter {
     }
 
     public void createTestLevel() {
+        waveSounds = Gdx.audio.newMusic(Gdx.files.internal("nice_waves.mp3"));
+        waveSounds.setLooping(true);
+        waveSounds.setVolume(0.2f);
+        waveSounds.play();
+
         world = new World(new Vector2(0, Constants.GRAVITY_VALUE), true);
         final var contactListener = new WorldContactListener();
         world.setContactListener(contactListener);
@@ -159,6 +166,7 @@ public class CoreGame extends ApplicationAdapter {
         water.dispose();
         boat.dispose();
         characters.forEach(c -> c.dispose());
+        waveSounds.dispose();
     }
 
     @Override
