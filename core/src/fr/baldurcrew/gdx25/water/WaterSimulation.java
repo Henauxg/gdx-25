@@ -43,7 +43,7 @@ public class WaterSimulation implements Disposable, ContactHandler {
     // TODO Tweak
     private float wavesPropagationPasses = 4; // 8
     private float wavesPropagationSpreadFactor = 0.2f;
-    private float springsStiffness = 0.025f;
+    private float springsStiffness = 0.005f; // TODO Reduce
     private float springsDampeningFactor = 0.025f;
     private float baseWaterLevel = 5f;
     private float waterDensity = 1.0f;
