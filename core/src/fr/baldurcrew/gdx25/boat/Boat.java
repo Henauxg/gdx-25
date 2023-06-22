@@ -6,24 +6,20 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Disposable;
+import fr.baldurcrew.gdx25.Constants;
+import fr.baldurcrew.gdx25.CoreGame;
 
 public class Boat implements Disposable {
 
-    private static final float BOAT_HEIGHT = 5f;
-    private static final float ASPECT_RATIO = 1.07f;
-    private static final float BOAT_WIDTH = ASPECT_RATIO * BOAT_HEIGHT;
+    public static final float BOAT_HEIGHT = 5f;
+    public static final float ASPECT_RATIO = 1.07f;
+    public static final float BOAT_WIDTH = ASPECT_RATIO * BOAT_HEIGHT;
     private Sprite boatSprite;
     private Texture boatTexture;
     private SpriteBatch spriteBatch; // TODO Share a sprite batch in CoreGame
-    //    private float centerX, centerY, renderX, renderY;
     private Body body;
 
     public Boat(World world, float centerX, float centerY) {
-//        this.centerX = centerX;
-//        this.centerY = centerY;
-//        this.renderX = centerX - BOAT_WIDTH / 2f;
-//        this.renderY = centerY - BOAT_HEIGHT / 2f;
-
         spriteBatch = new SpriteBatch();
         boatTexture = new Texture("blue_boat.png");
         boatSprite = new Sprite(boatTexture);
@@ -69,16 +65,23 @@ public class Boat implements Disposable {
         boatSprite.setPosition(renderX, renderY);
         boatSprite.setRotation(rotation);
 
-        spriteBatch.setProjectionMatrix(camera.combined);
-        spriteBatch.begin();
-        boatSprite.draw(spriteBatch);
+        if (CoreGame.debugEnableBoatRendering) {
+            spriteBatch.setProjectionMatrix(camera.combined);
+            spriteBatch.begin();
+            boatSprite.draw(spriteBatch);
 //        spriteBatch.draw(boatSprite, posX, posY, BOAT_WIDTH, BOAT_HEIGHT);
-        spriteBatch.end();
+            spriteBatch.end();
+        }
     }
 
     @Override
     public void dispose() {
         boatTexture.dispose();
         spriteBatch.dispose();
+    }
+
+    public void update() {
+        // Force the boat x position.
+        body.setTransform(Constants.VIEWPORT_WIDTH / 2f, body.getPosition().y, body.getAngle()); // TODO Clean
     }
 }

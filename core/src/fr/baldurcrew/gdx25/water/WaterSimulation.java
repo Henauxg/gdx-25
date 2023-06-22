@@ -6,23 +6,39 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Disposable;
 import fr.baldurcrew.gdx25.CoreGame;
-import fr.baldurcrew.gdx25.Utils;
 import fr.baldurcrew.gdx25.physics.ContactHandler;
 import fr.baldurcrew.gdx25.physics.ContactStatus;
 import fr.baldurcrew.gdx25.physics.FixtureContact;
+import fr.baldurcrew.gdx25.utils.Range;
+import fr.baldurcrew.gdx25.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class WaterSimulation implements Disposable, ContactHandler {
 
-    private final float fromX, toX;
+    /**
+     * All the springs simulating the water surface. Fixed size and content during execution.
+     */
     private final ArrayList<Spring> springs;
-    private final Set<FixtureContact> fixtureContacts;
-
+    /**
+     * Sublist view of the springs list, containing the springs that are used for the physical simulation.
+     */
+    private final List<Spring> physicalSpringsSublist;
     private final Body waterBody;
     private final WaterRenderer renderer;
+    private final Range waterRange;
+    private final float springsSpacing;
+    /**
+     * Dynamic set of fixtures in contact with the water fixtures.
+     */
+    private final Set<FixtureContact> fixtureContacts;
+    /**
+     * Current physical representation of the water. Fixed size during execution.
+     */
+    private final Fixture[] waterFixtures;
 
     // TODO Tweak
     private float wavesPropagationPasses = 4; // 8
@@ -30,53 +46,70 @@ public class WaterSimulation implements Disposable, ContactHandler {
     private float springsStiffness = 0.025f;
     private float springsDampeningFactor = 0.025f;
     private float baseWaterLevel = 5f;
+    private float waterDensity = 1.0f;
 
-    public WaterSimulation(World world, int springsCount, float fromX, float toX) {
-        this.fromX = fromX;
-        this.toX = toX;
+
+    /**
+     * @param world                  Physic world
+     * @param springsCount           How many springs in the simulation
+     * @param simulationRangeX       Range of the water simulation, on the X axis
+     * @param physicSimulationRangeX Sub-range of the water simulation where physic is simulated (buoyancy, drag, waves, ...), on the X axis
+     */
+    public WaterSimulation(World world, int springsCount, Range simulationRangeX, Range physicSimulationRangeX) {
+        this.waterRange = simulationRangeX;
         this.springs = new ArrayList<>(springsCount);
         this.fixtureContacts = new HashSet<>();
 
-        final var totalLength = toX - fromX;
-        final var springPlacementStep = totalLength / (springsCount - 1);
+        springsSpacing = waterRange.extent / (springsCount - 1);
         for (int i = 0; i < springsCount; i++) {
-            final float x = fromX + i * springPlacementStep;
+            final float x = waterRange.from + i * springsSpacing;
             springs.add(new Spring(x, baseWaterLevel));
         }
 
         renderer = new WaterRenderer(springsCount - 1);
-        waterBody = createWaterBody(world, fromX, toX);
+        waterBody = createWaterBody(world, new Vector2(simulationRangeX.getCenter(), baseWaterLevel / 2f));
+        final int startIndex = Math.round(springs.size() * waterRange.percentage(physicSimulationRangeX.from));
+        final int endIndex = Math.round(springs.size() * waterRange.percentage(physicSimulationRangeX.to));
+        physicalSpringsSublist = springs.subList(startIndex, endIndex);
+        waterFixtures = new Fixture[(physicalSpringsSublist.size())];
+        generateFixtures(waterFixtures, waterBody, physicalSpringsSublist, springsSpacing);
     }
 
-    private Body createWaterBody(World world, float fromX, float toX) {
-        final var halfWidth = (toX - fromX) / 2f;
-        final var halfHeight = baseWaterLevel / 2f;
-        final var centerX = fromX + halfWidth;
-        final var centerY = halfHeight;
-
+    private Body createWaterBody(World world, Vector2 center) {
         final var bodyDef = new BodyDef();
-        bodyDef.type = BodyDef.BodyType.DynamicBody; // TODO Might just be static if not using fixtures for waves
-        bodyDef.position.set(centerX, centerY);
-        bodyDef.gravityScale = 0;
+        bodyDef.type = BodyDef.BodyType.StaticBody;
+        bodyDef.position.set(center);
 
         final var body = world.createBody(bodyDef);
         body.setUserData(this);
 
-        final var waterPolygon = new PolygonShape();
-        // TODO generate multiple fixtures for the water body
-        // TODO Optimization: Create water fixtures for waves only under the boat
-        waterPolygon.setAsBox(halfWidth, halfHeight);
-
-        final var fixtureDef = new FixtureDef();
-        fixtureDef.shape = waterPolygon;
-        fixtureDef.isSensor = true;
-        fixtureDef.density = 1.0f; // TODO Tweak ?
-
-        body.createFixture(fixtureDef);
-
-        waterPolygon.dispose();
-
         return body;
+    }
+
+    private void destroyFixtures() {
+        for (Fixture f : this.waterFixtures) {
+            waterBody.destroyFixture(f);
+        }
+    }
+
+    private void generateFixtures(Fixture[] waterFixtures, Body body, List<Spring> springs, float springsSpacing) {
+        for (int i = 0; i < springs.size(); i++) {
+            final var waterPolygon = new PolygonShape();
+
+            // TODO If needed, could group multiple springs together to form 1 fixture to reduce physics simulation stress
+            final var spring = springs.get(i);
+            final var halfSpringSpacing = springsSpacing / 2f;
+            final var halfSpringHeight = spring.getHeight() / 2f;
+            waterPolygon.setAsBox(halfSpringSpacing, halfSpringHeight, new Vector2(spring.getX() + halfSpringSpacing - body.getWorldCenter().x, halfSpringHeight - body.getWorldCenter().y), 0);
+
+            final var fixtureDef = new FixtureDef();
+            fixtureDef.shape = waterPolygon;
+            fixtureDef.isSensor = true;
+            fixtureDef.density = waterDensity;
+            waterFixtures[i] = body.createFixture(fixtureDef);
+
+            waterPolygon.dispose();
+        }
     }
 
     public void handleContact(ContactStatus status, FixtureContact contact) {
@@ -94,9 +127,12 @@ public class WaterSimulation implements Disposable, ContactHandler {
         // TODO Should depend on Constants.TIME_STEP
         updateSprings();
         updateImmersedFixtures();
+
+        fixtureContacts.clear();
+        destroyFixtures();
+        generateFixtures(waterFixtures, waterBody, physicalSpringsSublist, springsSpacing);
     }
 
-    // TODO Check: Should update fixtureContacts before this
     private void updateImmersedFixtures() {
         this.fixtureContacts.forEach(contact -> {
             final var fixtureA = contact.fixtureA();
@@ -114,8 +150,7 @@ public class WaterSimulation implements Disposable, ContactHandler {
 
                 // Apply buoyancy
                 final var displacedMass = fluidDensity * intersectionArea;
-                Vector2 buoyancyForce = new Vector2(displacedMass * -world.getGravity().x,
-                        displacedMass * -world.getGravity().y);
+                Vector2 buoyancyForce = new Vector2(displacedMass * -world.getGravity().x, displacedMass * -world.getGravity().y);
                 fixtureB.getBody().applyForce(buoyancyForce, intersectionCentroid, true);
 
                 if (CoreGame.debugEnableWaterDrag) {
@@ -192,10 +227,8 @@ public class WaterSimulation implements Disposable, ContactHandler {
 
     public void handleInput(float xWorld) {
         if (CoreGame.debugMode) {
-            if (xWorld >= fromX && xWorld <= toX) {
-                final float index = this.springs.size() * (xWorld - fromX) / (toX - fromX);
-                this.disturbWater(Math.round(index), 5f);
-            }
+            final float index = this.springs.size() * waterRange.clampedPercentage(xWorld);
+            this.disturbWater(Math.round(index), 5f);
         }
     }
 

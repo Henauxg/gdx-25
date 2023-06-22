@@ -14,6 +14,7 @@ import fr.baldurcrew.gdx25.boat.Boat;
 import fr.baldurcrew.gdx25.character.Character;
 import fr.baldurcrew.gdx25.character.CharacterResources;
 import fr.baldurcrew.gdx25.physics.WorldContactListener;
+import fr.baldurcrew.gdx25.utils.Range;
 import fr.baldurcrew.gdx25.water.WaterSimulation;
 import fr.baldurcrew.gdx25.water.WaveEmitter;
 
@@ -24,8 +25,11 @@ import java.util.List;
 public class CoreGame extends ApplicationAdapter {
 
     private static final Color CLEAR_COLOR = new Color(0.5f, 0.898f, 1, 1);
+    private static final Color DEBUG_CLEAR_COLOR = new Color(1f, 1f, 1f, 1f);
     public static boolean debugMode = true;
+    public static boolean debugClearColor = false;
     public static boolean debugEnableWaterRendering = true;
+    public static boolean debugEnableBoatRendering = true;
     public static boolean debugEnableWaveGeneration = true;
     public static boolean debugEnableWaterDrag = true;
 
@@ -59,11 +63,15 @@ public class CoreGame extends ApplicationAdapter {
         characters = new ArrayList<>();
         characters.add(new Character(CharacterResources.GREEN, world));
         characters.add(new Character(CharacterResources.BEIGE, world));
-        characters.add(new Character(CharacterResources.BLUE, world));
-        characters.add(new Character(CharacterResources.PINK, world));
-        characters.add(new Character(CharacterResources.YELLOW, world));
+//        characters.add(new Character(CharacterResources.BLUE, world));
+//        characters.add(new Character(CharacterResources.PINK, world));
+//        characters.add(new Character(CharacterResources.YELLOW, world));
 
-        water = new WaterSimulation(world, 80, -0.25f * Constants.VIEWPORT_WIDTH, 1.25f * Constants.VIEWPORT_WIDTH);
+        final var waterSimulationRange = Range.buildRange(-0.25f * Constants.VIEWPORT_WIDTH, 1.25f * Constants.VIEWPORT_WIDTH);
+        // Only simulate physics under the boat
+        final float physicSimualtinMargin = Boat.BOAT_WIDTH * 0.2f;
+        final var waterPhysicsSimulationRange = waterSimulationRange.buildSubRange(waterSimulationRange.halfExtent - Boat.BOAT_WIDTH / 2f - physicSimualtinMargin, Boat.BOAT_WIDTH + 2 * physicSimualtinMargin);
+        water = new WaterSimulation(world, 80, waterSimulationRange, waterPhysicsSimulationRange);
         boat = new Boat(world, Constants.VIEWPORT_WIDTH / 2f, water.getWaterLevel() + 1f);
         waveEmitter = new WaveEmitter(water, new Vector2(0.5f, 1.5f), new Vector2(4f, 6.5f)); // TODO Evolve over time to increase the difficulty
 
@@ -80,7 +88,12 @@ public class CoreGame extends ApplicationAdapter {
 
         camera.update();
 
-        ScreenUtils.clear(CLEAR_COLOR);
+        if (debugClearColor) {
+            ScreenUtils.clear(DEBUG_CLEAR_COLOR);
+        } else {
+            ScreenUtils.clear(CLEAR_COLOR);
+        }
+
 
         if (debugMode) {
             debugRenderer.render(world, camera.combined);
@@ -102,9 +115,15 @@ public class CoreGame extends ApplicationAdapter {
                 debugEnableWaterRendering = !debugEnableWaterRendering;
             }
             if (Gdx.input.isKeyJustPressed(Input.Keys.F3)) {
-                debugEnableWaveGeneration = !debugEnableWaveGeneration;
+                debugEnableBoatRendering = !debugEnableBoatRendering;
             }
             if (Gdx.input.isKeyJustPressed(Input.Keys.F4)) {
+                debugClearColor = !debugClearColor;
+            }
+            if (Gdx.input.isKeyJustPressed(Input.Keys.F5)) {
+                debugEnableWaveGeneration = !debugEnableWaveGeneration;
+            }
+            if (Gdx.input.isKeyJustPressed(Input.Keys.F6)) {
                 debugEnableWaterDrag = !debugEnableWaterDrag;
             }
             if (Gdx.input.isKeyJustPressed(Input.Keys.F12)) {
@@ -131,6 +150,7 @@ public class CoreGame extends ApplicationAdapter {
             waveEmitter.update();
             water.update();
             world.step(Constants.TIME_STEP, Constants.VELOCITY_ITERATIONS, Constants.POSITION_ITERATIONS);
+            boat.update();
             accumulator -= Constants.TIME_STEP;
         }
     }
