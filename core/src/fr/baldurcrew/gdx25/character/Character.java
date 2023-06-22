@@ -11,35 +11,27 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.utils.Disposable;
-import com.badlogic.gdx.utils.Logger;
 import fr.baldurcrew.gdx25.Constants;
 
-import static com.badlogic.gdx.utils.Align.left;
-import static com.badlogic.gdx.utils.Align.right;
-
 public class Character extends Actor implements Disposable {
-    private static final float CHARACTER_HEIGHT = 1f;
+    private static final float CHARACTER_HEIGHT = 0.75f;
     private static final float ASPECT_RATIO = 0.76f;
     private static final float CHARACTER_WIDTH = ASPECT_RATIO * CHARACTER_HEIGHT;
+    private static final float MAX_X_MOVEMENT_VELOCITY = 5f;
+
     private final Animation<TextureRegion> animation;
-    public float MAX_X_MOVEMENT_VELOCITY = 5f;
-    public float MAX_Y_MOVEMENT_VELOCITY = 2;
-    float stateTime;
-    //    float time;
-//    boolean isFacingRight = true;
-//    boolean canJump = false;
-//    float deltaTime = Gdx.graphics.getDeltaTime();
-    private int colorRow;
-    private float xVelocity = 0f;
-    private float yVelocity = 0f;
+
     private Body body;
-    private CharacterAnimator characterAnimator;
     private SpriteBatch spriteBatch;
+    private float stateTime;
     private TextureRegion currentFrame;
     private MoveState moveState;
 
+    private float density = 0.6f;
+    private float friction = 0.5f;
+    private float restitution = 0.5f;
+
     public Character(int colorRow, World world) {
-        this.colorRow = colorRow;
         this.animation = CharacterResources.getInstance().getAnimation(Action.IDLE, colorRow);
         this.moveState = MoveState.IDLE;
         this.body = createBody(world, Constants.VIEWPORT_WIDTH / 2, Constants.VIEWPORT_HEIGHT / 2 + 5);
@@ -63,9 +55,9 @@ public class Character extends Actor implements Disposable {
         characterPolygon.setAsBox(CHARACTER_WIDTH / 2f, CHARACTER_HEIGHT / 2f);
 
         fixtureDef.shape = characterPolygon;
-        fixtureDef.density = 0.5f;
-        fixtureDef.friction = 1f;
-        fixtureDef.restitution = 0.5f;
+        fixtureDef.density = density;
+        fixtureDef.friction = friction;
+        fixtureDef.restitution = restitution;
 
         body.createFixture(fixtureDef);
 
@@ -75,7 +67,6 @@ public class Character extends Actor implements Disposable {
     }
 
     public void render(Camera camera) {
-        //TODO: create animation only once
         stateTime += Gdx.graphics.getDeltaTime(); // Accumulate elapsed animation time
         var isFlipped = false;
         if (currentFrame != null) {
@@ -92,9 +83,6 @@ public class Character extends Actor implements Disposable {
         float bodyY = body.getPosition().y;
         float rotation = (float) Math.toDegrees(body.getAngle());
 
-        //Sprite feinte = animation.getKeyFrame().getTexture();
-
-        //TODO: Check if correct when rotated
         final var renderX = bodyX - (CHARACTER_WIDTH / 2f) * Math.cos(body.getAngle()) + (CHARACTER_WIDTH / 2f) * Math.sin(body.getAngle());
         final var renderY = bodyY - (CHARACTER_HEIGHT / 2f) * Math.cos(body.getAngle()) - (CHARACTER_HEIGHT / 2f) * Math.sin(body.getAngle());
 
@@ -105,7 +93,6 @@ public class Character extends Actor implements Disposable {
 
         spriteBatch.begin();
         spriteBatch.draw(currentFrame, CHARACTER_WIDTH, CHARACTER_HEIGHT, affine);
-
         spriteBatch.end();
     }
 
@@ -126,7 +113,7 @@ public class Character extends Actor implements Disposable {
     }
 
     public void update() {
-        var velocity = body.getLinearVelocity(); // TODO
+        var velocity = body.getLinearVelocity(); // TODO Compute the character relative velocity to its environment (boat, ..)
 
         float desiredVelX = 0f;
         switch (moveState) {
