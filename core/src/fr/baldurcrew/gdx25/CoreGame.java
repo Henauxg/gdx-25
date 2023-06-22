@@ -4,6 +4,7 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -23,6 +24,11 @@ import fr.baldurcrew.gdx25.utils.Range;
 import fr.baldurcrew.gdx25.utils.Utils;
 import fr.baldurcrew.gdx25.water.WaterSimulation;
 import fr.baldurcrew.gdx25.water.WaveEmitter;
+import imgui.ImGui;
+import imgui.ImGuiIO;
+import imgui.gl3.ImGuiImplGl3;
+import imgui.glfw.ImGuiImplGlfw;
+import org.lwjgl.opengl.GL;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,6 +64,10 @@ public class CoreGame extends ApplicationAdapter {
     private float sailingTime;
     private CharacterSpawner characterSpawner;
 
+    private ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
+    private ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
+    private long windowHandle;
+
     @Override
     public void create() {
         camera = new OrthographicCamera();
@@ -69,8 +79,24 @@ public class CoreGame extends ApplicationAdapter {
         spriteBatch = new SpriteBatch();
         font = new BitmapFont(); // libGDX's default Arial font
 
+        createImGui();
         createTestLevel();
     }
+
+    private void createImGui() {
+        long windowHandle = ((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle();
+        org.lwjgl.glfw.GLFW.glfwMakeContextCurrent(windowHandle);
+        GL.createCapabilities();
+        ImGui.createContext();
+        ImGuiIO io = ImGui.getIO();
+        io.setIniFilename(null);
+        io.getFonts().addFontDefault();
+        io.getFonts().build();
+
+        imGuiGlfw.init(windowHandle, true);
+        imGuiGl3.init("#version 110");
+    }
+
 
     public void createTestLevel() {
         waveSounds = Gdx.audio.newMusic(Gdx.files.internal("nice_waves.mp3"));
@@ -117,6 +143,7 @@ public class CoreGame extends ApplicationAdapter {
 
         camera.update();
 
+
         if (debugClearColor) {
             ScreenUtils.clear(DEBUG_CLEAR_COLOR);
         } else {
@@ -128,6 +155,7 @@ public class CoreGame extends ApplicationAdapter {
             debugRenderer.render(world, camera.combined);
         }
 
+
         boat.render(camera);
         water.render(camera);
         characters.forEach(character -> character.render(camera));
@@ -135,6 +163,18 @@ public class CoreGame extends ApplicationAdapter {
         spriteBatch.begin();
         font.draw(spriteBatch, Utils.secondsToDisplayString(sailingTime), Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() - 10, 0, Align.center, false);
         spriteBatch.end();
+
+        renderImGui();
+    }
+
+    private void renderImGui() {
+        imGuiGlfw.newFrame();
+        ImGui.newFrame();
+        // --- ImGUI draw commands go here ---
+        ImGui.button("I'm a Button!");
+        // ---
+        ImGui.render();
+        imGuiGl3.renderDrawData(ImGui.getDrawData());
     }
 
     public void handleInputs(OrthographicCamera camera) {
@@ -200,6 +240,9 @@ public class CoreGame extends ApplicationAdapter {
     public void dispose() {
         debugRenderer.dispose();
         disposeCurrentLevel();
+        imGuiGl3.dispose();
+        imGuiGlfw.dispose();
+        ImGui.destroyContext();
     }
 
     public void spawnCharacter(int charIndex, float x, float y) {
