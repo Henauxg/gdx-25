@@ -41,6 +41,7 @@ public class Boat implements Disposable {
         final var bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
         bodyDef.position.set(centerX, centerY);
+        bodyDef.angularDamping = 0;
 
         final var body = world.createBody(bodyDef);
 
