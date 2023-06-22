@@ -32,6 +32,8 @@ public class CoreGame extends ApplicationAdapter {
 
     private static final Color CLEAR_COLOR = new Color(0.5f, 0.898f, 1, 1);
     private static final Color DEBUG_CLEAR_COLOR = new Color(1f, 1f, 1f, 1f);
+    private static final int INITIAL_CHARACTER_COUNT = 3;
+    private static final float DEFAULT_AUDIO_VOLUME = 0.2f;
 
     public static boolean debugMode = true;
     public static boolean debugClearColor = false;
@@ -73,7 +75,7 @@ public class CoreGame extends ApplicationAdapter {
     public void createTestLevel() {
         waveSounds = Gdx.audio.newMusic(Gdx.files.internal("nice_waves.mp3"));
         waveSounds.setLooping(true);
-        waveSounds.setVolume(0.2f);
+        waveSounds.setVolume(DEFAULT_AUDIO_VOLUME);
         waveSounds.play();
 
         world = new World(new Vector2(0, Constants.GRAVITY_VALUE), true);
@@ -96,10 +98,9 @@ public class CoreGame extends ApplicationAdapter {
         final Range spawnRangeY = Range.buildRange(water.getWaterLevel() + Boat.BOAT_HEIGHT / 2f, water.getWaterLevel() + Boat.BOAT_HEIGHT * 1.5f);
 
         characters = new ArrayList<>();
-        characters.add(new Character(world, CharacterResources.getRandomCharacterIndex(), spawnRangeX.getRandom(), spawnRangeY.getRandom()));
-        characters.add(new Character(world, CharacterResources.getRandomCharacterIndex(), spawnRangeX.getRandom(), spawnRangeY.getRandom()));
-        characters.add(new Character(world, CharacterResources.getRandomCharacterIndex(), spawnRangeX.getRandom(), spawnRangeY.getRandom()));
-
+        for (int i = 0; i < INITIAL_CHARACTER_COUNT; i++) {
+            this.spawnCharacter(CharacterResources.getRandomCharacterIndex(), spawnRangeX.getRandom(), spawnRangeY.getRandom());
+        }
         characterSpawner = new CharacterSpawner(this, spawnRangeX, spawnRangeY, Range.buildRange(2.5f, 6f));
 
         sailingTime = 0;
@@ -203,5 +204,6 @@ public class CoreGame extends ApplicationAdapter {
 
     public void spawnCharacter(int charIndex, float x, float y) {
         characters.add(new Character(world, charIndex, x, y));
+        CharacterResources.getInstance().getRandomSpawnSound().play(DEFAULT_AUDIO_VOLUME);
     }
 }

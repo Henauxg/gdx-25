@@ -1,6 +1,7 @@
 package fr.baldurcrew.gdx25.character;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -16,11 +17,12 @@ public class CharacterResources {
     public static final int GREEN = 2;
     public static final int PINK = 3;
     public static final int YELLOW = 4;
-
+    public static final int SPAWN_SOUNDS_COUNT = 4;
     private static final int FRAME_COLS = 11, FRAME_ROWS = 5;
     private static final TextureRegion[][] allTextureRegions = loadAndSplitSpriteSheet("chars_sheet_trim.png", FRAME_COLS, FRAME_ROWS);
     private static CharacterResources instance;
     private final Map<Integer, Map<Action, Animation<TextureRegion>>> characterAnimations;
+    private Sound[] spawnSounds;
 
     private CharacterResources() {
         this.characterAnimations = new HashMap<>();
@@ -36,6 +38,10 @@ public class CharacterResources {
                     });
         });
 
+        spawnSounds = new Sound[SPAWN_SOUNDS_COUNT];
+        for (int i = 0; i < 4; i++) {
+            spawnSounds[i] = Gdx.audio.newSound(Gdx.files.internal("weee_" + i + ".mp3"));
+        }
     }
 
     public static CharacterResources getInstance() {
@@ -57,6 +63,10 @@ public class CharacterResources {
 
     public static int getRandomCharacterIndex() {
         return MathUtils.random(BEIGE, YELLOW);
+    }
+
+    public Sound getRandomSpawnSound() {
+        return spawnSounds[MathUtils.random(0, SPAWN_SOUNDS_COUNT - 1)];
     }
 
     public Animation<TextureRegion> getAnimation(Action action, int rowColor) {
