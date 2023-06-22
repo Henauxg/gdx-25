@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.MathUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,18 +18,9 @@ public class CharacterResources {
     public static final int YELLOW = 4;
 
     private static final int FRAME_COLS = 11, FRAME_ROWS = 5;
-
+    private static final TextureRegion[][] allTextureRegions = loadAndSplitSpriteSheet("chars_sheet_trim.png", FRAME_COLS, FRAME_ROWS);
     private static CharacterResources instance;
     private final Map<Integer, Map<Action, Animation<TextureRegion>>> characterAnimations;
-    private static final TextureRegion[][] allTextureRegions = loadAndSplitSpriteSheet("chars_sheet_trim.png", FRAME_COLS, FRAME_ROWS);
-
-    public static CharacterResources getInstance() {
-        if (instance == null) {
-            instance = new CharacterResources();
-        }
-
-        return instance;
-    }
 
     private CharacterResources() {
         this.characterAnimations = new HashMap<>();
@@ -46,10 +38,12 @@ public class CharacterResources {
 
     }
 
-    public Animation<TextureRegion> getAnimation(Action action, int rowColor) {
-        //TODO: check if rowColor exist
-        return characterAnimations.get(rowColor).get(action);
+    public static CharacterResources getInstance() {
+        if (instance == null) {
+            instance = new CharacterResources();
+        }
 
+        return instance;
     }
 
     private static TextureRegion[][] loadAndSplitSpriteSheet(String imagePath, int frameCols, int frameRows) {
@@ -59,6 +53,16 @@ public class CharacterResources {
         //split sheet
         TextureRegion[][] frames = TextureRegion.split(charactersSheet, charactersSheet.getWidth() / frameCols, charactersSheet.getHeight() / frameRows);
         return frames;
+    }
+
+    public static int getRandomCharacterIndex() {
+        return MathUtils.random(BEIGE, YELLOW);
+    }
+
+    public Animation<TextureRegion> getAnimation(Action action, int rowColor) {
+        //TODO: check if rowColor exist
+        return characterAnimations.get(rowColor).get(action);
+
     }
 
     private TextureRegion[] getCharActionTextureRegions(Action action, TextureRegion[] charTextureRegions) {

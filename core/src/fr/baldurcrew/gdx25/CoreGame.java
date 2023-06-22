@@ -17,6 +17,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import fr.baldurcrew.gdx25.boat.Boat;
 import fr.baldurcrew.gdx25.character.Character;
 import fr.baldurcrew.gdx25.character.CharacterResources;
+import fr.baldurcrew.gdx25.character.CharacterSpawner;
 import fr.baldurcrew.gdx25.physics.WorldContactListener;
 import fr.baldurcrew.gdx25.utils.Range;
 import fr.baldurcrew.gdx25.utils.Utils;
@@ -53,6 +54,7 @@ public class CoreGame extends ApplicationAdapter {
     private WaveEmitter waveEmitter;
     private Music waveSounds;
     private float sailingTime;
+    private CharacterSpawner characterSpawner;
 
     @Override
     public void create() {
@@ -75,25 +77,30 @@ public class CoreGame extends ApplicationAdapter {
         waveSounds.play();
 
         world = new World(new Vector2(0, Constants.GRAVITY_VALUE), true);
-        final var contactListener = new WorldContactListener();
-        world.setContactListener(contactListener);
 
-        characters = new ArrayList<>();
-        characters.add(new Character(CharacterResources.GREEN, world));
-        characters.add(new Character(CharacterResources.BEIGE, world));
-//        characters.add(new Character(CharacterResources.BLUE, world));
-//        characters.add(new Character(CharacterResources.PINK, world));
-//        characters.add(new Character(CharacterResources.YELLOW, world));
-
-        final var waterSimulationRange = Range.buildRange(-0.25f * Constants.VIEWPORT_WIDTH, 1.25f * Constants.VIEWPORT_WIDTH);
+        final Range waterSimulationRange = Range.buildRange(-0.25f * Constants.VIEWPORT_WIDTH, 1.25f * Constants.VIEWPORT_WIDTH);
         // Only simulate physics under the boat
         final float physicSimulationMargin = Boat.BOAT_WIDTH * 0.2f;
-        final var waterPhysicsSimulationRange = waterSimulationRange.buildSubRange(waterSimulationRange.halfExtent - Boat.BOAT_WIDTH / 2f - physicSimulationMargin, Boat.BOAT_WIDTH + 2 * physicSimulationMargin);
+        final Range waterPhysicsSimulationRange = waterSimulationRange.buildSubRange(waterSimulationRange.halfExtent - Boat.BOAT_WIDTH / 2f - physicSimulationMargin, Boat.BOAT_WIDTH + 2 * physicSimulationMargin);
+
         water = new WaterSimulation(world, 80, waterSimulationRange, waterPhysicsSimulationRange);
         boat = new Boat(world, Constants.VIEWPORT_WIDTH / 2f, water.getWaterLevel() + 1f);
         waveEmitter = new WaveEmitter(water, Range.buildRange(0.5f, 1.5f), Range.buildRange(4f, 6.5f)); // TODO Evolve over time to increase the difficulty
 
+        final var contactListener = new WorldContactListener();
+        world.setContactListener(contactListener);
         contactListener.addListener(water);
+
+        final float charsSpawnPadding = Boat.BOAT_WIDTH * 0.2f;
+        final Range spawnRangeX = waterSimulationRange.buildSubRange(waterSimulationRange.halfExtent - Boat.BOAT_WIDTH / 2f + charsSpawnPadding, Boat.BOAT_WIDTH - 2 * charsSpawnPadding);
+        final Range spawnRangeY = Range.buildRange(water.getWaterLevel() + Boat.BOAT_HEIGHT / 2f, water.getWaterLevel() + Boat.BOAT_HEIGHT * 1.5f);
+
+        characters = new ArrayList<>();
+        characters.add(new Character(world, CharacterResources.getRandomCharacterIndex(), spawnRangeX.getRandom(), spawnRangeY.getRandom()));
+        characters.add(new Character(world, CharacterResources.getRandomCharacterIndex(), spawnRangeX.getRandom(), spawnRangeY.getRandom()));
+        characters.add(new Character(world, CharacterResources.getRandomCharacterIndex(), spawnRangeX.getRandom(), spawnRangeY.getRandom()));
+
+        characterSpawner = new CharacterSpawner(this, spawnRangeX, spawnRangeY, Range.buildRange(2.5f, 6f));
 
         sailingTime = 0;
     }
@@ -173,6 +180,7 @@ public class CoreGame extends ApplicationAdapter {
         while (accumulator >= Constants.TIME_STEP) {
             characters.forEach(c -> c.update());
             waveEmitter.update();
+            characterSpawner.update();
             water.update();
             world.step(Constants.TIME_STEP, Constants.VELOCITY_ITERATIONS, Constants.POSITION_ITERATIONS);
             boat.update();
@@ -191,5 +199,9 @@ public class CoreGame extends ApplicationAdapter {
     public void dispose() {
         debugRenderer.dispose();
         disposeCurrentLevel();
+    }
+
+    public void spawnCharacter(int charIndex, float x, float y) {
+        characters.add(new Character(world, charIndex, x, y));
     }
 }

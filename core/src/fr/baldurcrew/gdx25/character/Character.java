@@ -11,7 +11,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.utils.Disposable;
-import fr.baldurcrew.gdx25.Constants;
 
 public class Character extends Actor implements Disposable {
     private static final float CHARACTER_HEIGHT = 0.75f;
@@ -29,12 +28,12 @@ public class Character extends Actor implements Disposable {
 
     private float density = 0.6f;
     private float friction = 0.5f;
-    private float restitution = 0.5f;
+    private float restitution = 0.2f;
 
-    public Character(int colorRow, World world) {
+    public Character(World world, int colorRow, float x, float y) {
         this.animation = CharacterResources.getInstance().getAnimation(Action.IDLE, colorRow);
         this.moveState = MoveState.IDLE;
-        this.body = createBody(world, Constants.VIEWPORT_WIDTH / 2, Constants.VIEWPORT_HEIGHT / 2 + 5);
+        this.body = createBody(world, x, y);
 
         spriteBatch = new SpriteBatch();
         stateTime = 0f;
