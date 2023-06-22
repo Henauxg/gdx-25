@@ -1,2 +1,0 @@
-assets/blue_boat.png filter=lfs diff=lfs merge=lfs -text
-assets/chars_sheet_trim.png filter=lfs diff=lfs merge=lfs -text
