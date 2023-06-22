@@ -19,10 +19,9 @@ public class Boat implements Disposable {
     private SpriteBatch spriteBatch; // TODO Share a sprite batch in CoreGame
     private Body body;
 
-
     // TODO Tweak
-    private float density = 0.5f;
-    private float restituion = 0.5f;
+    private float density = 0.4f;
+    private float restituion = 0.3f;
     private float friction = 0.5f;
 
     public Boat(World world, float centerX, float centerY) {
