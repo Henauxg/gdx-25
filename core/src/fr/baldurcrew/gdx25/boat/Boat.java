@@ -45,8 +45,13 @@ public class Boat implements Disposable {
         final var body = world.createBody(bodyDef);
 
         final var boatPolygon = new PolygonShape();
-        // TODO generate vertices for the boat body
-        boatPolygon.setAsBox(BOAT_WIDTH / 2f, BOAT_HEIGHT / 5f); // TODO Adjust
+        float[] vertices = new float[]{
+                -BOAT_WIDTH / 2f, 0,
+                -BOAT_WIDTH / 3f, -BOAT_HEIGHT / 3f,
+                0, -2f,
+                BOAT_WIDTH / 3f, -BOAT_HEIGHT / 3f,
+                BOAT_WIDTH / 2.2f, 0};
+        boatPolygon.set(vertices);
 
         final var fixtureDef = new FixtureDef();
         fixtureDef.shape = boatPolygon;
@@ -67,7 +72,7 @@ public class Boat implements Disposable {
         float rotation = (float) Math.toDegrees(body.getAngle());
 
         final var renderX = bodyX - BOAT_WIDTH / 2f;
-        final var renderY = bodyY - BOAT_HEIGHT / 5f; // TODO Adjust
+        final var renderY = bodyY - BOAT_HEIGHT / 2.5f; // TODO Adjust to fixture vertices
         boatSprite.setPosition(renderX, renderY);
         boatSprite.setRotation(rotation);
 
@@ -75,7 +80,7 @@ public class Boat implements Disposable {
             spriteBatch.setProjectionMatrix(camera.combined);
             spriteBatch.begin();
             boatSprite.draw(spriteBatch);
-//        spriteBatch.draw(boatSprite, posX, posY, BOAT_WIDTH, BOAT_HEIGHT);
+            // spriteBatch.draw(boatSprite, posX, posY, BOAT_WIDTH, BOAT_HEIGHT);
             spriteBatch.end();
         }
     }
