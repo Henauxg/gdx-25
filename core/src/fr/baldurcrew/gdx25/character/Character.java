@@ -130,10 +130,10 @@ public class Character extends Actor implements Disposable, ContactHandler { // 
     }
 
     public void update() {
-        var velocity = body.getLinearVelocity(); // TODO Compute the character relative velocity to its environment (boat, ..)
+        var velocity = body.getLinearVelocity();
+        // Here, compute the character relative velocity to its environment (boat, ..)
         if (touchingBoat && boatContactPoint != null) {
             final float boatAngularVelocity = boat.getBody().getAngularVelocity();
-            Gdx.app.log("Char", "Correcting char velocity by " + boatAngularVelocity);
             if (boatAngularVelocity != 0) {
                 final Vector2 contactVector = boatContactPoint.cpy().sub(boat.getBody().getPosition());
                 final Vector2 velocityFromBoatAngularVel = new Vector2(-boatAngularVelocity * contactVector.y, boatAngularVelocity * contactVector.x);
@@ -153,7 +153,6 @@ public class Character extends Actor implements Disposable, ContactHandler { // 
             break;
             case IDLE: {
                 desiredVelX = 0f;
-                //desiredVelX = velocity.x * 0.97f;
             }
             break;
             default:
@@ -194,7 +193,6 @@ public class Character extends Actor implements Disposable, ContactHandler { // 
     public void handleContactBegin(FixtureContact contact) {
         if (contact.otherFixture().getBody().getUserData() == boat) {
             touchingBoat = true;
-            Gdx.app.log("Char", "touchingBoat = true");
         }
     }
 
@@ -202,7 +200,6 @@ public class Character extends Actor implements Disposable, ContactHandler { // 
     public void handleContactEnd(FixtureContact contact) {
         if (contact.otherFixture().getBody().getUserData() == boat) {
             touchingBoat = false;
-            Gdx.app.log("Char", "touchingBoat = false");
         }
     }
 
