@@ -71,6 +71,7 @@ public class CoreGame extends ApplicationAdapter {
     private Music waveSounds;
     private Music music;
     private float sailingTime;
+    private boolean gameOver;
     private CharacterSpawner characterSpawner;
     private float characterDensity = 3.0f;
     private float characterFriction = 0.5f;
@@ -181,6 +182,7 @@ public class CoreGame extends ApplicationAdapter {
         characterSpawner = new CharacterSpawner(this, charactersSpawnRangeX, charactersSpawnRangeY, Range.buildRangeEx(2.5f, 6f));
 
         sailingTime = 0;
+        gameOver = false;
 
         initTweakingUIValues();
     }
@@ -212,9 +214,11 @@ public class CoreGame extends ApplicationAdapter {
     @Override
     public void render() {
         float deltaTime = Gdx.graphics.getDeltaTime();
-        sailingTime += deltaTime;
 
-        handleInputs(camera);
+        if (!gameOver) {
+            sailingTime += deltaTime;
+            handleInputs(camera);
+        }
 
         doPhysicsStep(deltaTime);
 
@@ -402,10 +406,15 @@ public class CoreGame extends ApplicationAdapter {
         while (accumulator >= Constants.TIME_STEP) {
             characters.forEach(c -> c.update());
             waveEmitter.update();
-            characterSpawner.update();
+            if (!gameOver) {
+                characterSpawner.update();
+            }
             water.update();
             world.step(Constants.TIME_STEP, Constants.VELOCITY_ITERATIONS, Constants.POSITION_ITERATIONS);
-            boat.update();
+            final boolean upsideDownBoat = boat.update();
+            if (upsideDownBoat) {
+                gameOver = true;
+            }
             accumulator -= Constants.TIME_STEP;
         }
     }

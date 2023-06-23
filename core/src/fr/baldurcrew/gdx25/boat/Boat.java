@@ -15,16 +15,20 @@ public class Boat implements Disposable {
     public static final float ASPECT_RATIO = 1.07f;
     public static final float BOAT_WIDTH = ASPECT_RATIO * BOAT_HEIGHT;
     private static final float DEFAULT_BOAT_ANGULAR_DAMPING = 0;
+    private static final double MAX_ALLOWED_BOAT_ANGLE = 120;
+    private static final float BOAT_UPSIDE_DOWN_TIMER = 1.5f;
+
     private Sprite boatSprite;
     private Texture boatTexture;
     private SpriteBatch spriteBatch; // TODO Share a sprite batch in CoreGame
     private Body body;
+    private float upsideDownTimer;
+    private boolean upsideDown;
 
     // TODO Tweak
     private float density = 0.25f;
     private float restitution = 0.3f;
     private float friction = 0.5f;
-
 
     public Boat(World world, float centerX, float centerY) {
         spriteBatch = new SpriteBatch();
@@ -36,6 +40,8 @@ public class Boat implements Disposable {
         boatSprite.setPosition(centerX - BOAT_WIDTH / 2f, centerY - BOAT_HEIGHT / 2f);
 
         body = createBody(world, centerX, centerY);
+        upsideDownTimer = 0f;
+        upsideDown = false;
     }
 
     private Body createBody(World world, float centerX, float centerY) {
@@ -94,9 +100,22 @@ public class Boat implements Disposable {
         spriteBatch.dispose();
     }
 
-    public void update() {
+    public boolean update() {
         // Force the boat x position.
         body.setTransform(Constants.VIEWPORT_WIDTH / 2f, body.getPosition().y, body.getAngle()); // TODO Clean
+
+        // Check for Upside down boat
+        final var clampedAngle = Math.abs(Math.toDegrees(body.getAngle()) % 360);
+        if (clampedAngle >= MAX_ALLOWED_BOAT_ANGLE) {
+            upsideDownTimer += Constants.TIME_STEP;
+            if (upsideDownTimer >= BOAT_UPSIDE_DOWN_TIMER) {
+                upsideDown = true;
+            }
+        } else {
+            upsideDownTimer = 0;
+        }
+
+        return upsideDown;
     }
 
     public float getDensity() {
