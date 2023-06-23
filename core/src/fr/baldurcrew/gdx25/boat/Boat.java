@@ -96,6 +96,10 @@ public class Boat implements Disposable {
         body.setTransform(Constants.VIEWPORT_WIDTH / 2f, body.getPosition().y, body.getAngle()); // TODO Clean
     }
 
+    public float getDensity() {
+        return density;
+    }
+
     public void setDensity(float density) {
         this.density = density;
         this.body.getFixtureList().forEach(fixture -> {
@@ -103,11 +107,19 @@ public class Boat implements Disposable {
         });
     }
 
+    public float getRestitution() {
+        return restituion;
+    }
+
     public void setRestitution(float restitution) {
         this.restituion = restitution;
         this.body.getFixtureList().forEach(fixture -> {
             fixture.setRestitution(restitution);
         });
+    }
+
+    public float getFriction() {
+        return friction;
     }
 
     public void setFriction(float friction) {

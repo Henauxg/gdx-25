@@ -144,6 +144,25 @@ public class CoreGame extends ApplicationAdapter {
         characterSpawner = new CharacterSpawner(this, spawnRangeX, spawnRangeY, Range.buildRange(2.5f, 6f));
 
         sailingTime = 0;
+
+        initTweakingUIValues();
+    }
+
+    private void initTweakingUIValues() {
+        charFriction[0] = characters.get(0).getFriction();
+        charDensity[0] = characters.get(0).getDensity();
+        charRestitution[0] = characters.get(0).getRestitution();
+        //Boat
+        boatDensity[0] = boat.getDensity();
+        boatRestitution[0] = boat.getRestitution();
+        boatFriction[0] = boat.getFriction();
+        //Water
+        waterWavesPropagationPasses[0] = water.getWavesPropagationPasses();
+        waterWavesPropagationSpreadFactor[0] = water.getWavesPropagationSpreadFactor();
+        waterSpringsStiffness[0] = water.getSpringsStiffness();
+        waterSpringsDampeningFactor[0] = water.getSpringsDampening();
+        waterBaseWaterLevel[0] = water.getWaterLevel();
+        waterDensity[0] = water.getDensity();
     }
 
     @Override

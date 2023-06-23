@@ -241,18 +241,6 @@ public class WaterSimulation implements Disposable, ContactHandler {
         return this.baseWaterLevel;
     }
 
-    public void setWavesPropagationPasses(int wavesPropagationPasses) {
-        this.wavesPropagationPasses = wavesPropagationPasses;
-    }
-
-    public void setWavesPropagationSpreadFactor(float wavesPropagationSpreadFactor) {
-        this.wavesPropagationSpreadFactor = wavesPropagationSpreadFactor;
-    }
-
-    public void setSpringsStiffness(float springsStiffness) {
-        this.springsStiffness = springsStiffness;
-    }
-
     public void setSpringsDampeningFactor(float springsDampeningFactor) {
         this.springsDampeningFactor = springsDampeningFactor;
     }
@@ -260,6 +248,38 @@ public class WaterSimulation implements Disposable, ContactHandler {
     public void setBaseWaterLevel(float baseWaterLevel) {
         // TODO Need to recreate springs
 //        this.baseWaterLevel = baseWaterLevel;
+    }
+
+    public int getWavesPropagationPasses() {
+        return wavesPropagationPasses;
+    }
+
+    public void setWavesPropagationPasses(int wavesPropagationPasses) {
+        this.wavesPropagationPasses = wavesPropagationPasses;
+    }
+
+    public float getWavesPropagationSpreadFactor() {
+        return wavesPropagationSpreadFactor;
+    }
+
+    public void setWavesPropagationSpreadFactor(float wavesPropagationSpreadFactor) {
+        this.wavesPropagationSpreadFactor = wavesPropagationSpreadFactor;
+    }
+
+    public float getSpringsStiffness() {
+        return springsStiffness;
+    }
+
+    public void setSpringsStiffness(float springsStiffness) {
+        this.springsStiffness = springsStiffness;
+    }
+
+    public float getSpringsDampening() {
+        return springsDampeningFactor;
+    }
+
+    public float getDensity() {
+        return waterDensity;
     }
 
     public void setDensity(float density) {

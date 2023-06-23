@@ -140,6 +140,10 @@ public class Character extends Actor implements Disposable {
         spriteBatch.dispose();
     }
 
+    public float getFriction() {
+        return friction;
+    }
+
     public void setFriction(float friction) {
         this.friction = friction;
         this.body.getFixtureList().forEach(fixture -> {
@@ -147,11 +151,19 @@ public class Character extends Actor implements Disposable {
         });
     }
 
+    public float getDensity() {
+        return density;
+    }
+
     public void setDensity(float density) {
         this.density = density;
         this.body.getFixtureList().forEach(fixture -> {
             fixture.setFriction(density);
         });
+    }
+
+    public float getRestitution() {
+        return restitution;
     }
 
     public void setRestitution(float restitution) {
