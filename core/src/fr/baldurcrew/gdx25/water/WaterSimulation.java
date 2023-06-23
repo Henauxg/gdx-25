@@ -120,8 +120,8 @@ public class WaterSimulation implements Disposable, ContactHandler {
     }
 
     @Override
-    public void handlePreSolve(FixtureContact contact) {
-        // TODO
+    public void handlePreSolve(Contact contact, FixtureContact fixtures) {
+        // Nothing to do here
     }
 
     public void update() {

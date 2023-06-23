@@ -11,8 +11,10 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.utils.Disposable;
+import fr.baldurcrew.gdx25.physics.ContactHandler;
+import fr.baldurcrew.gdx25.physics.FixtureContact;
 
-public class Character extends Actor implements Disposable {
+public class Character extends Actor implements Disposable, ContactHandler { // TODO Remove Actor since unused
     private static final float CHARACTER_HEIGHT = 0.75f;
     private static final float ASPECT_RATIO = 0.76f;
     private static final float CHARACTER_WIDTH = ASPECT_RATIO * CHARACTER_HEIGHT;
@@ -174,9 +176,26 @@ public class Character extends Actor implements Disposable {
         });
     }
 
+    @Override
+    public void handleContactBegin(FixtureContact contact) {
+        //
+    }
+
+    @Override
+    public void handleContactEnd(FixtureContact contact) {
+        //
+    }
+
+    @Override
+    public void handlePreSolve(Contact contact, FixtureContact fixtures) {
+        if (contact.getWorldManifold().getNumberOfContactPoints() > 0) {
+            var contactPoint = contact.getWorldManifold().getPoints()[0];
+            // TODO Implement
+        }
+    }
+
     enum AnimationState {
         EnteringIdle, Idle, Walking, Climbing, EnteringJumping, Jumping, Landing, Swimming;
-
     }
 
     enum MoveState {

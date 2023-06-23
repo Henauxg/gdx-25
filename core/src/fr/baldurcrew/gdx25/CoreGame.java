@@ -57,6 +57,7 @@ public class CoreGame extends ApplicationAdapter {
     private List<Character> characters;
     private float accumulator = 0;
 
+    private WorldContactListener worldContactListener;
     private WaterSimulation water;
     private Boat boat;
     private WaveEmitter waveEmitter;
@@ -129,10 +130,6 @@ public class CoreGame extends ApplicationAdapter {
         boat = new Boat(world, Constants.VIEWPORT_WIDTH / 2f, water.getWaterLevel() + 1f);
         waveEmitter = new WaveEmitter(water, Range.buildRange(0.5f, 1.5f), Range.buildRange(4f, 6.5f)); // TODO Evolve over time to increase the difficulty
 
-        final var contactListener = new WorldContactListener();
-        world.setContactListener(contactListener);
-        contactListener.addListener(water);
-
         final float charsSpawnPadding = Boat.BOAT_WIDTH * 0.2f;
         final Range spawnRangeX = waterSimulationRange.buildSubRange(waterSimulationRange.halfExtent - Boat.BOAT_WIDTH / 2f + charsSpawnPadding, Boat.BOAT_WIDTH - 2 * charsSpawnPadding);
         final Range spawnRangeY = Range.buildRange(water.getWaterLevel() + Boat.BOAT_HEIGHT / 2f, water.getWaterLevel() + Boat.BOAT_HEIGHT * 1.5f);
@@ -142,6 +139,11 @@ public class CoreGame extends ApplicationAdapter {
             this.spawnCharacter(CharacterResources.getRandomCharacterIndex(), spawnRangeX.getRandom(), spawnRangeY.getRandom());
         }
         characterSpawner = new CharacterSpawner(this, spawnRangeX, spawnRangeY, Range.buildRange(2.5f, 6f));
+
+        worldContactListener = new WorldContactListener();
+        world.setContactListener(worldContactListener);
+        worldContactListener.addListener(water);
+        characters.forEach(c -> worldContactListener.addListener(c));
 
         sailingTime = 0;
 
@@ -324,7 +326,9 @@ public class CoreGame extends ApplicationAdapter {
     }
 
     public void spawnCharacter(int charIndex, float x, float y) {
-        characters.add(new Character(world, charIndex, x, y));
+        final var spawned = new Character(world, charIndex, x, y);
+        characters.add(spawned);
+        worldContactListener.addListener(spawned);
         CharacterResources.getInstance().getRandomSpawnSound().play(DEFAULT_AUDIO_VOLUME);
     }
 }
