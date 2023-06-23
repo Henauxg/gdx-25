@@ -7,7 +7,6 @@ import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Disposable;
 import fr.baldurcrew.gdx25.CoreGame;
 import fr.baldurcrew.gdx25.physics.ContactHandler;
-import fr.baldurcrew.gdx25.physics.ContactStatus;
 import fr.baldurcrew.gdx25.physics.FixtureContact;
 import fr.baldurcrew.gdx25.utils.Range;
 import fr.baldurcrew.gdx25.utils.Utils;
@@ -112,15 +111,17 @@ public class WaterSimulation implements Disposable, ContactHandler {
         }
     }
 
-    public void handleContact(ContactStatus status, FixtureContact contact) {
-        switch (status) {
-            case Begin -> {
-                fixtureContacts.add(contact);
-            }
-            case End -> {
-                fixtureContacts.remove(contact);
-            }
-        }
+    public void handleContactBegin(FixtureContact contact) {
+        fixtureContacts.add(contact);
+    }
+
+    public void handleContactEnd(FixtureContact contact) {
+        fixtureContacts.remove(contact);
+    }
+
+    @Override
+    public void handlePreSolve(FixtureContact contact) {
+        // TODO
     }
 
     public void update() {
@@ -135,14 +136,14 @@ public class WaterSimulation implements Disposable, ContactHandler {
 
     private void updateImmersedFixtures() {
         this.fixtureContacts.forEach(contact -> {
-            final var fixtureA = contact.fixtureA();
-            final var fixtureB = contact.fixtureB();
+            final var waterFixture = contact.handledFixture();
+            final var immersedFixture = contact.otherFixture();
 
-            final float fluidDensity = fixtureA.getDensity();
+            final float fluidDensity = waterFixture.getDensity();
 
-            final var intersectionVertices = Utils.getIntersection(fixtureA, fixtureB);
+            final var intersectionVertices = Utils.getIntersection(waterFixture, immersedFixture);
             if (intersectionVertices != null && !intersectionVertices.isEmpty()) {
-                final var world = fixtureB.getBody().getWorld();
+                final var world = immersedFixture.getBody().getWorld();
 
                 final var intersectionPolygon = Utils.getPolygon(intersectionVertices);
                 final float intersectionArea = intersectionPolygon.area();
@@ -151,7 +152,7 @@ public class WaterSimulation implements Disposable, ContactHandler {
                 // Apply buoyancy
                 final var displacedMass = fluidDensity * intersectionArea;
                 Vector2 buoyancyForce = new Vector2(displacedMass * -world.getGravity().x, displacedMass * -world.getGravity().y);
-                fixtureB.getBody().applyForce(buoyancyForce, intersectionCentroid, true);
+                immersedFixture.getBody().applyForce(buoyancyForce, intersectionCentroid, true);
 
                 if (CoreGame.debugEnableWaterDrag) {
                     // Apply drag separately for each polygon edge
@@ -161,7 +162,7 @@ public class WaterSimulation implements Disposable, ContactHandler {
                         final Vector2 midPoint = v0.cpy().add(v1).scl(0.5f);
 
                         // Find relative velocity between object and fluid at edge midpoint
-                        final Vector2 velDir = fixtureB.getBody().getLinearVelocityFromWorldPoint(midPoint).sub(fixtureA.getBody().getLinearVelocityFromWorldPoint(midPoint)); // TODO In our sim, water velocity will probably always be 0
+                        final Vector2 velDir = immersedFixture.getBody().getLinearVelocityFromWorldPoint(midPoint).sub(waterFixture.getBody().getLinearVelocityFromWorldPoint(midPoint)); // TODO In our sim, water velocity will probably always be 0
                         final float vel = velDir.len();
                         velDir.nor();
 
@@ -175,7 +176,7 @@ public class WaterSimulation implements Disposable, ContactHandler {
                         if (dragDot >= 0f) {
                             final float dragMag = dragDot * edgeLength * fluidDensity * vel * vel;
                             Vector2 dragForce = velDir.cpy().scl(-dragMag);
-                            fixtureB.getBody().applyForce(dragForce, midPoint, true);
+                            immersedFixture.getBody().applyForce(dragForce, midPoint, true);
                         }
                     }
                 }

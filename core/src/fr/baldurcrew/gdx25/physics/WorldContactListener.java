@@ -16,16 +16,15 @@ public class WorldContactListener implements ContactListener {
     public void beginContact(Contact contact) {
         Fixture fixtureA = contact.getFixtureA();
         Fixture fixtureB = contact.getFixtureB();
-        final var status = ContactStatus.Begin;
 
         final var handlerA = contactHandlers.get(fixtureA.getBody().getUserData());
         if (handlerA != null) {
-            handlerA.handleContact(status, new FixtureContact(fixtureA, fixtureB));
+            handlerA.handleContactBegin(new FixtureContact(fixtureA, fixtureB));
         }
 
         final var handlerB = contactHandlers.get(fixtureB.getBody().getUserData());
         if (handlerB != null) {
-            handlerB.handleContact(status, new FixtureContact(fixtureB, fixtureA));
+            handlerB.handleContactBegin(new FixtureContact(fixtureB, fixtureA));
         }
     }
 
@@ -33,16 +32,15 @@ public class WorldContactListener implements ContactListener {
     public void endContact(Contact contact) {
         Fixture fixtureA = contact.getFixtureA();
         Fixture fixtureB = contact.getFixtureB();
-        final var status = ContactStatus.End;
 
         final var handlerA = contactHandlers.get(fixtureA.getBody().getUserData());
         if (handlerA != null) {
-            handlerA.handleContact(status, new FixtureContact(fixtureA, fixtureB));
+            handlerA.handleContactEnd(new FixtureContact(fixtureA, fixtureB));
         }
 
         final var handlerB = contactHandlers.get(fixtureB.getBody().getUserData());
         if (handlerB != null) {
-            handlerB.handleContact(status, new FixtureContact(fixtureB, fixtureA));
+            handlerB.handleContactEnd(new FixtureContact(fixtureB, fixtureA));
         }
     }
 
