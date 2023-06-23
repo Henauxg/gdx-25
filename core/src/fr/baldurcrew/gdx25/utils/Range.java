@@ -5,8 +5,8 @@ import com.badlogic.gdx.math.MathUtils;
 public class Range {
     public final float extent;
     public final float halfExtent;
-    public final float from;
-    public final float to;
+    public float from;
+    public float to;
 
     private Range(float from, float to) {
         this.from = from;
@@ -67,5 +67,29 @@ public class Range {
 
     public float getRandom() {
         return MathUtils.random(from, to);
+    }
+
+    public void addToEnd(float v) {
+        if (to + v >= from) {
+            to += v;
+        }
+    }
+
+    public void addToStart(float v) {
+        if (from + v <= to) {
+            from += v;
+        }
+    }
+
+    public void changeEnd(float v) {
+        if (v >= from) {
+            to = v;
+        }
+    }
+
+    public void changeStart(float v) {
+        if (v <= to) {
+            from = v;
+        }
     }
 }

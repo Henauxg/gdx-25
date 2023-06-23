@@ -38,7 +38,6 @@ import java.util.List;
 
 
 public class CoreGame extends ApplicationAdapter {
-
     private static final Color CLEAR_COLOR = new Color(0.5f, 0.898f, 1, 1);
     private static final Color DEBUG_CLEAR_COLOR = new Color(1f, 1f, 1f, 1f);
     private static final int INITIAL_CHARACTER_COUNT = 1;
@@ -53,17 +52,14 @@ public class CoreGame extends ApplicationAdapter {
     public static boolean debugEnableWaterDrag = true;
     public static boolean debugEnableFakeWaterVelocity = true;
     public static boolean debugEnableLiftForce = true;
-    ;
     public SpriteBatch spriteBatch;
     private List<ParallaxLayer> parallaxLayers;
     private BitmapFont font;
-
     private World world;
     private OrthographicCamera camera;
     private Box2DDebugRenderer debugRenderer;
     private List<Character> characters;
     private float accumulator = 0;
-
     private WorldContactListener worldContactListener;
     private WaterSimulation water;
     private Boat boat;
@@ -71,19 +67,18 @@ public class CoreGame extends ApplicationAdapter {
     private Music waveSounds;
     private Music music;
     private float sailingTime;
+    private float difficultyFactor;
     private boolean gameOver;
     private CharacterSpawner characterSpawner;
     private float characterDensity = 3.0f;
     private float characterFriction = 0.5f;
     private float characterRestitution = 0.2f;
     private Range defaultWavePeriodRange = Range.buildRangeEx(0.5f, 1.5f);
-    private Range defaultWaveAmplitudeRange = Range.buildRangeEx(4f, 6.5f);
+    private Range defaultWaveAmplitudeRange = Range.buildRangeEx(2.5f, 5f);
     private Range charactersSpawnRangeX;
     private Range charactersSpawnRangeY;
-
     private ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
     private ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
-    private long windowHandle;
     //Character
     private float[] uiCharFriction = new float[1];
     private float[] uiCharDensity = new float[1];
@@ -104,13 +99,10 @@ public class CoreGame extends ApplicationAdapter {
     private float[] uiWaterFakeVelocityY = new float[1];
     private float[] uiWaveEmitterAmplitudeRange = new float[2];
     private float[] uiWaveEmitterPeriodRange = new float[2];
+    private float[] uiSailingTime = new float[1];
 
     @Override
     public void create() {
-//        waveSounds = Gdx.audio.newMusic(Gdx.files.internal("DasLiedderSturme.mp3"));
-//        waveSounds.setLooping(true);
-//        waveSounds.setVolume(DEFAULT_AUDIO_VOLUME);
-//        waveSounds.play();
         camera = new OrthographicCamera();
         camera.setToOrtho(false, Constants.VIEWPORT_WIDTH, Constants.VIEWPORT_HEIGHT);
 
@@ -182,21 +174,23 @@ public class CoreGame extends ApplicationAdapter {
         characterSpawner = new CharacterSpawner(this, charactersSpawnRangeX, charactersSpawnRangeY, Range.buildRangeEx(2.5f, 6f));
 
         sailingTime = 0;
+        difficultyFactor = 1;
         gameOver = false;
 
         initTweakingUIValues();
     }
 
     private void initTweakingUIValues() {
+        // Char
         uiCharFriction[0] = characterFriction;
         uiCharDensity[0] = characterDensity;
         uiCharRestitution[0] = characterRestitution;
-        //Boat
+        // Boat
         uiBoatDensity[0] = boat.getDensity();
         uiBoatRestitution[0] = boat.getRestitution();
         uiBoatFriction[0] = boat.getFriction();
         uiBoatAngularDamping[0] = boat.getBody().getAngularDamping();
-        //Water
+        // Water
         uiWaterWavesPropagationPasses[0] = water.getWavesPropagationPasses();
         uiWaterWavesPropagationSpreadFactor[0] = water.getWavesPropagationSpreadFactor();
         uiWaterSpringsStiffness[0] = water.getSpringsStiffness();
@@ -209,6 +203,8 @@ public class CoreGame extends ApplicationAdapter {
         uiWaveEmitterAmplitudeRange[1] = defaultWaveAmplitudeRange.to;
         uiWaveEmitterPeriodRange[0] = defaultWavePeriodRange.from;
         uiWaveEmitterPeriodRange[1] = defaultWavePeriodRange.to;
+        // Others
+        uiSailingTime[0] = sailingTime;
     }
 
     @Override
@@ -217,6 +213,7 @@ public class CoreGame extends ApplicationAdapter {
 
         if (!gameOver) {
             sailingTime += deltaTime;
+            updateDifficulty(sailingTime);
             handleInputs(camera);
         }
         handleDebugInputs(camera);
@@ -358,6 +355,38 @@ public class CoreGame extends ApplicationAdapter {
         if (ImGui.checkbox("White Clear Color", debugClearColor)) {
             debugClearColor = !debugClearColor;
         }
+        if (ImGui.sliderFloat("Sailing time", uiSailingTime, 0, Difficulty.MAX_SAILING_TIME_SCALING)) {
+            this.setSailingTime(uiSailingTime[0]);
+        }
+        ImGui.textDisabled("Difficulty factor " + difficultyFactor);
+    }
+
+    private void setSailingTime(float time) {
+        this.sailingTime = time;
+        updateDifficulty(sailingTime);
+    }
+
+    private void updateDifficulty(float sailingTime) {
+        difficultyFactor = Difficulty.STARTING_DIFFICULTY_FACTOR + (Difficulty.MAX_DIFFICULTY_FACTOR - Difficulty.STARTING_DIFFICULTY_FACTOR) * sailingTime / Difficulty.MAX_SAILING_TIME_SCALING;
+        var difficultyMultiplier = (difficultyFactor - Difficulty.STARTING_DIFFICULTY_FACTOR) / (Difficulty.MAX_DIFFICULTY_FACTOR - Difficulty.STARTING_DIFFICULTY_FACTOR);
+        var fakeWaterVelocityX = Difficulty.FAKE_WATER_VELOCITY_X_AT_MIN_SCALING + difficultyMultiplier * (Difficulty.FAKE_WATER_VELOCITY_X_AT_MAX_SCALING - Difficulty.FAKE_WATER_VELOCITY_X_AT_MIN_SCALING);
+        var fakeWaterVelocityY = Difficulty.FAKE_WATER_VELOCITY_Y_AT_MIN_SCALING + difficultyMultiplier * (Difficulty.FAKE_WATER_VELOCITY_Y_AT_MAX_SCALING - Difficulty.FAKE_WATER_VELOCITY_Y_AT_MIN_SCALING);
+        var waveSpreadFactor = Difficulty.WAVE_SPREAD_FACTOR_AT_MIN_SCALING + difficultyMultiplier * (Difficulty.WAVE_SPREAD_FACTOR_AT_MAX_SCALING - Difficulty.WAVE_SPREAD_FACTOR_AT_MIN_SCALING);
+        // Wave period from (0.5f, 1.5f) to ? Do not increase
+        var minWaveAmplitude = Difficulty.MIN_WAVES_AMPLITUDE_AT_MIN_SCALING + difficultyMultiplier * (Difficulty.MIN_WAVES_AMPLITUDE_AT_MAX_SCALING - Difficulty.MIN_WAVES_AMPLITUDE_AT_MIN_SCALING);
+        var maxWaveAmplitude = Difficulty.MAX_WAVES_AMPLITUDE_AT_MIN_SCALING + difficultyMultiplier * (Difficulty.MAX_WAVES_AMPLITUDE_AT_MAX_SCALING - Difficulty.MAX_WAVES_AMPLITUDE_AT_MIN_SCALING);
+
+        // TODO Difficulty seems to go ver MAX difficulty
+
+        // TODO Sailing time UI not in sync
+
+        // TODO UI is out of sync
+        Gdx.app.log("Game", "UI out of sync");
+        water.setFakeWaterVelocityX(fakeWaterVelocityX);
+        water.setFakeWaterVelocityX(fakeWaterVelocityY);
+        water.setWavesPropagationSpreadFactor(waveSpreadFactor);
+
+        waveEmitter.setAmplitudeRange(Range.buildRange(minWaveAmplitude, maxWaveAmplitude));
     }
 
     public void handleInputs(OrthographicCamera camera) {
