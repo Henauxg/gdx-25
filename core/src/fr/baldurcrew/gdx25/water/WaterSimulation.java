@@ -41,7 +41,7 @@ public class WaterSimulation implements Disposable, ContactHandler {
     private final Fixture[] waterFixtures;
 
     // TODO Tweak
-    private float wavesPropagationPasses = 4; // 8
+    private int wavesPropagationPasses = 4; // 8
     private float wavesPropagationSpreadFactor = 0.2f;
     private float springsStiffness = 0.005f; // TODO Reduce
     private float springsDampeningFactor = 0.025f;
@@ -241,7 +241,7 @@ public class WaterSimulation implements Disposable, ContactHandler {
         return this.baseWaterLevel;
     }
 
-    public void setWavesPropagationPasses(float wavesPropagationPasses) {
+    public void setWavesPropagationPasses(int wavesPropagationPasses) {
         this.wavesPropagationPasses = wavesPropagationPasses;
     }
 
