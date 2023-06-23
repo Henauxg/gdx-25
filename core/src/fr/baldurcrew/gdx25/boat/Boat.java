@@ -20,7 +20,6 @@ public class Boat implements Disposable {
 
     private Sprite boatSprite;
     private Texture boatTexture;
-    private SpriteBatch spriteBatch; // TODO Share a sprite batch in CoreGame
     private Body body;
     private float upsideDownTimer;
     private boolean upsideDown;
@@ -31,7 +30,6 @@ public class Boat implements Disposable {
     private float friction = 0.5f;
 
     public Boat(World world, float centerX, float centerY) {
-        spriteBatch = new SpriteBatch();
         boatTexture = new Texture("blue_boat.png");
         boatSprite = new Sprite(boatTexture);
 
@@ -75,7 +73,7 @@ public class Boat implements Disposable {
         return body;
     }
 
-    public void render(Camera camera) {
+    public void render(Camera camera, SpriteBatch spriteBatch) {
         float bodyX = body.getPosition().x;
         float bodyY = body.getPosition().y;
         float rotation = (float) Math.toDegrees(body.getAngle());

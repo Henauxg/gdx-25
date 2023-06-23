@@ -107,10 +107,8 @@ public class CoreGame extends ApplicationAdapter {
 
     @Override
     public void create() {
-//        waveSounds = Gdx.audio.newMusic(Gdx.files.internal("DasLiedderSturme.mp3"));
-//        waveSounds.setLooping(true);
-//        waveSounds.setVolume(DEFAULT_AUDIO_VOLUME);
-//        waveSounds.play();
+        music = Gdx.audio.newMusic(Gdx.files.internal("DasLiedderSturme.mp3"));
+        playMusic(music);
         camera = new OrthographicCamera();
         camera.setToOrtho(false, Constants.VIEWPORT_WIDTH, Constants.VIEWPORT_HEIGHT);
 
@@ -124,6 +122,12 @@ public class CoreGame extends ApplicationAdapter {
 
         createImGui();
         createTestLevel();
+    }
+
+    private void playMusic(Music music) {
+        music.setLooping(true);
+        music.setVolume(DEFAULT_AUDIO_VOLUME);
+        music.play();
     }
 
     private void createParallaxLayers() {
@@ -162,9 +166,7 @@ public class CoreGame extends ApplicationAdapter {
 
     public void createTestLevel() {
         waveSounds = Gdx.audio.newMusic(Gdx.files.internal("nice_waves.mp3"));
-        waveSounds.setLooping(true);
-        waveSounds.setVolume(DEFAULT_AUDIO_VOLUME);
-        waveSounds.play();
+        playMusic(waveSounds);
 
         world = new World(new Vector2(0, Constants.GRAVITY_VALUE), true);
         worldContactListener = new WorldContactListener();
@@ -446,6 +448,8 @@ public class CoreGame extends ApplicationAdapter {
         disposeCurrentLevel();
         imGuiGl3.dispose();
         imGuiGlfw.dispose();
+        waveSounds.dispose();
+        music.dispose();
         ImGui.destroyContext();
     }
 
