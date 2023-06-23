@@ -417,7 +417,7 @@ public class CoreGame extends ApplicationAdapter {
         var maxWaveAmplitude = Difficulty.MAX_WAVES_AMPLITUDE_AT_MIN_SCALING + difficultyMultiplier * (Difficulty.MAX_WAVES_AMPLITUDE_AT_MAX_SCALING - Difficulty.MAX_WAVES_AMPLITUDE_AT_MIN_SCALING);
 
         water.setFakeWaterVelocityX(fakeWaterVelocityX);
-        water.setFakeWaterVelocityX(fakeWaterVelocityY);
+        water.setFakeWaterVelocityY(fakeWaterVelocityY);
         water.setWavesPropagationSpreadFactor(waveSpreadFactor);
         waveEmitter.setAmplitudeRange(Range.buildRange(minWaveAmplitude, maxWaveAmplitude));
     }
