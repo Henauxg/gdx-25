@@ -7,8 +7,10 @@ import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Box2D;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
@@ -19,6 +21,7 @@ import fr.baldurcrew.gdx25.boat.Boat;
 import fr.baldurcrew.gdx25.character.Character;
 import fr.baldurcrew.gdx25.character.CharacterResources;
 import fr.baldurcrew.gdx25.character.CharacterSpawner;
+import fr.baldurcrew.gdx25.layer.ParallaxLayer;
 import fr.baldurcrew.gdx25.physics.WorldContactListener;
 import fr.baldurcrew.gdx25.utils.Range;
 import fr.baldurcrew.gdx25.utils.Utils;
@@ -49,6 +52,7 @@ public class CoreGame extends ApplicationAdapter {
     public static boolean debugEnableWaveGeneration = true;
     public static boolean debugEnableWaterDrag = true;
 
+    private List<ParallaxLayer> parallaxLayers;
     public SpriteBatch spriteBatch;
     private BitmapFont font;
 
@@ -63,6 +67,7 @@ public class CoreGame extends ApplicationAdapter {
     private Boat boat;
     private WaveEmitter waveEmitter;
     private Music waveSounds;
+    private Music music;
     private float sailingTime;
     private CharacterSpawner characterSpawner;
     private float characterDensity = 0.6f;
@@ -91,6 +96,10 @@ public class CoreGame extends ApplicationAdapter {
 
     @Override
     public void create() {
+        waveSounds = Gdx.audio.newMusic(Gdx.files.internal("DasLiedderSturme.mp3"));
+        waveSounds.setLooping(true);
+        waveSounds.setVolume(DEFAULT_AUDIO_VOLUME);
+        waveSounds.play();
         camera = new OrthographicCamera();
         camera.setToOrtho(false, Constants.VIEWPORT_WIDTH, Constants.VIEWPORT_HEIGHT);
 
@@ -100,8 +109,21 @@ public class CoreGame extends ApplicationAdapter {
         spriteBatch = new SpriteBatch();
         font = new BitmapFont(); // libGDX's default Arial font
 
+        createParallaxLayers();
+
         createImGui();
         createTestLevel();
+    }
+
+    private void createParallaxLayers() {
+        parallaxLayers = new ArrayList<>();
+//        parallaxLayers[0] = new ParallaxLayer(new Texture("0.png"), 0.1f, true, false);
+//        parallaxLayers[1] = new ParallaxLayer(new Texture("1.png"), 0.2f, true, false);
+//        parallaxLayers[2] = new ParallaxLayer(new Texture("2.png"), 0.3f, true, false);
+//        parallaxLayers[3] = new ParallaxLayer(new Texture("3.png"), 0.5f, true, false);
+//        parallaxLayers[4] = new ParallaxLayer(new Texture("4.png"), 0.8f, true, false);
+        parallaxLayers.add(new ParallaxLayer(new Texture("5.png"), 1.5f, true, false));
+        parallaxLayers.add(new ParallaxLayer(new Texture("6.png"), 1.2f, true, false));
     }
 
     private void createImGui() {
@@ -182,24 +204,27 @@ public class CoreGame extends ApplicationAdapter {
 
         camera.update();
 
-
         if (debugClearColor) {
             ScreenUtils.clear(DEBUG_CLEAR_COLOR);
         } else {
             ScreenUtils.clear(CLEAR_COLOR);
         }
 
-
         if (debugMode) {
             debugRenderer.render(world, camera.combined);
         }
 
+        spriteBatch.begin();
+
+        Matrix4 originalMatrix = spriteBatch.getProjectionMatrix().cpy();
+        spriteBatch.setProjectionMatrix(camera.combined);
+        parallaxLayers.forEach(l -> l.render(camera, spriteBatch, deltaTime));
 
         boat.render(camera);
         water.render(camera);
         characters.forEach(character -> character.render(camera));
 
-        spriteBatch.begin();
+        spriteBatch.setProjectionMatrix(originalMatrix);
         font.draw(spriteBatch, Utils.secondsToDisplayString(sailingTime), Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() - 10, 0, Align.center, false);
         spriteBatch.end();
 
