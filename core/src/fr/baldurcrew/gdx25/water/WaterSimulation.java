@@ -46,6 +46,8 @@ public class WaterSimulation implements Disposable, ContactHandler {
     private float springsDampeningFactor = 0.025f;
     private float baseWaterLevel = 5f;
     private float waterDensity = 1.0f;
+    private float fakeWaterVelocityX = 15;
+    private float fakeWaterVelocityY = 0;
 
 
     /**
@@ -164,7 +166,7 @@ public class WaterSimulation implements Disposable, ContactHandler {
                         // Find relative velocity between object and fluid at edge midpoint
                         Vector2 velDir;
                         if (CoreGame.debugEnableFakeWaterVelocity) {
-                            velDir = immersedFixture.getBody().getLinearVelocityFromWorldPoint(midPoint).sub(new Vector2(15, 0));
+                            velDir = immersedFixture.getBody().getLinearVelocityFromWorldPoint(midPoint).sub(new Vector2(fakeWaterVelocityX, fakeWaterVelocityY));
                         } else {
                             velDir = immersedFixture.getBody().getLinearVelocityFromWorldPoint(midPoint).sub(waterFixture.getBody().getLinearVelocityFromWorldPoint(midPoint));
                         }
@@ -294,5 +296,21 @@ public class WaterSimulation implements Disposable, ContactHandler {
         this.waterBody.getFixtureList().forEach(fixture -> {
             fixture.setDensity(density);
         });
+    }
+
+    public float getFakeWaterVelocityX() {
+        return fakeWaterVelocityX;
+    }
+
+    public void setFakeWaterVelocityX(float value) {
+        this.fakeWaterVelocityX = value;
+    }
+
+    public float getFakeWaterVelocityY() {
+        return fakeWaterVelocityY;
+    }
+
+    public void setFakeWaterVelocityY(float value) {
+        this.fakeWaterVelocityY = value;
     }
 }

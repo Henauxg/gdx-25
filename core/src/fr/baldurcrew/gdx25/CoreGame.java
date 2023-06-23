@@ -92,7 +92,8 @@ public class CoreGame extends ApplicationAdapter {
     private float[] uiWaterSpringsDampeningFactor = new float[1];
     private float[] uiWaterBaseWaterLevel = new float[1];
     private float[] uiWaterDensity = new float[1];
-
+    private float[] uiWaterFakeVelocityX = new float[1];
+    private float[] uiWaterFakeVelocityY = new float[1];
 
     @Override
     public void create() {
@@ -191,6 +192,8 @@ public class CoreGame extends ApplicationAdapter {
         uiWaterSpringsDampeningFactor[0] = water.getSpringsDampening();
         uiWaterBaseWaterLevel[0] = water.getWaterLevel();
         uiWaterDensity[0] = water.getDensity();
+        uiWaterFakeVelocityX[0] = water.getFakeWaterVelocityX();
+        uiWaterFakeVelocityY[0] = water.getFakeWaterVelocityY();
     }
 
     @Override
@@ -263,7 +266,7 @@ public class CoreGame extends ApplicationAdapter {
         if (ImGui.checkbox("Boat rendering", debugEnableBoatRendering)) {
             debugEnableBoatRendering = !debugEnableBoatRendering;
         }
-        if (ImGui.sliderFloat("Boat Density", uiBoatDensity, 0, 1)) {
+        if (ImGui.sliderFloat("Boat Density", uiBoatDensity, 0.25f, 1)) {
             boat.setDensity(uiBoatDensity[0]);
         }
         if (ImGui.sliderFloat("Boat Restitution", uiBoatRestitution, 0, 1)) {
@@ -305,6 +308,16 @@ public class CoreGame extends ApplicationAdapter {
         if (ImGui.sliderFloat("Springs Dampening", uiWaterSpringsDampeningFactor, 0f, 0.2f)) {
             water.setSpringsDampeningFactor(uiWaterSpringsDampeningFactor[0]);
         }
+        if (ImGui.sliderFloat("Fake water velocity X", uiWaterFakeVelocityX, 0f, 25f)) {
+            water.setFakeWaterVelocityX(uiWaterFakeVelocityX[0]);
+        }
+        if (ImGui.sliderFloat("Fake velocity Y", uiWaterFakeVelocityY, -10f, 10f)) {
+            water.setFakeWaterVelocityY(uiWaterFakeVelocityY[0]);
+        }
+        if (ImGui.sliderFloat("Fake velocity X", uiWaterFakeVelocityX, 0f, 25f)) {
+            water.setFakeWaterVelocityX(uiWaterFakeVelocityX[0]);
+        }
+
         ImGui.separator();
         ImGui.text("Debug");
         if (ImGui.checkbox("Debug Mode", debugMode)) {
