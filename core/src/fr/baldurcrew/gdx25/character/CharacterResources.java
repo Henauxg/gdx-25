@@ -22,7 +22,7 @@ public class CharacterResources {
     public static final float ASPECT_RATIO = 0.76f;
     public static final float CHARACTER_WIDTH = ASPECT_RATIO * CHARACTER_HEIGHT;
     private static final int FRAME_COLS = 11, FRAME_ROWS = 5;
-    private static final TextureRegion[][] allTextureRegions = loadAndSplitSpriteSheet("chars_sheet_trim.png", FRAME_COLS, FRAME_ROWS);
+    private static final TextureRegion[][] allTextureRegions = loadAndSplitSpriteSheet("chars_sheet.png", FRAME_COLS, FRAME_ROWS);
     private static CharacterResources instance;
     private final Map<Integer, Map<Action, Animation<TextureRegion>>> characterAnimations;
     private Sound[] spawnSounds;
