@@ -67,6 +67,21 @@ public class CoreGame extends ApplicationAdapter {
     private ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
     private ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
     private long windowHandle;
+    //Character
+    private float[] charFriction = new float[1];
+    private float[] charDensity = new float[1];
+    private float[] charRestitution = new float[1];
+    //Boat
+    private float[] boatDensity = new float[1];
+    private float[] boatRestitution = new float[1];
+    private float[] boatFriction = new float[1];
+    //Water
+    private int[] waterWavesPropagationPasses = new int[1];
+    private float[] waterWavesPropagationSpreadFactor = new float[1];
+    private float[] waterSpringsStiffness = new float[1];
+    private float[] waterSpringsDampeningFactor = new float[1];
+    private float[] waterBaseWaterLevel = new float[1];
+    private float[] waterDensity = new float[1];
 
     @Override
     public void create() {
@@ -96,7 +111,6 @@ public class CoreGame extends ApplicationAdapter {
         imGuiGlfw.init(windowHandle, true);
         imGuiGl3.init("#version 110");
     }
-
 
     public void createTestLevel() {
         waveSounds = Gdx.audio.newMusic(Gdx.files.internal("nice_waves.mp3"));
@@ -177,66 +191,48 @@ public class CoreGame extends ApplicationAdapter {
         imGuiGl3.renderDrawData(ImGui.getDrawData());
     }
 
-    //Character
-    private float[] charFriction = new float[1];
-    private float[] charDensity = new float[1];
-    private float[] charRestitution = new float[1];
-
-    //Boat
-    private float[] boatDensity = new float[1];
-    private float[] boatRestitution = new float[1];
-    private float[] boatFriction = new float[1];
-
-    //Water
-    private float[] waterWavesPropagationPasses = new float[1];
-    private float[] waterWavesPropagationSpreadFactor = new float[1];
-    private float[] waterSpringsStiffness = new float[1];
-    private float[] waterSpringsDampeningFactor = new float[1];
-    private float[] waterBaseWaterLevel = new float[1];
-    private float[] waterDensity = new float[1];
-
-    //TODO : MIGHT NEED TO CLAMP SOME VALUES
     private void drawUI() {
         ImGui.text("Character");
-        if (ImGui.dragFloat("Characters Friction", charFriction)) {
+        if (ImGui.sliderFloat("Char Friction", charFriction, 0, 1)) {
             characters.forEach(c -> c.setFriction(charFriction[0]));
         }
-        if (ImGui.dragFloat("Characters Density", charDensity)) {
+        if (ImGui.sliderFloat("Char Density", charDensity, 0, 1)) {
             characters.forEach(c -> c.setDensity(charDensity[0]));
         }
-        if (ImGui.dragFloat("Characters Restitution", charRestitution)) {
+        if (ImGui.sliderFloat("Char Restitution", charRestitution, 0, 1)) {
             characters.forEach(c -> c.setRestitution(charRestitution[0]));
         }
-
+        ImGui.separator();
         ImGui.text("Boat");
-        if (ImGui.dragFloat("Boat Density", boatDensity)) {
+        if (ImGui.sliderFloat("Boat Density", boatDensity, 0, 1)) {
             boat.setDensity(boatDensity[0]);
         }
-        if (ImGui.dragFloat("Boat Restitution", boatRestitution)) {
+        if (ImGui.sliderFloat("Boat Restitution", boatRestitution, 0, 1)) {
             boat.setRestitution(charRestitution[0]);
         }
-        if (ImGui.dragFloat("Boat Friction", boatFriction)) {
+        if (ImGui.sliderFloat("Boat Friction", boatFriction, 0, 1)) {
             boat.setFriction(boatFriction[0]);
         }
-
+        ImGui.separator();
         ImGui.text("Water");
-        if (ImGui.dragFloat("Waves Propagation", waterWavesPropagationPasses)) {
-            water.setWavesPropagationPasses(waterWavesPropagationPasses[0]);
+        if (ImGui.sliderFloat("Water Density", waterDensity, 0, 1)) {
+            water.setDensity(waterDensity[0]);
         }
-        if (ImGui.dragFloat("Waves Propagation Spread Factor", waterWavesPropagationSpreadFactor)) {
-            water.setWavesPropagationSpreadFactor(waterWavesPropagationSpreadFactor[0]);
-        }
-        if (ImGui.dragFloat("Springs Stiffness", waterSpringsStiffness)) {
-            water.setSpringsStiffness(waterSpringsStiffness[0]);
-        }
-        if (ImGui.dragFloat("Springs Dampening Factor", waterSpringsDampeningFactor)) {
-            water.setSpringsDampeningFactor(waterSpringsDampeningFactor[0]);
-        }
-        if (ImGui.dragFloat("Base Water Level", waterBaseWaterLevel)) {
+        if (ImGui.sliderFloat("Base Level", waterBaseWaterLevel, 0.5f, Constants.VIEWPORT_HEIGHT)) {
             water.setBaseWaterLevel(waterBaseWaterLevel[0]);
         }
-        if (ImGui.dragFloat("Water Density", waterDensity)) {
-            water.setDensity(waterDensity[0]);
+        ImGui.text("Water waves");
+        if (ImGui.dragInt("Waves Propagation", waterWavesPropagationPasses, 1, 1, 10)) {
+            water.setWavesPropagationPasses(waterWavesPropagationPasses[0]);
+        }
+        if (ImGui.sliderFloat("Waves Propagation Spread Factor", waterWavesPropagationSpreadFactor, 0f, 0.4f)) {
+            water.setWavesPropagationSpreadFactor(waterWavesPropagationSpreadFactor[0]);
+        }
+        if (ImGui.sliderFloat("Springs Stiffness", waterSpringsStiffness, 0f, 0.1f)) {
+            water.setSpringsStiffness(waterSpringsStiffness[0]);
+        }
+        if (ImGui.sliderFloat("Springs Dampening", waterSpringsDampeningFactor, 0f, 0.2f)) {
+            water.setSpringsDampeningFactor(waterSpringsDampeningFactor[0]);
         }
     }
 
