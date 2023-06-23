@@ -75,6 +75,8 @@ public class CoreGame extends ApplicationAdapter {
     private float characterRestitution = 0.2f;
     private Range defaultWavePeriodRange = Range.buildRangeEx(0.5f, 1.5f);
     private Range defaultWaveAmplitudeRange = Range.buildRangeEx(4f, 6.5f);
+    private Range charactersSpawnRangeX;
+    private Range charactersSpawnRangeY;
 
     private ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
     private ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
@@ -166,14 +168,14 @@ public class CoreGame extends ApplicationAdapter {
         waveEmitter = new WaveEmitter(water, defaultWavePeriodRange, defaultWaveAmplitudeRange); // TODO Evolve over time to increase the difficulty
 
         final float charsSpawnPadding = Boat.BOAT_WIDTH * 0.2f;
-        final Range spawnRangeX = waterSimulationRange.buildSubRange(waterSimulationRange.halfExtent - Boat.BOAT_WIDTH / 2f + charsSpawnPadding, Boat.BOAT_WIDTH - 2 * charsSpawnPadding);
-        final Range spawnRangeY = Range.buildRangeEx(water.getWaterLevel() + Boat.BOAT_HEIGHT / 2f, water.getWaterLevel() + Boat.BOAT_HEIGHT * 1.5f);
+        charactersSpawnRangeX = waterSimulationRange.buildSubRange(waterSimulationRange.halfExtent - Boat.BOAT_WIDTH / 2f + charsSpawnPadding, Boat.BOAT_WIDTH - 2 * charsSpawnPadding);
+        charactersSpawnRangeY = Range.buildRangeEx(water.getWaterLevel() + Boat.BOAT_HEIGHT / 2f, water.getWaterLevel() + Boat.BOAT_HEIGHT * 1.5f);
 
         characters = new ArrayList<>();
         for (int i = 0; i < INITIAL_CHARACTER_COUNT; i++) {
-            this.spawnCharacter(CharacterResources.getRandomCharacterIndex(), false, spawnRangeX.getRandom(), spawnRangeY.getRandom());
+            this.spawnCharacter(CharacterResources.getRandomCharacterIndex(), false, charactersSpawnRangeX.getRandom(), charactersSpawnRangeY.getRandom());
         }
-        characterSpawner = new CharacterSpawner(this, spawnRangeX, spawnRangeY, Range.buildRangeEx(2.5f, 6f));
+        characterSpawner = new CharacterSpawner(this, charactersSpawnRangeX, charactersSpawnRangeY, Range.buildRangeEx(2.5f, 6f));
 
         sailingTime = 0;
 
@@ -368,6 +370,9 @@ public class CoreGame extends ApplicationAdapter {
             if (Gdx.input.isKeyJustPressed(Input.Keys.F12)) {
                 disposeCurrentLevel();
                 createTestLevel();
+            }
+            if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+                this.spawnCharacter(CharacterResources.getRandomCharacterIndex(), false, charactersSpawnRangeX.getRandom(), charactersSpawnRangeY.getRandom());
             }
         }
 
