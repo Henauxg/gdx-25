@@ -73,6 +73,8 @@ public class CoreGame extends ApplicationAdapter {
     private float characterDensity = 0.6f;
     private float characterFriction = 0.5f;
     private float characterRestitution = 0.2f;
+    private Range defaultWavePeriodRange = Range.buildRangeEx(0.5f, 1.5f);
+    private Range defaultWaveAmplitudeRange = Range.buildRangeEx(4f, 6.5f);
 
     private ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
     private ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
@@ -94,6 +96,12 @@ public class CoreGame extends ApplicationAdapter {
     private float[] uiWaterDensity = new float[1];
     private float[] uiWaterFakeVelocityX = new float[1];
     private float[] uiWaterFakeVelocityY = new float[1];
+    private float[] uiWaveEmitterAmplitudeRange = new float[2];
+    private float[] uiWaveEmitterPeriodRange = new float[2];
+    ;
+
+//    private float[] uiWaterFakeVelocityX = new float[1];
+//    private float[] uiWaterFakeVelocityY = new float[1];
 
     @Override
     public void create() {
@@ -152,7 +160,7 @@ public class CoreGame extends ApplicationAdapter {
         world.setContactListener(worldContactListener);
 
 
-        final Range waterSimulationRange = Range.buildRange(-0.25f * Constants.VIEWPORT_WIDTH, 1.25f * Constants.VIEWPORT_WIDTH);
+        final Range waterSimulationRange = Range.buildRangeEx(-0.25f * Constants.VIEWPORT_WIDTH, 1.25f * Constants.VIEWPORT_WIDTH);
         // Only simulate physics under the boat
         final float physicSimulationMargin = Boat.BOAT_WIDTH * 0.2f;
         final Range waterPhysicsSimulationRange = waterSimulationRange.buildSubRange(waterSimulationRange.halfExtent - Boat.BOAT_WIDTH / 2f - physicSimulationMargin, Boat.BOAT_WIDTH + 2 * physicSimulationMargin);
@@ -160,17 +168,17 @@ public class CoreGame extends ApplicationAdapter {
         water = new WaterSimulation(world, 80, waterSimulationRange, waterPhysicsSimulationRange);
         worldContactListener.addListener(water);
         boat = new Boat(world, Constants.VIEWPORT_WIDTH / 2f, water.getWaterLevel() + 1f);
-        waveEmitter = new WaveEmitter(water, Range.buildRange(0.5f, 1.5f), Range.buildRange(4f, 6.5f)); // TODO Evolve over time to increase the difficulty
+        waveEmitter = new WaveEmitter(water, defaultWavePeriodRange, defaultWaveAmplitudeRange); // TODO Evolve over time to increase the difficulty
 
         final float charsSpawnPadding = Boat.BOAT_WIDTH * 0.2f;
         final Range spawnRangeX = waterSimulationRange.buildSubRange(waterSimulationRange.halfExtent - Boat.BOAT_WIDTH / 2f + charsSpawnPadding, Boat.BOAT_WIDTH - 2 * charsSpawnPadding);
-        final Range spawnRangeY = Range.buildRange(water.getWaterLevel() + Boat.BOAT_HEIGHT / 2f, water.getWaterLevel() + Boat.BOAT_HEIGHT * 1.5f);
+        final Range spawnRangeY = Range.buildRangeEx(water.getWaterLevel() + Boat.BOAT_HEIGHT / 2f, water.getWaterLevel() + Boat.BOAT_HEIGHT * 1.5f);
 
         characters = new ArrayList<>();
         for (int i = 0; i < INITIAL_CHARACTER_COUNT; i++) {
             this.spawnCharacter(CharacterResources.getRandomCharacterIndex(), spawnRangeX.getRandom(), spawnRangeY.getRandom());
         }
-        characterSpawner = new CharacterSpawner(this, spawnRangeX, spawnRangeY, Range.buildRange(2.5f, 6f));
+        characterSpawner = new CharacterSpawner(this, spawnRangeX, spawnRangeY, Range.buildRangeEx(2.5f, 6f));
 
         sailingTime = 0;
 
@@ -194,6 +202,10 @@ public class CoreGame extends ApplicationAdapter {
         uiWaterDensity[0] = water.getDensity();
         uiWaterFakeVelocityX[0] = water.getFakeWaterVelocityX();
         uiWaterFakeVelocityY[0] = water.getFakeWaterVelocityY();
+        uiWaveEmitterAmplitudeRange[0] = defaultWaveAmplitudeRange.from;
+        uiWaveEmitterAmplitudeRange[1] = defaultWaveAmplitudeRange.to;
+        uiWaveEmitterPeriodRange[0] = defaultWavePeriodRange.from;
+        uiWaveEmitterPeriodRange[1] = defaultWavePeriodRange.to;
     }
 
     @Override
@@ -245,10 +257,13 @@ public class CoreGame extends ApplicationAdapter {
     }
 
     private void drawUI() {
+        ImGui.pushItemWidth(ImGui.getWindowWidth() * 0.35f);
+
         ImGui.text("Characters");
         if (ImGui.checkbox("Character Generation", debugEnableCharacterGeneration)) {
             debugEnableCharacterGeneration = !debugEnableCharacterGeneration;
         }
+
         if (ImGui.sliderFloat("Char Friction", uiCharFriction, 0, 1)) {
             characterFriction = uiCharFriction[0];
             characters.forEach(c -> c.setFriction(uiCharFriction[0]));
@@ -311,11 +326,15 @@ public class CoreGame extends ApplicationAdapter {
         if (ImGui.sliderFloat("Fake water velocity X", uiWaterFakeVelocityX, 0f, 25f)) {
             water.setFakeWaterVelocityX(uiWaterFakeVelocityX[0]);
         }
-        if (ImGui.sliderFloat("Fake velocity Y", uiWaterFakeVelocityY, -10f, 10f)) {
+
+        if (ImGui.sliderFloat("Fake water velocity Y", uiWaterFakeVelocityY, -10f, 10f)) {
             water.setFakeWaterVelocityY(uiWaterFakeVelocityY[0]);
         }
-        if (ImGui.sliderFloat("Fake velocity X", uiWaterFakeVelocityX, 0f, 25f)) {
-            water.setFakeWaterVelocityX(uiWaterFakeVelocityX[0]);
+        if (ImGui.sliderFloat2("Wave emitter amplitude range", uiWaveEmitterAmplitudeRange, 0f, 25f)) {
+            waveEmitter.setAmplitudeRange(Range.buildRange(uiWaveEmitterAmplitudeRange[0], uiWaveEmitterAmplitudeRange[1]));
+        }
+        if (ImGui.sliderFloat2("Wave emitter period range", uiWaveEmitterPeriodRange, 0f, 6f)) {
+            waveEmitter.setPeriodRange(Range.buildRange(uiWaveEmitterPeriodRange[0], uiWaveEmitterPeriodRange[1]));
         }
 
         ImGui.separator();

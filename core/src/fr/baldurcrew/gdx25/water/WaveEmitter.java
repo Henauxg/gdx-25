@@ -33,4 +33,12 @@ public class WaveEmitter {
             this.nextWaveWaitTime = wavePeriodRange.getRandom();
         }
     }
+
+    public void setAmplitudeRange(Range amplitudeRange) {
+        this.waveAmplitudeRange = amplitudeRange;
+    }
+
+    public void setPeriodRange(Range range) {
+        this.wavePeriodRange = range;
+    }
 }
