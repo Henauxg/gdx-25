@@ -68,6 +68,9 @@ public class Character extends Actor implements Disposable, ContactHandler { // 
             collider.density = density;
             collider.friction = friction;
             collider.restitution = restitution;
+            // Quick & dirty characters do not collide with each others
+            collider.filter.categoryBits = 2;
+            collider.filter.maskBits = 1;
 
             body.createFixture(collider);
             characterPolygon.dispose();
