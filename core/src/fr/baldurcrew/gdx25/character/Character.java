@@ -160,7 +160,7 @@ public class Character extends Actor implements Disposable, ContactHandler { // 
     public void setDensity(float density) {
         this.density = density;
         this.body.getFixtureList().forEach(fixture -> {
-            fixture.setFriction(density);
+            fixture.setDensity(density);
         });
         this.body.resetMassData();
     }
