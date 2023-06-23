@@ -46,7 +46,17 @@ public class WorldContactListener implements ContactListener {
 
     @Override
     public void preSolve(Contact contact, Manifold oldManifold) {
+        Fixture fixtureA = contact.getFixtureA();
+        Fixture fixtureB = contact.getFixtureB();
 
+        final var handlerA = contactHandlers.get(fixtureA.getBody().getUserData());
+        if (handlerA != null) {
+            handlerA.handlePreSolve(contact, new FixtureContact(fixtureA, fixtureB));
+        }
+        final var handlerB = contactHandlers.get(fixtureB.getBody().getUserData());
+        if (handlerB != null) {
+            handlerB.handlePreSolve(contact, new FixtureContact(fixtureB, fixtureA));
+        }
     }
 
     @Override
