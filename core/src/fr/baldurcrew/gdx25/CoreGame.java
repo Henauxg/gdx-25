@@ -103,6 +103,8 @@ public class CoreGame extends ApplicationAdapter {
 
     @Override
     public void create() {
+        waveSounds = Gdx.audio.newMusic(Gdx.files.internal("nice_waves.mp3"));
+        music = Gdx.audio.newMusic(Gdx.files.internal("DasLiedderSturme.mp3"));
         camera = new OrthographicCamera();
         camera.setToOrtho(false, Constants.VIEWPORT_WIDTH, Constants.VIEWPORT_HEIGHT);
 
@@ -118,15 +120,31 @@ public class CoreGame extends ApplicationAdapter {
         createTestLevel();
     }
 
+    private void playMusic(Music music) {
+        music.setLooping(true);
+        music.setVolume(DEFAULT_AUDIO_VOLUME);
+        music.play();
+    }
+
     private void createParallaxLayers() {
         parallaxLayers = new ArrayList<>();
-//        parallaxLayers[0] = new ParallaxLayer(new Texture("0.png"), 0.1f, true, false);
-//        parallaxLayers[1] = new ParallaxLayer(new Texture("1.png"), 0.2f, true, false);
-//        parallaxLayers[2] = new ParallaxLayer(new Texture("2.png"), 0.3f, true, false);
-//        parallaxLayers[3] = new ParallaxLayer(new Texture("3.png"), 0.5f, true, false);
-//        parallaxLayers[4] = new ParallaxLayer(new Texture("4.png"), 0.8f, true, false);
-        parallaxLayers.add(new ParallaxLayer(new Texture("5.png"), 1.5f, true, false));
-        parallaxLayers.add(new ParallaxLayer(new Texture("6.png"), 1.2f, true, false));
+        //parallaxLayers.add(new ParallaxLayer(new Texture("1.png"), 0.2f, true, false)); //front rock
+        //parallaxLayers.add(new ParallaxLayer(new Texture("3.png"), 0.5f, true, false)); //back rock
+        parallaxLayers.add(new ParallaxLayer(new Texture("sky.png"), 0.3f, 0.8f, 0.12f, true, true, 0, 0)); // far cloud
+        parallaxLayers.add(new ParallaxLayer(new Texture("cloud_01.png"), 0.6f, 0.9f, 0.11f, true, false, 0, 0)); // cloud
+        parallaxLayers.add(new ParallaxLayer(new Texture("cloud_02.png"), 0.8f, 0.9f, 0.12f, true, false, 0, 0)); // cloud
+        parallaxLayers.add(new ParallaxLayer(new Texture("island.png"), 0.2f, 0.8f, -0.36f, true, false, 0, 0)); // far island
+        parallaxLayers.add(new ParallaxLayer(new Texture("ocean.png"), 0.4f, 0.9f, -0.40f, true, false, 1.2f, 0.15f)); // ocean
+        parallaxLayers.add(new ParallaxLayer(new Texture("waves-trans.png"), 0.4f, 0.4f, -0.22f, true, false, 3, 0.25f)); //sea
+        parallaxLayers.add(new ParallaxLayer(new Texture("creek.png"), 0.7f, 0.9f, -0.34f, true, false, 0.5f, 0.01f)); // far island
+        parallaxLayers.add(new ParallaxLayer(new Texture("waves.png"), 0.82f, 0.4f, -0.29f, true, false, 5, 0.2f)); //sea
+        parallaxLayers.add(new ParallaxLayer(new Texture("rock_03.png"), 0.9f, 0.85f, -0.32f, true, false, 3, 0.05f)); //rock reef
+        parallaxLayers.add(new ParallaxLayer(new Texture("waves-2.png"), 1f, 0.4f, -0.30f, true, false, 2, 0.1f)); //sea
+        parallaxLayers.add(new ParallaxLayer(new Texture("waves-3.png"), 1.2f, 0.4f, -0.31f, true, false, 1, 0.2f)); //sea
+        parallaxLayers.add(new ParallaxLayer(new Texture("rock_reef.png"), 1.4f, 0.5f, -0.42f, true, false, 3, 0.05f));
+        parallaxLayers.add(new ParallaxLayer(new Texture("waves-4.png"), 1.5f, 0.4f, -0.32f, true, false, 3, 0.25f)); //sea
+        parallaxLayers.add(new ParallaxLayer(new Texture("groundswell.png"), 1.8f, 0.9f, -0.52f, true, false, 0, 0)); //rock reef
+        parallaxLayers.add(new ParallaxLayer(new Texture("bedrock.png"), 2f, 0.3f, -0.96f, true, false, 0, 0)); //rock bottom
     }
 
     private void createImGui() {
@@ -143,10 +161,8 @@ public class CoreGame extends ApplicationAdapter {
     }
 
     public void createTestLevel() {
-        waveSounds = Gdx.audio.newMusic(Gdx.files.internal("nice_waves.mp3"));
-        waveSounds.setLooping(true);
-        waveSounds.setVolume(DEFAULT_AUDIO_VOLUME);
-        waveSounds.play();
+        playMusic(waveSounds);
+        playMusic(music);
 
         world = new World(new Vector2(0, Constants.GRAVITY_VALUE), true);
         worldContactListener = new WorldContactListener();
@@ -238,14 +254,15 @@ public class CoreGame extends ApplicationAdapter {
         spriteBatch.setProjectionMatrix(camera.combined);
         parallaxLayers.forEach(l -> l.render(camera, spriteBatch, deltaTime));
 
-        boat.render(camera);
-        water.render(camera);
+        boat.render(camera, spriteBatch);
         characters.forEach(character -> character.render(camera));
 
         spriteBatch.setProjectionMatrix(originalMatrix);
         font.draw(spriteBatch, Utils.secondsToDisplayString(sailingTime), Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() - 10, 0, Align.center, false);
-
         spriteBatch.end();
+
+        water.render(camera);
+
 
         renderImGui();
     }
@@ -464,6 +481,8 @@ public class CoreGame extends ApplicationAdapter {
         disposeCurrentLevel();
         imGuiGl3.dispose();
         imGuiGlfw.dispose();
+        waveSounds.dispose();
+        music.dispose();
         ImGui.destroyContext();
     }
 
