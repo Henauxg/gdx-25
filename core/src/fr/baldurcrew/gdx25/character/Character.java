@@ -50,19 +50,34 @@ public class Character extends Actor implements Disposable, ContactHandler { // 
         bodyDef.fixedRotation = true;
 
         final var body = world.createBody(bodyDef);
-        final var characterPolygon = new PolygonShape();
-        final var fixtureDef = new FixtureDef();
+        body.setUserData(this);
+        {
+            final var characterPolygon = new PolygonShape();
+            final var collider = new FixtureDef();
 
-        characterPolygon.setAsBox(CHARACTER_WIDTH / 2f, CHARACTER_HEIGHT / 2f);
+            characterPolygon.setAsBox(CHARACTER_WIDTH / 2f, CHARACTER_HEIGHT / 2f);
 
-        fixtureDef.shape = characterPolygon;
-        fixtureDef.density = density;
-        fixtureDef.friction = friction;
-        fixtureDef.restitution = restitution;
+            collider.shape = characterPolygon;
+            collider.density = density;
+            collider.friction = friction;
+            collider.restitution = restitution;
 
-        body.createFixture(fixtureDef);
+            body.createFixture(collider);
+            characterPolygon.dispose();
+        }
+        {
+            final var footSensorPolygon = new PolygonShape();
+            final var footSensor = new FixtureDef();
 
-        characterPolygon.dispose();
+            final var footSensorHeight = CHARACTER_HEIGHT / 10f;
+            footSensorPolygon.setAsBox(0.9f * CHARACTER_WIDTH / 2f, footSensorHeight, new Vector2(0, -CHARACTER_HEIGHT / 2f - footSensorHeight / 2f), 0f);
+
+            footSensor.shape = footSensorPolygon;
+            footSensor.isSensor = true;
+
+            body.createFixture(footSensor);
+            footSensorPolygon.dispose();
+        }
 
         return body;
     }
@@ -87,7 +102,6 @@ public class Character extends Actor implements Disposable, ContactHandler { // 
         final var renderX = bodyX - (CHARACTER_WIDTH / 2f) * Math.cos(body.getAngle()) + (CHARACTER_WIDTH / 2f) * Math.sin(body.getAngle());
         final var renderY = bodyY - (CHARACTER_HEIGHT / 2f) * Math.cos(body.getAngle()) - (CHARACTER_HEIGHT / 2f) * Math.sin(body.getAngle());
 
-        //TODO: Compute the scale elsewhere for better perf.
         affine.setToTrnRotScl((float) renderX, (float) renderY, rotation, 1, 1);
 
         spriteBatch.setProjectionMatrix(camera.combined);
