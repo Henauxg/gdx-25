@@ -1,24 +1,52 @@
 package fr.baldurcrew.gdx25.character.ai;
 
+import com.badlogic.gdx.math.MathUtils;
 import fr.baldurcrew.gdx25.character.Character;
 
 public class StalkerAiController extends AiController {
 
+    private static final float RANDOM_SEEK_AREA = 0.6f;
+
+    private State state;
+    private float targetX;
 
     public StalkerAiController(CharacterAiType aiType) {
         super(aiType);
+
+        state = State.ChoosingTargetPosition;
     }
 
     @Override
     public Character.MoveState computeMoves(float playerX, float posX, boolean touchedBoatRecently) {
         var moveState = Character.MoveState.IDLE;
-        if (playerX > posX) {
-            moveState = Character.MoveState.RIGHT;
-        } else {
-            moveState = Character.MoveState.LEFT;
+        switch (state) {
+            case RunningToPos -> {
+                if ((currentDirection == Character.MoveState.RIGHT && posX > targetX) || (currentDirection == Character.MoveState.LEFT && posX < targetX)) {
+                    state = State.ChoosingTargetPosition;
+                    moveState = Character.MoveState.IDLE;
+                } else {
+                    if (targetX > posX) {
+                        moveState = Character.MoveState.RIGHT;
+                    } else {
+                        moveState = Character.MoveState.LEFT;
+                    }
+                }
+            }
+            case ChoosingTargetPosition -> {
+                targetX = MathUtils.random(playerX - RANDOM_SEEK_AREA, playerX + RANDOM_SEEK_AREA);
+                if (targetX > posX) {
+                    currentDirection = Character.MoveState.RIGHT;
+                } else {
+                    currentDirection = Character.MoveState.LEFT;
+                }
+                state = State.RunningToPos;
+            }
         }
         return moveState;
     }
 
-
+    enum State {
+        RunningToPos,
+        ChoosingTargetPosition
+    }
 }

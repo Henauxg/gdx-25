@@ -1,5 +1,6 @@
 package fr.baldurcrew.gdx25.character.ai;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
 import fr.baldurcrew.gdx25.character.Character;
 
@@ -16,6 +17,7 @@ public abstract class AiController {
 
     public static AiController getRandomAiController() {
         var type = CharacterAiType.getRandomType();
+        Gdx.app.log("AI", "Spawning " + type);
         switch (type) {
             case Stalker -> {
                 return new StalkerAiController(type);
