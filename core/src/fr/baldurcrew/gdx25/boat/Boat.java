@@ -85,17 +85,14 @@ public class Boat implements Disposable {
 
         if (CoreGame.debugEnableBoatRendering) {
             spriteBatch.setProjectionMatrix(camera.combined);
-            spriteBatch.begin();
             boatSprite.draw(spriteBatch);
             // spriteBatch.draw(boatSprite, posX, posY, BOAT_WIDTH, BOAT_HEIGHT);
-            spriteBatch.end();
         }
     }
 
     @Override
     public void dispose() {
         boatTexture.dispose();
-        spriteBatch.dispose();
     }
 
     public boolean update() {
