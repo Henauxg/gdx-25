@@ -255,7 +255,7 @@ public class CoreGame extends ApplicationAdapter {
         parallaxLayers.forEach(l -> l.render(camera, spriteBatch, deltaTime));
 
         boat.render(camera, spriteBatch);
-        characters.forEach(character -> character.render(camera));
+        characters.forEach(character -> character.render(camera, spriteBatch));
 
         spriteBatch.setProjectionMatrix(originalMatrix);
         font.draw(spriteBatch, Utils.secondsToDisplayString(sailingTime), Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() - 10, 0, Align.center, false);

@@ -26,7 +26,6 @@ public class Character extends Actor implements Disposable, ContactHandler { // 
     private boolean touchedBoatRecently;
     private float lastBoatTouchTimer;
     private Body body;
-    private SpriteBatch spriteBatch;
     private float animationTimer;
     private Animation<TextureRegion> animation;
     private boolean shouldFlipX;
@@ -46,7 +45,6 @@ public class Character extends Actor implements Disposable, ContactHandler { // 
         this.shouldFlipX = false;
         this.body = createBody(world, x, y, density, friction, restitution);
 
-        spriteBatch = new SpriteBatch();
         animationTimer = 0f;
         touchingBoat = false;
         touchedBoatRecently = false;
@@ -96,7 +94,7 @@ public class Character extends Actor implements Disposable, ContactHandler { // 
         return body;
     }
 
-    public void render(Camera camera) {
+    public void render(Camera camera, SpriteBatch spriteBatch) {
         animationTimer += Gdx.graphics.getDeltaTime(); // Accumulate elapsed animation time
 
         // Update the animation
@@ -130,11 +128,7 @@ public class Character extends Actor implements Disposable, ContactHandler { // 
 
         affine.setToTrnRotScl((float) renderX, (float) renderY, rotation, 1, 1);
 
-        spriteBatch.setProjectionMatrix(camera.combined);
-
-        spriteBatch.begin();
         spriteBatch.draw(currentFrame, CharacterResources.CHARACTER_WIDTH, CharacterResources.CHARACTER_HEIGHT, affine);
-        spriteBatch.end();
     }
 
     public void handleInputs() {
@@ -201,7 +195,6 @@ public class Character extends Actor implements Disposable, ContactHandler { // 
 
     @Override
     public void dispose() {
-        spriteBatch.dispose();
     }
 
     public void setFriction(float friction) {
