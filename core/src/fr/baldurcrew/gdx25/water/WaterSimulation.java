@@ -156,38 +156,49 @@ public class WaterSimulation implements Disposable, ContactHandler {
                 Vector2 buoyancyForce = new Vector2(displacedMass * -world.getGravity().x, displacedMass * -world.getGravity().y);
                 immersedFixture.getBody().applyForce(buoyancyForce, intersectionCentroid, true);
 
-                if (CoreGame.debugEnableWaterDrag) {
-                    // Apply drag separately for each polygon edge
-                    for (int i = 0; i < intersectionVertices.size(); i++) {
-                        final Vector2 v0 = intersectionVertices.get(i);
-                        final Vector2 v1 = intersectionVertices.get((i + 1) % intersectionVertices.size());
-                        final Vector2 midPoint = v0.cpy().add(v1).scl(0.5f);
 
-                        // Find relative velocity between object and fluid at edge midpoint
-                        Vector2 velDir;
-                        if (CoreGame.debugEnableFakeWaterVelocity) {
-                            velDir = immersedFixture.getBody().getLinearVelocityFromWorldPoint(midPoint).sub(new Vector2(fakeWaterVelocityX, fakeWaterVelocityY));
-                        } else {
-                            velDir = immersedFixture.getBody().getLinearVelocityFromWorldPoint(midPoint).sub(waterFixture.getBody().getLinearVelocityFromWorldPoint(midPoint));
-                        }
+                // Apply drag separately for each polygon edge
+                for (int i = 0; i < intersectionVertices.size(); i++) {
+                    final Vector2 v0 = intersectionVertices.get(i);
+                    final Vector2 v1 = intersectionVertices.get((i + 1) % intersectionVertices.size());
+                    final Vector2 midPoint = v0.cpy().add(v1).scl(0.5f);
 
-                        final float vel = velDir.len();
-                        velDir.nor();
+                    // Find relative velocity between object and fluid at edge midpoint
+                    Vector2 velDir;
+                    if (CoreGame.debugEnableFakeWaterVelocity) {
+                        velDir = immersedFixture.getBody().getLinearVelocityFromWorldPoint(midPoint).sub(new Vector2(fakeWaterVelocityX, fakeWaterVelocityY));
+                    } else {
+                        velDir = immersedFixture.getBody().getLinearVelocityFromWorldPoint(midPoint).sub(waterFixture.getBody().getLinearVelocityFromWorldPoint(midPoint));
+                    }
 
-                        final Vector2 edge = v1.cpy().sub(v0);
-                        final float edgeLength = edge.len();
-                        edge.nor();
+                    final float vel = velDir.len();
+                    velDir.nor();
 
-                        final Vector2 normal = new Vector2(edge.y, -edge.x);
-                        final float dragDot = normal.dot(velDir);
+                    final Vector2 edge = v1.cpy().sub(v0);
+                    final float edgeLength = edge.len();
+                    edge.nor();
 
-                        if (dragDot >= 0f) {
-                            final float dragMag = dragDot * edgeLength * fluidDensity * vel * vel;
-                            Vector2 dragForce = velDir.cpy().scl(-dragMag);
+                    final Vector2 normal = new Vector2(edge.y, -edge.x);
+                    final float dragDot = normal.dot(velDir);
+
+                    if (dragDot >= 0f) {
+                        // Drag force
+                        final float dragMag = dragDot * edgeLength * fluidDensity * vel * vel;
+                        Vector2 dragForce = velDir.cpy().scl(-dragMag);
+                        if (CoreGame.debugEnableWaterDrag) {
                             immersedFixture.getBody().applyForce(dragForce, midPoint, true);
+                        }
+                        // Lift force
+                        final float liftDot = edge.dot(velDir);
+                        final float liftMag = dragMag * liftDot;
+                        final Vector2 liftDir = new Vector2(-velDir.y, velDir.x);
+                        final Vector2 liftForce = liftDir.scl(liftMag);
+                        if (CoreGame.debugEnableLiftForce) {
+                            immersedFixture.getBody().applyForce(liftForce, midPoint, true);
                         }
                     }
                 }
+
 
             }
         });

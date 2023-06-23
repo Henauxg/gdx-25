@@ -52,6 +52,8 @@ public class CoreGame extends ApplicationAdapter {
     public static boolean debugEnableWaveGeneration = true;
     public static boolean debugEnableWaterDrag = true;
     public static boolean debugEnableFakeWaterVelocity = true;
+    public static boolean debugEnableLiftForce = true;
+    ;
     public SpriteBatch spriteBatch;
     private List<ParallaxLayer> parallaxLayers;
     private BitmapFont font;
@@ -296,8 +298,11 @@ public class CoreGame extends ApplicationAdapter {
         if (ImGui.checkbox("Wave Generation", debugEnableWaveGeneration)) {
             debugEnableWaveGeneration = !debugEnableWaveGeneration;
         }
-        if (ImGui.checkbox("Wave Drag", debugEnableWaterDrag)) {
+        if (ImGui.checkbox("Water Drag", debugEnableWaterDrag)) {
             debugEnableWaterDrag = !debugEnableWaterDrag;
+        }
+        if (ImGui.checkbox("Lift force", debugEnableLiftForce)) {
+            debugEnableLiftForce = !debugEnableLiftForce;
         }
         if (ImGui.checkbox("Fake water velocity", debugEnableFakeWaterVelocity)) {
             debugEnableFakeWaterVelocity = !debugEnableFakeWaterVelocity;
