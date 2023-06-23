@@ -219,6 +219,7 @@ public class CoreGame extends ApplicationAdapter {
             sailingTime += deltaTime;
             handleInputs(camera);
         }
+        handleDebugInputs(camera);
 
         doPhysicsStep(deltaTime);
 
@@ -361,7 +362,9 @@ public class CoreGame extends ApplicationAdapter {
 
     public void handleInputs(OrthographicCamera camera) {
         characters.forEach(character -> character.handleInputs());
+    }
 
+    public void handleDebugInputs(OrthographicCamera camera) {
         if (Gdx.input.isKeyJustPressed(Input.Keys.F1)) {
             debugMode = !debugMode;
         }
