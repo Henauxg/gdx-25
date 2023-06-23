@@ -137,7 +137,6 @@ public class CoreGame extends ApplicationAdapter {
         GL.createCapabilities();
         ImGui.createContext();
         ImGuiIO io = ImGui.getIO();
-        io.setIniFilename(null);
         io.getFonts().addFontDefault();
         io.getFonts().build();
 
