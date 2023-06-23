@@ -95,4 +95,25 @@ public class Boat implements Disposable {
         // Force the boat x position.
         body.setTransform(Constants.VIEWPORT_WIDTH / 2f, body.getPosition().y, body.getAngle()); // TODO Clean
     }
+
+    public void setDensity(float density) {
+        this.density = density;
+        this.body.getFixtureList().forEach(fixture -> {
+            fixture.setDensity(density);
+        });
+    }
+
+    public void setRestitution(float restitution) {
+        this.restituion = restitution;
+        this.body.getFixtureList().forEach(fixture -> {
+            fixture.setRestitution(restitution);
+        });
+    }
+
+    public void setFriction(float friction) {
+        this.friction = friction;
+        this.body.getFixtureList().forEach(fixture -> {
+            fixture.setFriction(friction);
+        });
+    }
 }

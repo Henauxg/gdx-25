@@ -240,4 +240,36 @@ public class WaterSimulation implements Disposable, ContactHandler {
     public float getWaterLevel() {
         return this.baseWaterLevel;
     }
+
+    public void setWavesPropagationPasses(float wavesPropagationPasses) {
+        this.wavesPropagationPasses = wavesPropagationPasses;
+        updateSprings();
+    }
+
+    public void setWavesPropagationSpreadFactor(float wavesPropagationSpreadFactor) {
+        this.wavesPropagationSpreadFactor = wavesPropagationSpreadFactor;
+        updateSprings();
+    }
+
+    public void setSpringsStiffness(float springsStiffness) {
+        this.springsStiffness = springsStiffness;
+        updateSprings();
+    }
+
+    public void setSpringsDampeningFactor(float springsDampeningFactor) {
+        this.springsDampeningFactor = springsDampeningFactor;
+        updateSprings();
+    }
+
+    public void setBaseWaterLevel(float baseWaterLevel) {
+        this.baseWaterLevel = baseWaterLevel;
+        updateSprings();
+    }
+
+    public void setDensity(float density) {
+        this.waterDensity = density;
+        this.waterBody.getFixtureList().forEach(fixture -> {
+            fixture.setDensity(density);
+        });
+    }
 }

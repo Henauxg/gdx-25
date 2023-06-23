@@ -171,10 +171,73 @@ public class CoreGame extends ApplicationAdapter {
         imGuiGlfw.newFrame();
         ImGui.newFrame();
         // --- ImGUI draw commands go here ---
-        ImGui.button("I'm a Button!");
+        drawUI();
         // ---
         ImGui.render();
         imGuiGl3.renderDrawData(ImGui.getDrawData());
+    }
+
+    //Character
+    private float[] charFriction = new float[1];
+    private float[] charDensity = new float[1];
+    private float[] charRestitution = new float[1];
+
+    //Boat
+    private float[] boatDensity = new float[1];
+    private float[] boatRestitution = new float[1];
+    private float[] boatFriction = new float[1];
+
+    //Water
+    private float[] waterWavesPropagationPasses = new float[1];
+    private float[] waterWavesPropagationSpreadFactor = new float[1];
+    private float[] waterSpringsStiffness = new float[1];
+    private float[] waterSpringsDampeningFactor = new float[1];
+    private float[] waterBaseWaterLevel = new float[1];
+    private float[] waterDensity = new float[1];
+
+    //TODO : MIGHT NEED TO CLAMP SOME VALUES
+    private void drawUI() {
+        ImGui.text("Character");
+        if (ImGui.dragFloat("Characters Friction", charFriction)) {
+            characters.forEach(c -> c.setFriction(charFriction[0]));
+        }
+        if (ImGui.dragFloat("Characters Density", charDensity)) {
+            characters.forEach(c -> c.setDensity(charDensity[0]));
+        }
+        if (ImGui.dragFloat("Characters Restitution", charRestitution)) {
+            characters.forEach(c -> c.setRestitution(charRestitution[0]));
+        }
+
+        ImGui.text("Boat");
+        if (ImGui.dragFloat("Boat Density", boatDensity)) {
+            boat.setDensity(boatDensity[0]);
+        }
+        if (ImGui.dragFloat("Boat Restitution", boatRestitution)) {
+            boat.setRestitution(charRestitution[0]);
+        }
+        if (ImGui.dragFloat("Boat Friction", boatFriction)) {
+            boat.setFriction(boatFriction[0]);
+        }
+
+        ImGui.text("Water");
+        if (ImGui.dragFloat("Waves Propagation", waterWavesPropagationPasses)) {
+            water.setWavesPropagationPasses(waterWavesPropagationPasses[0]);
+        }
+        if (ImGui.dragFloat("Waves Propagation Spread Factor", waterWavesPropagationSpreadFactor)) {
+            water.setWavesPropagationSpreadFactor(waterWavesPropagationSpreadFactor[0]);
+        }
+        if (ImGui.dragFloat("Springs Stiffness", waterSpringsStiffness)) {
+            water.setSpringsStiffness(waterSpringsStiffness[0]);
+        }
+        if (ImGui.dragFloat("Springs Dampening Factor", waterSpringsDampeningFactor)) {
+            water.setSpringsDampeningFactor(waterSpringsDampeningFactor[0]);
+        }
+        if (ImGui.dragFloat("Base Water Level", waterBaseWaterLevel)) {
+            water.setBaseWaterLevel(waterBaseWaterLevel[0]);
+        }
+        if (ImGui.dragFloat("Water Density", waterDensity)) {
+            water.setDensity(waterDensity[0]);
+        }
     }
 
     public void handleInputs(OrthographicCamera camera) {

@@ -140,6 +140,27 @@ public class Character extends Actor implements Disposable {
         spriteBatch.dispose();
     }
 
+    public void setFriction(float friction) {
+        this.friction = friction;
+        this.body.getFixtureList().forEach(fixture -> {
+            fixture.setFriction(friction);
+        });
+    }
+
+    public void setDensity(float density) {
+        this.density = density;
+        this.body.getFixtureList().forEach(fixture -> {
+            fixture.setFriction(density);
+        });
+    }
+
+    public void setRestitution(float restitution) {
+        this.restitution = restitution;
+        this.body.getFixtureList().forEach(fixture -> {
+            fixture.setRestitution(restitution);
+        });
+    }
+
     enum AnimationState {
         EnteringIdle, Idle, Walking, Climbing, EnteringJumping, Jumping, Landing, Swimming;
 

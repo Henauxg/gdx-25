@@ -18,6 +18,8 @@ public class WaterRenderer implements Disposable {
     private final ShaderProgram waterShaderProgram;
     private final MeshAndBuffers waterMeshAndBuffers;
 
+
+    //TODO: TWEAK (MAYBE NOT, PARALLAX MIGHT BE ENOUGH ?)
     private Color topWaterColor = new Color(0f, 1f, 0.8f, 0.7f);
     private Color bottomWaterColor = new Color(0f, 0f, 0.4f, 1f);
 
