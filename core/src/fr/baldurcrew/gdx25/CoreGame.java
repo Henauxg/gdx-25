@@ -241,14 +241,15 @@ public class CoreGame extends ApplicationAdapter {
         spriteBatch.setProjectionMatrix(camera.combined);
         parallaxLayers.forEach(l -> l.render(camera, spriteBatch, deltaTime));
 
-        boat.render(camera);
-        water.render(camera);
+        boat.render(camera, spriteBatch);
         characters.forEach(character -> character.render(camera));
 
         spriteBatch.setProjectionMatrix(originalMatrix);
         font.draw(spriteBatch, Utils.secondsToDisplayString(sailingTime), Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() - 10, 0, Align.center, false);
-
         spriteBatch.end();
+
+        water.render(camera);
+
 
         renderImGui();
     }
