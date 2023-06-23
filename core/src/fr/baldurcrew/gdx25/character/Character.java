@@ -11,16 +11,20 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.utils.Disposable;
+import fr.baldurcrew.gdx25.Constants;
 import fr.baldurcrew.gdx25.boat.Boat;
 import fr.baldurcrew.gdx25.physics.ContactHandler;
 import fr.baldurcrew.gdx25.physics.FixtureContact;
 
 public class Character extends Actor implements Disposable, ContactHandler { // TODO Remove Actor since unused
     private static final float MAX_X_MOVEMENT_VELOCITY = 5f;
+    private static final float MAX_TIME_RECENT_BOAT_TOUCH = 2f;
 
     private final Animation<TextureRegion> animation;
     private final boolean aiControlled;
     private boolean touchingBoat;
+    private boolean touchedBoatRecently;
+    private float lastBoatTouchTimer;
 
     private Body body;
     private SpriteBatch spriteBatch;
@@ -29,6 +33,7 @@ public class Character extends Actor implements Disposable, ContactHandler { // 
     private MoveState moveState;
     private Boat boat;
     private Vector2 boatContactPoint;
+
 
     public Character(World world, Boat boat, int colorRow, boolean aiControlled, float x, float y, float density, float friction, float restitution) {
         this.boat = boat;
@@ -40,6 +45,7 @@ public class Character extends Actor implements Disposable, ContactHandler { // 
         spriteBatch = new SpriteBatch();
         stateTime = 0f;
         touchingBoat = false;
+        touchedBoatRecently = false;
     }
 
     private Body createBody(World world, float centerX, float centerY, float density, float friction, float restitution) {
@@ -114,7 +120,11 @@ public class Character extends Actor implements Disposable, ContactHandler { // 
 
     public void handleInputs() {
         if (aiControlled) {
-
+            if (touchedBoatRecently) {
+                moveState = MoveState.LEFT;
+            } else {
+                moveState = MoveState.IDLE;
+            }
         } else {
             moveState = MoveState.IDLE;
             if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
@@ -133,6 +143,15 @@ public class Character extends Actor implements Disposable, ContactHandler { // 
     }
 
     public void update() {
+        if (touchedBoatRecently && !touchingBoat) {
+            lastBoatTouchTimer += Constants.TIME_STEP;
+            if (lastBoatTouchTimer >= MAX_TIME_RECENT_BOAT_TOUCH) {
+                lastBoatTouchTimer = 0;
+                touchedBoatRecently = false;
+            }
+        }
+
+
         var velocity = body.getLinearVelocity();
         // Here, compute the character relative velocity to its environment (boat, ..)
         if (touchingBoat && boatContactPoint != null) {
@@ -196,6 +215,8 @@ public class Character extends Actor implements Disposable, ContactHandler { // 
     public void handleContactBegin(FixtureContact contact) {
         if (contact.otherFixture().getBody().getUserData() == boat) {
             touchingBoat = true;
+            touchedBoatRecently = true;
+            lastBoatTouchTimer = 0;
         }
     }
 
