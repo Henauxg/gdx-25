@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.utils.Disposable;
+import fr.baldurcrew.gdx25.boat.Boat;
 import fr.baldurcrew.gdx25.physics.ContactHandler;
 import fr.baldurcrew.gdx25.physics.FixtureContact;
 
@@ -21,20 +22,25 @@ public class Character extends Actor implements Disposable, ContactHandler { // 
     private static final float MAX_X_MOVEMENT_VELOCITY = 5f;
 
     private final Animation<TextureRegion> animation;
+    private boolean touchingBoat;
 
     private Body body;
     private SpriteBatch spriteBatch;
     private float stateTime;
     private TextureRegion currentFrame;
     private MoveState moveState;
+    private Boat boat;
+    private Vector2 boatContactPoint;
 
-    public Character(World world, int colorRow, float x, float y, float density, float friction, float restitution) {
+    public Character(World world, Boat boat, int colorRow, float x, float y, float density, float friction, float restitution) {
+        this.boat = boat;
         this.animation = CharacterResources.getInstance().getAnimation(Action.IDLE, colorRow);
         this.moveState = MoveState.IDLE;
         this.body = createBody(world, x, y, density, friction, restitution);
 
         spriteBatch = new SpriteBatch();
         stateTime = 0f;
+        touchingBoat = false;
     }
 
     private Body createBody(World world, float centerX, float centerY, float density, float friction, float restitution) {
@@ -125,6 +131,15 @@ public class Character extends Actor implements Disposable, ContactHandler { // 
 
     public void update() {
         var velocity = body.getLinearVelocity(); // TODO Compute the character relative velocity to its environment (boat, ..)
+        if (touchingBoat && boatContactPoint != null) {
+            final float boatAngularVelocity = boat.getBody().getAngularVelocity();
+            Gdx.app.log("Char", "Correcting char velocity by " + boatAngularVelocity);
+            if (boatAngularVelocity != 0) {
+                final Vector2 contactVector = boatContactPoint.cpy().sub(boat.getBody().getPosition());
+                final Vector2 velocityFromBoatAngularVel = new Vector2(-boatAngularVelocity * contactVector.y, boatAngularVelocity * contactVector.x);
+                velocity.sub(velocityFromBoatAngularVel);
+            }
+        }
 
         float desiredVelX = 0f;
         switch (moveState) {
@@ -177,19 +192,26 @@ public class Character extends Actor implements Disposable, ContactHandler { // 
 
     @Override
     public void handleContactBegin(FixtureContact contact) {
-        // if boat, in conact ?
+        if (contact.otherFixture().getBody().getUserData() == boat) {
+            touchingBoat = true;
+            Gdx.app.log("Char", "touchingBoat = true");
+        }
     }
 
     @Override
     public void handleContactEnd(FixtureContact contact) {
-        // if boat not in contact anymore, after X sec ->
+        if (contact.otherFixture().getBody().getUserData() == boat) {
+            touchingBoat = false;
+            Gdx.app.log("Char", "touchingBoat = false");
+        }
     }
 
     @Override
     public void handlePreSolve(Contact contact, FixtureContact fixtures) {
-        if (contact.getWorldManifold().getNumberOfContactPoints() > 0) {
-            var contactPoint = contact.getWorldManifold().getPoints()[0];
-            // TODO Implement
+        if (fixtures.otherFixture().getBody().getUserData() == boat) {
+            if (contact.getWorldManifold().getNumberOfContactPoints() > 0) {
+                boatContactPoint = contact.getWorldManifold().getPoints()[0];
+            }
         }
     }
 

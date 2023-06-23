@@ -162,7 +162,13 @@ public class WaterSimulation implements Disposable, ContactHandler {
                         final Vector2 midPoint = v0.cpy().add(v1).scl(0.5f);
 
                         // Find relative velocity between object and fluid at edge midpoint
-                        final Vector2 velDir = immersedFixture.getBody().getLinearVelocityFromWorldPoint(midPoint).sub(waterFixture.getBody().getLinearVelocityFromWorldPoint(midPoint)); // TODO In our sim, water velocity will probably always be 0
+                        Vector2 velDir;
+                        if (CoreGame.debugEnableFakeWaterVelocity) {
+                            velDir = immersedFixture.getBody().getLinearVelocityFromWorldPoint(midPoint).sub(new Vector2(15, 0));
+                        } else {
+                            velDir = immersedFixture.getBody().getLinearVelocityFromWorldPoint(midPoint).sub(waterFixture.getBody().getLinearVelocityFromWorldPoint(midPoint));
+                        }
+
                         final float vel = velDir.len();
                         velDir.nor();
 

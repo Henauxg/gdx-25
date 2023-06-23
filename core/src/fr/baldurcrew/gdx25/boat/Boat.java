@@ -43,6 +43,7 @@ public class Boat implements Disposable {
         bodyDef.angularDamping = 0;
 
         final var body = world.createBody(bodyDef);
+        body.setUserData(this);
 
         final var boatPolygon = new PolygonShape();
         float[] vertices = new float[]{
@@ -128,5 +129,9 @@ public class Boat implements Disposable {
         this.body.getFixtureList().forEach(fixture -> {
             fixture.setFriction(friction);
         });
+    }
+
+    public Body getBody() {
+        return body;
     }
 }

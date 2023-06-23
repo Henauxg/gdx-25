@@ -51,9 +51,9 @@ public class CoreGame extends ApplicationAdapter {
     public static boolean debugEnableBoatRendering = true;
     public static boolean debugEnableWaveGeneration = true;
     public static boolean debugEnableWaterDrag = true;
-
-    private List<ParallaxLayer> parallaxLayers;
+    public static boolean debugEnableFakeWaterVelocity = true;
     public SpriteBatch spriteBatch;
+    private List<ParallaxLayer> parallaxLayers;
     private BitmapFont font;
 
     private World world;
@@ -96,10 +96,10 @@ public class CoreGame extends ApplicationAdapter {
 
     @Override
     public void create() {
-        waveSounds = Gdx.audio.newMusic(Gdx.files.internal("DasLiedderSturme.mp3"));
-        waveSounds.setLooping(true);
-        waveSounds.setVolume(DEFAULT_AUDIO_VOLUME);
-        waveSounds.play();
+//        waveSounds = Gdx.audio.newMusic(Gdx.files.internal("DasLiedderSturme.mp3"));
+//        waveSounds.setLooping(true);
+//        waveSounds.setVolume(DEFAULT_AUDIO_VOLUME);
+//        waveSounds.play();
         camera = new OrthographicCamera();
         camera.setToOrtho(false, Constants.VIEWPORT_WIDTH, Constants.VIEWPORT_HEIGHT);
 
@@ -283,6 +283,9 @@ public class CoreGame extends ApplicationAdapter {
         if (ImGui.checkbox("Wave Drag", debugEnableWaterDrag)) {
             debugEnableWaterDrag = !debugEnableWaterDrag;
         }
+        if (ImGui.checkbox("Fake water velocity", debugEnableFakeWaterVelocity)) {
+            debugEnableFakeWaterVelocity = !debugEnableFakeWaterVelocity;
+        }
         if (ImGui.sliderFloat("Water Density", uiWaterDensity, 0, 1)) {
             water.setDensity(uiWaterDensity[0]);
         }
@@ -381,7 +384,7 @@ public class CoreGame extends ApplicationAdapter {
     }
 
     public void spawnCharacter(int charIndex, float x, float y) {
-        final var spawned = new Character(world, charIndex, x, y, characterDensity, characterFriction, characterRestitution);
+        final var spawned = new Character(world, boat, charIndex, x, y, characterDensity, characterFriction, characterRestitution);
         characters.add(spawned);
         worldContactListener.addListener(spawned);
         CharacterResources.getInstance().getRandomSpawnSound().play(DEFAULT_AUDIO_VOLUME);
