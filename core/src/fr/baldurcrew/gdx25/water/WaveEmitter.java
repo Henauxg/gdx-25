@@ -43,10 +43,10 @@ public class WaveEmitter {
     }
 
     public float getAmplitudeRangeMin() {
-        return this.waveAmplitudeRange.to;
+        return this.waveAmplitudeRange.from;
     }
 
     public float getAmplitudeRangeMax() {
-        return this.waveAmplitudeRange.from;
+        return this.waveAmplitudeRange.to;
     }
 }
