@@ -160,6 +160,7 @@ public class Character extends Actor implements Disposable {
         this.body.getFixtureList().forEach(fixture -> {
             fixture.setFriction(density);
         });
+        this.body.resetMassData();
     }
 
     public float getRestitution() {

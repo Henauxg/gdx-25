@@ -105,6 +105,7 @@ public class Boat implements Disposable {
         this.body.getFixtureList().forEach(fixture -> {
             fixture.setDensity(density);
         });
+        this.body.resetMassData();
     }
 
     public float getRestitution() {
