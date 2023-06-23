@@ -25,7 +25,7 @@ public class CharacterSpawner {
     }
 
     public void update() {
-        if (!CoreGame.debugEnableWaveGeneration) return;
+        if (!CoreGame.debugEnableCharacterGeneration) return;
 
         spawnTimer += Constants.TIME_STEP;
         if (spawnTimer >= nextSpawnWaitTime) {

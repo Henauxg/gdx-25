@@ -43,6 +43,7 @@ public class CoreGame extends ApplicationAdapter {
 
     public static boolean debugMode = true;
     public static boolean debugClearColor = false;
+    public static boolean debugEnableCharacterGeneration = true;
     public static boolean debugEnableWaterRendering = true;
     public static boolean debugEnableBoatRendering = true;
     public static boolean debugEnableWaveGeneration = true;
@@ -83,6 +84,7 @@ public class CoreGame extends ApplicationAdapter {
     private float[] waterSpringsDampeningFactor = new float[1];
     private float[] waterBaseWaterLevel = new float[1];
     private float[] waterDensity = new float[1];
+
 
     @Override
     public void create() {
@@ -212,7 +214,10 @@ public class CoreGame extends ApplicationAdapter {
     }
 
     private void drawUI() {
-        ImGui.text("Character");
+        ImGui.text("Characters");
+        if (ImGui.checkbox("Character Generation", debugEnableCharacterGeneration)) {
+            debugEnableCharacterGeneration = !debugEnableCharacterGeneration;
+        }
         if (ImGui.sliderFloat("Char Friction", charFriction, 0, 1)) {
             characters.forEach(c -> c.setFriction(charFriction[0]));
         }
@@ -224,6 +229,9 @@ public class CoreGame extends ApplicationAdapter {
         }
         ImGui.separator();
         ImGui.text("Boat");
+        if (ImGui.checkbox("Boat rendering", debugEnableBoatRendering)) {
+            debugEnableBoatRendering = !debugEnableBoatRendering;
+        }
         if (ImGui.sliderFloat("Boat Density", boatDensity, 0, 1)) {
             boat.setDensity(boatDensity[0]);
         }
@@ -235,6 +243,15 @@ public class CoreGame extends ApplicationAdapter {
         }
         ImGui.separator();
         ImGui.text("Water");
+        if (ImGui.checkbox("Water rendering", debugEnableWaterRendering)) {
+            debugEnableWaterRendering = !debugEnableWaterRendering;
+        }
+        if (ImGui.checkbox("Wave Generation", debugEnableWaveGeneration)) {
+            debugEnableWaveGeneration = !debugEnableWaveGeneration;
+        }
+        if (ImGui.checkbox("Wave Drag", debugEnableWaterDrag)) {
+            debugEnableWaterDrag = !debugEnableWaterDrag;
+        }
         if (ImGui.sliderFloat("Water Density", waterDensity, 0, 1)) {
             water.setDensity(waterDensity[0]);
         }
@@ -253,6 +270,14 @@ public class CoreGame extends ApplicationAdapter {
         }
         if (ImGui.sliderFloat("Springs Dampening", waterSpringsDampeningFactor, 0f, 0.2f)) {
             water.setSpringsDampeningFactor(waterSpringsDampeningFactor[0]);
+        }
+        ImGui.separator();
+        ImGui.text("Debug");
+        if (ImGui.checkbox("Debug Mode", debugMode)) {
+            debugMode = !debugMode;
+        }
+        if (ImGui.checkbox("White Clear Color", debugClearColor)) {
+            debugClearColor = !debugClearColor;
         }
     }
 
@@ -276,7 +301,7 @@ public class CoreGame extends ApplicationAdapter {
                 debugEnableWaveGeneration = !debugEnableWaveGeneration;
             }
             if (Gdx.input.isKeyJustPressed(Input.Keys.F6)) {
-                debugEnableWaterDrag = !debugEnableWaterDrag;
+                debugEnableCharacterGeneration = !debugEnableCharacterGeneration;
             }
             if (Gdx.input.isKeyJustPressed(Input.Keys.F12)) {
                 disposeCurrentLevel();
