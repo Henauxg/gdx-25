@@ -26,7 +26,7 @@ public abstract class AiController {
                 return new DarwinAiController(type);
             }
             case MadRunner -> {
-                return new RunnerAiController(type);
+                return new MadRunnerAiController(type);
             }
             case BellyDancer -> {
                 return new BellyDancerAiController(type);

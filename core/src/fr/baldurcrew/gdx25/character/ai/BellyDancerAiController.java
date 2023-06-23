@@ -9,7 +9,6 @@ public class BellyDancerAiController extends AiController {
 
     @Override
     public Character.MoveState computeMoves(float playerX, float posX, boolean touchedBoatRecently) {
-        // TODO Implement
-        return Character.MoveState.IDLE;
+        return Character.MoveState.JUMP;
     }
 }
