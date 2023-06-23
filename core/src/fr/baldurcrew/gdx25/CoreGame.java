@@ -173,7 +173,7 @@ public class CoreGame extends ApplicationAdapter {
 
         characters = new ArrayList<>();
         for (int i = 0; i < INITIAL_CHARACTER_COUNT; i++) {
-            this.spawnCharacter(CharacterResources.getRandomCharacterIndex(), false, charactersSpawnRangeX.getRandom(), charactersSpawnRangeY.getRandom());
+            this.spawnCharacter(CharacterResources.getPlayerCharacterIndex(), false, charactersSpawnRangeX.getRandom(), charactersSpawnRangeY.getRandom());
         }
         characterSpawner = new CharacterSpawner(this, charactersSpawnRangeX, charactersSpawnRangeY, Range.buildRangeEx(2.5f, 6f));
 
@@ -372,7 +372,7 @@ public class CoreGame extends ApplicationAdapter {
                 createTestLevel();
             }
             if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-                this.spawnCharacter(CharacterResources.getRandomCharacterIndex(), false, charactersSpawnRangeX.getRandom(), charactersSpawnRangeY.getRandom());
+                this.spawnCharacter(CharacterResources.getPlayerCharacterIndex(), false, charactersSpawnRangeX.getRandom(), charactersSpawnRangeY.getRandom());
             }
         }
 
