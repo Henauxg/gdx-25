@@ -19,6 +19,7 @@ import fr.baldurcrew.gdx25.physics.FixtureContact;
 public class Character implements Disposable, ContactHandler { // TODO Remove Actor since unused
     private static final float MAX_X_MOVEMENT_VELOCITY = 5f;
     private static final float MAX_TIME_RECENT_BOAT_TOUCH = 2f;
+    private static final float PLAYER_SPRITE_SCALE = 1.3f;
     private final boolean aiControlled;
     private final int charIndex;
     private AiController ai;
@@ -114,6 +115,14 @@ public class Character implements Disposable, ContactHandler { // TODO Remove Ac
             animation = CharacterResources.getInstance().getAnimation(Action.IDLE, charIndex);
             animationTimer = 0f;
             shouldFlipX = false;
+        } else if (moveState == MoveState.SWIM && previousMoveState != MoveState.IDLE) {
+            animation = CharacterResources.getInstance().getAnimation(Action.SWIM, charIndex);
+            animationTimer = 0f;
+            shouldFlipX = false;
+        } else if (moveState == MoveState.JUMP && previousMoveState != MoveState.JUMP) {
+            animation = CharacterResources.getInstance().getAnimation(Action.JUMP, charIndex);
+            animationTimer = 0f;
+            shouldFlipX = false;
         }
         previousMoveState = moveState;
 
@@ -130,7 +139,9 @@ public class Character implements Disposable, ContactHandler { // TODO Remove Ac
         final var renderX = bodyX - (CharacterResources.CHARACTER_WIDTH / 2f) * Math.cos(body.getAngle()) + (CharacterResources.CHARACTER_WIDTH / 2f) * Math.sin(body.getAngle());
         final var renderY = bodyY - (CharacterResources.CHARACTER_HEIGHT / 2f) * Math.cos(body.getAngle()) - (CharacterResources.CHARACTER_HEIGHT / 2f) * Math.sin(body.getAngle());
 
-        affine.setToTrnRotScl((float) renderX, (float) renderY, rotation, 1, 1);
+
+        var scale = aiControlled ? 1f : PLAYER_SPRITE_SCALE;
+        affine.setToTrnRotScl((float) renderX, (float) renderY, rotation, 1.3f, 1.3f);
 
         spriteBatch.draw(currentFrame, CharacterResources.CHARACTER_WIDTH, CharacterResources.CHARACTER_HEIGHT, affine);
     }
@@ -179,12 +190,10 @@ public class Character implements Disposable, ContactHandler { // TODO Remove Ac
                 desiredVelX = -MAX_X_MOVEMENT_VELOCITY;
             }
             break;
-            case IDLE: {
+            default: {
                 desiredVelX = 0f;
             }
             break;
-            default:
-                System.out.println("(╯°□°）╯︵ ┻━┻ ");
         }
 
         var deltaVelX = desiredVelX - velocity.x;
@@ -250,6 +259,6 @@ public class Character implements Disposable, ContactHandler { // TODO Remove Ac
     }
 
     public enum MoveState {
-        RIGHT, IDLE, LEFT
+        RIGHT, IDLE, LEFT, SWIM, JUMP
     }
 }
