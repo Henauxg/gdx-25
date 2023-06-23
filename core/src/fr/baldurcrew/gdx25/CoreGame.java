@@ -120,6 +120,9 @@ public class CoreGame extends ApplicationAdapter {
         waveSounds.play();
 
         world = new World(new Vector2(0, Constants.GRAVITY_VALUE), true);
+        worldContactListener = new WorldContactListener();
+        world.setContactListener(worldContactListener);
+
 
         final Range waterSimulationRange = Range.buildRange(-0.25f * Constants.VIEWPORT_WIDTH, 1.25f * Constants.VIEWPORT_WIDTH);
         // Only simulate physics under the boat
@@ -127,6 +130,7 @@ public class CoreGame extends ApplicationAdapter {
         final Range waterPhysicsSimulationRange = waterSimulationRange.buildSubRange(waterSimulationRange.halfExtent - Boat.BOAT_WIDTH / 2f - physicSimulationMargin, Boat.BOAT_WIDTH + 2 * physicSimulationMargin);
 
         water = new WaterSimulation(world, 80, waterSimulationRange, waterPhysicsSimulationRange);
+        worldContactListener.addListener(water);
         boat = new Boat(world, Constants.VIEWPORT_WIDTH / 2f, water.getWaterLevel() + 1f);
         waveEmitter = new WaveEmitter(water, Range.buildRange(0.5f, 1.5f), Range.buildRange(4f, 6.5f)); // TODO Evolve over time to increase the difficulty
 
@@ -139,11 +143,6 @@ public class CoreGame extends ApplicationAdapter {
             this.spawnCharacter(CharacterResources.getRandomCharacterIndex(), spawnRangeX.getRandom(), spawnRangeY.getRandom());
         }
         characterSpawner = new CharacterSpawner(this, spawnRangeX, spawnRangeY, Range.buildRange(2.5f, 6f));
-
-        worldContactListener = new WorldContactListener();
-        world.setContactListener(worldContactListener);
-        worldContactListener.addListener(water);
-        characters.forEach(c -> worldContactListener.addListener(c));
 
         sailingTime = 0;
 
@@ -217,7 +216,7 @@ public class CoreGame extends ApplicationAdapter {
         if (ImGui.sliderFloat("Char Friction", charFriction, 0, 1)) {
             characters.forEach(c -> c.setFriction(charFriction[0]));
         }
-        if (ImGui.sliderFloat("Char Density", charDensity, 0, 1)) {
+        if (ImGui.sliderFloat("Char Density", charDensity, 0, 30f)) {
             characters.forEach(c -> c.setDensity(charDensity[0]));
         }
         if (ImGui.sliderFloat("Char Restitution", charRestitution, 0, 1)) {
