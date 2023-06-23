@@ -18,11 +18,15 @@ import java.util.stream.IntStream;
 
 public enum Action {
 
-    IDLE(3),
-    CLIMB(0, 1),
-    JUMP(6, 5, 2),
-    SWIM(7, 8),
-    WALK(9, 10);
+    IDLE(4),//1
+
+    CLIMB(3, 2),
+
+    JUMP(1, 7, 5, 0),
+
+    SWIM(10, 8),
+
+    WALK(9, 6);
 
     private int[] frames;
 

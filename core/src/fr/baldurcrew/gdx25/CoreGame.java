@@ -42,6 +42,22 @@ public class CoreGame extends ApplicationAdapter {
     private static final Color DEBUG_CLEAR_COLOR = new Color(1f, 1f, 1f, 1f);
     private static final int INITIAL_CHARACTER_COUNT = 1;
     private static final float DEFAULT_AUDIO_VOLUME = 0.2f;
+    public static final String LAYER_00 = "sky.png";
+    public static final String LAYER_01 = "cloud_01.png";
+    public static final String LAYER_02 = "cloud_02.png";
+    public static final String LAYER_03 = "island.png";
+    public static final String LAYER_04 = "ocean.png";
+    public static final String LAYER_05 = "waves-trans.png";
+    public static final String LAYER_06 = "creek.png";
+    public static final String LAYER_07 = "waves.png";
+    public static final String LAYER_08 = "rock_03.png";
+    public static final String LAYER_09 = "waves-2.png";
+    public static final String LAYER_10 = "waves-3.png";
+    public static final String LAYER_11 = "rock_reef.png";
+    public static final String LAYER_12 = "waves-4.png";
+    public static final String LAYER_13 = "groundswell.png";
+    public static final String LAYER_14 = "bedrock.png";
+
 
     public static boolean debugMode = true;
     public static boolean debugClearColor = false;
@@ -131,21 +147,21 @@ public class CoreGame extends ApplicationAdapter {
         parallaxLayers = new ArrayList<>();
         //parallaxLayers.add(new ParallaxLayer(new Texture("1.png"), 0.2f, true, false)); //front rock
         //parallaxLayers.add(new ParallaxLayer(new Texture("3.png"), 0.5f, true, false)); //back rock
-        parallaxLayers.add(new ParallaxLayer(new Texture("sky.png"), 0.3f, 0.8f, 0.12f, true, true, 0, 0)); // far cloud
-        parallaxLayers.add(new ParallaxLayer(new Texture("cloud_01.png"), 0.6f, 0.9f, 0.11f, true, false, 0, 0)); // cloud
-        parallaxLayers.add(new ParallaxLayer(new Texture("cloud_02.png"), 0.8f, 0.9f, 0.12f, true, false, 0, 0)); // cloud
-        parallaxLayers.add(new ParallaxLayer(new Texture("island.png"), 0.2f, 0.8f, -0.36f, true, false, 0, 0)); // far island
-        parallaxLayers.add(new ParallaxLayer(new Texture("ocean.png"), 0.4f, 0.9f, -0.40f, true, false, 1.2f, 0.15f)); // ocean
-        parallaxLayers.add(new ParallaxLayer(new Texture("waves-trans.png"), 0.4f, 0.4f, -0.22f, true, false, 3, 0.25f)); //sea
-        parallaxLayers.add(new ParallaxLayer(new Texture("creek.png"), 0.7f, 0.9f, -0.34f, true, false, 0.5f, 0.01f)); // far island
-        parallaxLayers.add(new ParallaxLayer(new Texture("waves.png"), 0.82f, 0.4f, -0.29f, true, false, 5, 0.2f)); //sea
-        parallaxLayers.add(new ParallaxLayer(new Texture("rock_03.png"), 0.9f, 0.85f, -0.32f, true, false, 3, 0.05f)); //rock reef
-        parallaxLayers.add(new ParallaxLayer(new Texture("waves-2.png"), 1f, 0.4f, -0.30f, true, false, 2, 0.1f)); //sea
-        parallaxLayers.add(new ParallaxLayer(new Texture("waves-3.png"), 1.2f, 0.4f, -0.31f, true, false, 1, 0.2f)); //sea
-        parallaxLayers.add(new ParallaxLayer(new Texture("rock_reef.png"), 1.4f, 0.5f, -0.42f, true, false, 3, 0.05f));
-        parallaxLayers.add(new ParallaxLayer(new Texture("waves-4.png"), 1.5f, 0.4f, -0.32f, true, false, 3, 0.25f)); //sea
-        parallaxLayers.add(new ParallaxLayer(new Texture("groundswell.png"), 1.8f, 0.9f, -0.52f, true, false, 0, 0)); //rock reef
-        parallaxLayers.add(new ParallaxLayer(new Texture("bedrock.png"), 2f, 0.3f, -0.96f, true, false, 0, 0)); //rock bottom
+        parallaxLayers.add(new ParallaxLayer(new Texture(LAYER_00), 0.3f, 0.8f, 0.12f, true, true, 0, 0)); // far cloud
+        parallaxLayers.add(new ParallaxLayer(new Texture(LAYER_01), 0.6f, 0.9f, 0.11f, true, false, 0, 0)); // cloud
+        parallaxLayers.add(new ParallaxLayer(new Texture(LAYER_02), 0.8f, 0.9f, 0.12f, true, false, 0, 0)); // cloud
+        parallaxLayers.add(new ParallaxLayer(new Texture(LAYER_03), 0.2f, 0.8f, -0.36f, true, false, 0, 0)); // far island
+        parallaxLayers.add(new ParallaxLayer(new Texture(LAYER_04), 0.4f, 0.9f, -0.40f, true, false, 1.2f, 0.15f)); // ocean
+        parallaxLayers.add(new ParallaxLayer(new Texture(LAYER_05), 0.4f, 0.4f, -0.22f, true, false, 3, 0.25f)); //sea
+        parallaxLayers.add(new ParallaxLayer(new Texture(LAYER_06), 0.7f, 0.9f, -0.34f, true, false, 0.5f, 0.01f)); // far island
+        parallaxLayers.add(new ParallaxLayer(new Texture(LAYER_07), 0.82f, 0.4f, -0.29f, true, false, 5, 0.2f)); //sea
+        parallaxLayers.add(new ParallaxLayer(new Texture(LAYER_08), 0.9f, 0.85f, -0.32f, true, false, 3, 0.05f)); //rock reef
+        parallaxLayers.add(new ParallaxLayer(new Texture(LAYER_09), 1f, 0.4f, -0.30f, true, false, 2, 0.1f)); //sea
+        parallaxLayers.add(new ParallaxLayer(new Texture(LAYER_10), 1.2f, 0.4f, -0.31f, true, false, 1, 0.2f)); //sea
+        parallaxLayers.add(new ParallaxLayer(new Texture(LAYER_11), 1.4f, 0.5f, -0.42f, true, false, 3, 0.05f));
+        parallaxLayers.add(new ParallaxLayer(new Texture(LAYER_12), 1.5f, 0.4f, -0.32f, true, false, 3, 0.25f)); //sea
+        parallaxLayers.add(new ParallaxLayer(new Texture(LAYER_13), 1.8f, 0.9f, -0.52f, true, false, 0, 0)); //rock reef
+        parallaxLayers.add(new ParallaxLayer(new Texture(LAYER_14), 2f, 0.3f, -0.96f, true, false, 0, 0)); //rock bottom
     }
 
     private void createImGui() {
