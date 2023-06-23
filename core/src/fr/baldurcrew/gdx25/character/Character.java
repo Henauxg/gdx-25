@@ -9,18 +9,19 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Affine2;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.utils.Disposable;
 import fr.baldurcrew.gdx25.Constants;
 import fr.baldurcrew.gdx25.boat.Boat;
+import fr.baldurcrew.gdx25.character.ai.AiController;
 import fr.baldurcrew.gdx25.physics.ContactHandler;
 import fr.baldurcrew.gdx25.physics.FixtureContact;
 
-public class Character extends Actor implements Disposable, ContactHandler { // TODO Remove Actor since unused
+public class Character implements Disposable, ContactHandler { // TODO Remove Actor since unused
     private static final float MAX_X_MOVEMENT_VELOCITY = 5f;
     private static final float MAX_TIME_RECENT_BOAT_TOUCH = 2f;
     private final boolean aiControlled;
     private final int charIndex;
+    private AiController ai;
 
     private boolean touchingBoat;
     private boolean touchedBoatRecently;
@@ -39,6 +40,9 @@ public class Character extends Actor implements Disposable, ContactHandler { // 
         this.boat = boat;
         this.charIndex = charIndex;
         this.aiControlled = aiControlled;
+        if (aiControlled) {
+            ai = AiController.getRandomAiController();
+        }
         this.animation = CharacterResources.getInstance().getAnimation(Action.IDLE, charIndex);
         this.previousMoveState = MoveState.IDLE;
         this.moveState = MoveState.IDLE;
@@ -131,13 +135,9 @@ public class Character extends Actor implements Disposable, ContactHandler { // 
         spriteBatch.draw(currentFrame, CharacterResources.CHARACTER_WIDTH, CharacterResources.CHARACTER_HEIGHT, affine);
     }
 
-    public void handleInputs() {
+    public void handleInputs(float playerX) {
         if (aiControlled) {
-            if (touchedBoatRecently) {
-                moveState = MoveState.LEFT;
-            } else {
-                moveState = MoveState.IDLE;
-            }
+            moveState = ai.computeMoves(playerX, body.getPosition().x, touchedBoatRecently);
         } else {
             if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
                 moveState = MoveState.LEFT;
@@ -241,11 +241,15 @@ public class Character extends Actor implements Disposable, ContactHandler { // 
         }
     }
 
+    public float getX() {
+        return body.getPosition().x;
+    }
+
     enum AnimationState {
         EnteringIdle, Idle, Walking, Climbing, EnteringJumping, Jumping, Landing, Swimming;
     }
 
-    enum MoveState {
+    public enum MoveState {
         RIGHT, IDLE, LEFT
     }
 }
