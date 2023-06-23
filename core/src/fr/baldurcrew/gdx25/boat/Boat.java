@@ -14,6 +14,7 @@ public class Boat implements Disposable {
     public static final float BOAT_HEIGHT = 5f;
     public static final float ASPECT_RATIO = 1.07f;
     public static final float BOAT_WIDTH = ASPECT_RATIO * BOAT_HEIGHT;
+    private static final float DEFAULT_BOAT_ANGULAR_DAMPING = 0;
     private Sprite boatSprite;
     private Texture boatTexture;
     private SpriteBatch spriteBatch; // TODO Share a sprite batch in CoreGame
@@ -23,6 +24,7 @@ public class Boat implements Disposable {
     private float density = 0.25f;
     private float restitution = 0.3f;
     private float friction = 0.5f;
+
 
     public Boat(World world, float centerX, float centerY) {
         spriteBatch = new SpriteBatch();
@@ -40,7 +42,7 @@ public class Boat implements Disposable {
         final var bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
         bodyDef.position.set(centerX, centerY);
-        bodyDef.angularDamping = 0;
+        bodyDef.angularDamping = DEFAULT_BOAT_ANGULAR_DAMPING;
 
         final var body = world.createBody(bodyDef);
         body.setUserData(this);
@@ -133,5 +135,9 @@ public class Boat implements Disposable {
 
     public Body getBody() {
         return body;
+    }
+
+    public void setAngularDamping(float v) {
+        this.body.setAngularDamping(v);
     }
 }

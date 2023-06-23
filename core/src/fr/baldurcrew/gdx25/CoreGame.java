@@ -91,6 +91,7 @@ public class CoreGame extends ApplicationAdapter {
     private float[] uiBoatDensity = new float[1];
     private float[] uiBoatRestitution = new float[1];
     private float[] uiBoatFriction = new float[1];
+    private float[] uiBoatAngularDamping = new float[1];
     //Water
     private int[] uiWaterWavesPropagationPasses = new int[1];
     private float[] uiWaterWavesPropagationSpreadFactor = new float[1];
@@ -192,6 +193,7 @@ public class CoreGame extends ApplicationAdapter {
         uiBoatDensity[0] = boat.getDensity();
         uiBoatRestitution[0] = boat.getRestitution();
         uiBoatFriction[0] = boat.getFriction();
+        uiBoatAngularDamping[0] = boat.getBody().getAngularDamping();
         //Water
         uiWaterWavesPropagationPasses[0] = water.getWavesPropagationPasses();
         uiWaterWavesPropagationSpreadFactor[0] = water.getWavesPropagationSpreadFactor();
@@ -289,6 +291,9 @@ public class CoreGame extends ApplicationAdapter {
         }
         if (ImGui.sliderFloat("Boat Friction", uiBoatFriction, 0, 1)) {
             boat.setFriction(uiBoatFriction[0]);
+        }
+        if (ImGui.sliderFloat("Boat Angular Damping", uiBoatAngularDamping, 0, 1)) {
+            boat.setAngularDamping(uiBoatAngularDamping[0]);
         }
         ImGui.separator();
         ImGui.text("Water");
