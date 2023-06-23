@@ -70,7 +70,7 @@ public class CoreGame extends ApplicationAdapter {
     private Music music;
     private float sailingTime;
     private CharacterSpawner characterSpawner;
-    private float characterDensity = 0.6f;
+    private float characterDensity = 3.0f;
     private float characterFriction = 0.5f;
     private float characterRestitution = 0.2f;
     private Range defaultWavePeriodRange = Range.buildRangeEx(0.5f, 1.5f);

@@ -20,8 +20,8 @@ public class Boat implements Disposable {
     private Body body;
 
     // TODO Tweak
-    private float density = 0.4f;
-    private float restituion = 0.3f;
+    private float density = 0.25f;
+    private float restitution = 0.3f;
     private float friction = 0.5f;
 
     public Boat(World world, float centerX, float centerY) {
@@ -58,7 +58,7 @@ public class Boat implements Disposable {
         fixtureDef.shape = boatPolygon;
         fixtureDef.density = density;
         fixtureDef.friction = friction;
-        fixtureDef.restitution = restituion;
+        fixtureDef.restitution = restitution;
 
         body.createFixture(fixtureDef);
 
@@ -110,11 +110,11 @@ public class Boat implements Disposable {
     }
 
     public float getRestitution() {
-        return restituion;
+        return restitution;
     }
 
     public void setRestitution(float restitution) {
-        this.restituion = restitution;
+        this.restitution = restitution;
         this.body.getFixtureList().forEach(fixture -> {
             fixture.setRestitution(restitution);
         });
