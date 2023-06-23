@@ -41,4 +41,12 @@ public class WaveEmitter {
     public void setPeriodRange(Range range) {
         this.wavePeriodRange = range;
     }
+
+    public float getAmplitudeRangeMin() {
+        return this.waveAmplitudeRange.to;
+    }
+
+    public float getAmplitudeRangeMax() {
+        return this.waveAmplitudeRange.from;
+    }
 }

@@ -341,6 +341,7 @@ public class CoreGame extends ApplicationAdapter {
         if (ImGui.dragInt("Waves Propagation", uiWaterWavesPropagationPasses, 1, 1, 10)) {
             water.setWavesPropagationPasses(uiWaterWavesPropagationPasses[0]);
         }
+        uiWaterWavesPropagationSpreadFactor[0] = water.getWavesPropagationSpreadFactor();
         if (ImGui.sliderFloat("Waves Propagation Spread Factor", uiWaterWavesPropagationSpreadFactor, 0f, 0.4f)) {
             water.setWavesPropagationSpreadFactor(uiWaterWavesPropagationSpreadFactor[0]);
         }
@@ -350,13 +351,16 @@ public class CoreGame extends ApplicationAdapter {
         if (ImGui.sliderFloat("Springs Dampening", uiWaterSpringsDampeningFactor, 0f, 0.2f)) {
             water.setSpringsDampeningFactor(uiWaterSpringsDampeningFactor[0]);
         }
+        uiWaterFakeVelocityX[0] = water.getFakeWaterVelocityX();
         if (ImGui.sliderFloat("Fake water velocity X", uiWaterFakeVelocityX, 0f, 25f)) {
             water.setFakeWaterVelocityX(uiWaterFakeVelocityX[0]);
         }
-
+        uiWaterFakeVelocityY[0] = water.getFakeWaterVelocityY();
         if (ImGui.sliderFloat("Fake water velocity Y", uiWaterFakeVelocityY, -10f, 10f)) {
             water.setFakeWaterVelocityY(uiWaterFakeVelocityY[0]);
         }
+        uiWaveEmitterAmplitudeRange[0] = waveEmitter.getAmplitudeRangeMin();
+        uiWaveEmitterAmplitudeRange[1] = waveEmitter.getAmplitudeRangeMax();
         if (ImGui.sliderFloat2("Wave emitter amplitude range", uiWaveEmitterAmplitudeRange, 0f, 25f)) {
             waveEmitter.setAmplitudeRange(Range.buildRange(uiWaveEmitterAmplitudeRange[0], uiWaveEmitterAmplitudeRange[1]));
         }
@@ -372,6 +376,7 @@ public class CoreGame extends ApplicationAdapter {
         if (ImGui.checkbox("White Clear Color", debugClearColor)) {
             debugClearColor = !debugClearColor;
         }
+        uiSailingTime[0] = sailingTime;
         if (ImGui.sliderFloat("Sailing time", uiSailingTime, 0, Difficulty.MAX_SAILING_TIME_SCALING)) {
             this.setSailingTime(uiSailingTime[0]);
         }
@@ -384,6 +389,7 @@ public class CoreGame extends ApplicationAdapter {
     }
 
     private void updateDifficulty(float sailingTime) {
+        // Difficulty could be clamped at MAX_DIFFICULTY_FACTOR. But maybe not ?
         difficultyFactor = Difficulty.STARTING_DIFFICULTY_FACTOR + (Difficulty.MAX_DIFFICULTY_FACTOR - Difficulty.STARTING_DIFFICULTY_FACTOR) * sailingTime / Difficulty.MAX_SAILING_TIME_SCALING;
         var difficultyMultiplier = (difficultyFactor - Difficulty.STARTING_DIFFICULTY_FACTOR) / (Difficulty.MAX_DIFFICULTY_FACTOR - Difficulty.STARTING_DIFFICULTY_FACTOR);
         var fakeWaterVelocityX = Difficulty.FAKE_WATER_VELOCITY_X_AT_MIN_SCALING + difficultyMultiplier * (Difficulty.FAKE_WATER_VELOCITY_X_AT_MAX_SCALING - Difficulty.FAKE_WATER_VELOCITY_X_AT_MIN_SCALING);
@@ -393,16 +399,9 @@ public class CoreGame extends ApplicationAdapter {
         var minWaveAmplitude = Difficulty.MIN_WAVES_AMPLITUDE_AT_MIN_SCALING + difficultyMultiplier * (Difficulty.MIN_WAVES_AMPLITUDE_AT_MAX_SCALING - Difficulty.MIN_WAVES_AMPLITUDE_AT_MIN_SCALING);
         var maxWaveAmplitude = Difficulty.MAX_WAVES_AMPLITUDE_AT_MIN_SCALING + difficultyMultiplier * (Difficulty.MAX_WAVES_AMPLITUDE_AT_MAX_SCALING - Difficulty.MAX_WAVES_AMPLITUDE_AT_MIN_SCALING);
 
-        // TODO Difficulty seems to go ver MAX difficulty
-
-        // TODO Sailing time UI not in sync
-
-        // TODO UI is out of sync
-        Gdx.app.log("Game", "UI out of sync");
         water.setFakeWaterVelocityX(fakeWaterVelocityX);
         water.setFakeWaterVelocityX(fakeWaterVelocityY);
         water.setWavesPropagationSpreadFactor(waveSpreadFactor);
-
         waveEmitter.setAmplitudeRange(Range.buildRange(minWaveAmplitude, maxWaveAmplitude));
     }
 
