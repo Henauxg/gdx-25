@@ -65,25 +65,28 @@ public class CoreGame extends ApplicationAdapter {
     private Music waveSounds;
     private float sailingTime;
     private CharacterSpawner characterSpawner;
+    private float characterDensity = 0.6f;
+    private float characterFriction = 0.5f;
+    private float characterRestitution = 0.2f;
 
     private ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
     private ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
     private long windowHandle;
     //Character
-    private float[] charFriction = new float[1];
-    private float[] charDensity = new float[1];
-    private float[] charRestitution = new float[1];
+    private float[] uiCharFriction = new float[1];
+    private float[] uiCharDensity = new float[1];
+    private float[] uiCharRestitution = new float[1];
     //Boat
-    private float[] boatDensity = new float[1];
-    private float[] boatRestitution = new float[1];
-    private float[] boatFriction = new float[1];
+    private float[] uiBoatDensity = new float[1];
+    private float[] uiBoatRestitution = new float[1];
+    private float[] uiBoatFriction = new float[1];
     //Water
-    private int[] waterWavesPropagationPasses = new int[1];
-    private float[] waterWavesPropagationSpreadFactor = new float[1];
-    private float[] waterSpringsStiffness = new float[1];
-    private float[] waterSpringsDampeningFactor = new float[1];
-    private float[] waterBaseWaterLevel = new float[1];
-    private float[] waterDensity = new float[1];
+    private int[] uiWaterWavesPropagationPasses = new int[1];
+    private float[] uiWaterWavesPropagationSpreadFactor = new float[1];
+    private float[] uiWaterSpringsStiffness = new float[1];
+    private float[] uiWaterSpringsDampeningFactor = new float[1];
+    private float[] uiWaterBaseWaterLevel = new float[1];
+    private float[] uiWaterDensity = new float[1];
 
 
     @Override
@@ -152,20 +155,20 @@ public class CoreGame extends ApplicationAdapter {
     }
 
     private void initTweakingUIValues() {
-        charFriction[0] = characters.get(0).getFriction();
-        charDensity[0] = characters.get(0).getDensity();
-        charRestitution[0] = characters.get(0).getRestitution();
+        uiCharFriction[0] = characterFriction;
+        uiCharDensity[0] = characterDensity;
+        uiCharRestitution[0] = characterRestitution;
         //Boat
-        boatDensity[0] = boat.getDensity();
-        boatRestitution[0] = boat.getRestitution();
-        boatFriction[0] = boat.getFriction();
+        uiBoatDensity[0] = boat.getDensity();
+        uiBoatRestitution[0] = boat.getRestitution();
+        uiBoatFriction[0] = boat.getFriction();
         //Water
-        waterWavesPropagationPasses[0] = water.getWavesPropagationPasses();
-        waterWavesPropagationSpreadFactor[0] = water.getWavesPropagationSpreadFactor();
-        waterSpringsStiffness[0] = water.getSpringsStiffness();
-        waterSpringsDampeningFactor[0] = water.getSpringsDampening();
-        waterBaseWaterLevel[0] = water.getWaterLevel();
-        waterDensity[0] = water.getDensity();
+        uiWaterWavesPropagationPasses[0] = water.getWavesPropagationPasses();
+        uiWaterWavesPropagationSpreadFactor[0] = water.getWavesPropagationSpreadFactor();
+        uiWaterSpringsStiffness[0] = water.getSpringsStiffness();
+        uiWaterSpringsDampeningFactor[0] = water.getSpringsDampening();
+        uiWaterBaseWaterLevel[0] = water.getWaterLevel();
+        uiWaterDensity[0] = water.getDensity();
     }
 
     @Override
@@ -218,28 +221,31 @@ public class CoreGame extends ApplicationAdapter {
         if (ImGui.checkbox("Character Generation", debugEnableCharacterGeneration)) {
             debugEnableCharacterGeneration = !debugEnableCharacterGeneration;
         }
-        if (ImGui.sliderFloat("Char Friction", charFriction, 0, 1)) {
-            characters.forEach(c -> c.setFriction(charFriction[0]));
+        if (ImGui.sliderFloat("Char Friction", uiCharFriction, 0, 1)) {
+            characterFriction = uiCharFriction[0];
+            characters.forEach(c -> c.setFriction(uiCharFriction[0]));
         }
-        if (ImGui.sliderFloat("Char Density", charDensity, 0, 30f)) {
-            characters.forEach(c -> c.setDensity(charDensity[0]));
+        if (ImGui.sliderFloat("Char Density", uiCharDensity, 0, 30f)) {
+            characterDensity = uiCharDensity[0];
+            characters.forEach(c -> c.setDensity(uiCharDensity[0]));
         }
-        if (ImGui.sliderFloat("Char Restitution", charRestitution, 0, 1)) {
-            characters.forEach(c -> c.setRestitution(charRestitution[0]));
+        if (ImGui.sliderFloat("Char Restitution", uiCharRestitution, 0, 1)) {
+            characterRestitution = uiCharRestitution[0];
+            characters.forEach(c -> c.setRestitution(uiCharRestitution[0]));
         }
         ImGui.separator();
         ImGui.text("Boat");
         if (ImGui.checkbox("Boat rendering", debugEnableBoatRendering)) {
             debugEnableBoatRendering = !debugEnableBoatRendering;
         }
-        if (ImGui.sliderFloat("Boat Density", boatDensity, 0, 1)) {
-            boat.setDensity(boatDensity[0]);
+        if (ImGui.sliderFloat("Boat Density", uiBoatDensity, 0, 1)) {
+            boat.setDensity(uiBoatDensity[0]);
         }
-        if (ImGui.sliderFloat("Boat Restitution", boatRestitution, 0, 1)) {
-            boat.setRestitution(charRestitution[0]);
+        if (ImGui.sliderFloat("Boat Restitution", uiBoatRestitution, 0, 1)) {
+            boat.setRestitution(uiBoatRestitution[0]);
         }
-        if (ImGui.sliderFloat("Boat Friction", boatFriction, 0, 1)) {
-            boat.setFriction(boatFriction[0]);
+        if (ImGui.sliderFloat("Boat Friction", uiBoatFriction, 0, 1)) {
+            boat.setFriction(uiBoatFriction[0]);
         }
         ImGui.separator();
         ImGui.text("Water");
@@ -252,24 +258,24 @@ public class CoreGame extends ApplicationAdapter {
         if (ImGui.checkbox("Wave Drag", debugEnableWaterDrag)) {
             debugEnableWaterDrag = !debugEnableWaterDrag;
         }
-        if (ImGui.sliderFloat("Water Density", waterDensity, 0, 1)) {
-            water.setDensity(waterDensity[0]);
+        if (ImGui.sliderFloat("Water Density", uiWaterDensity, 0, 1)) {
+            water.setDensity(uiWaterDensity[0]);
         }
-        if (ImGui.sliderFloat("Base Level", waterBaseWaterLevel, 0.5f, Constants.VIEWPORT_HEIGHT)) {
-            water.setBaseWaterLevel(waterBaseWaterLevel[0]);
+        if (ImGui.sliderFloat("Base Level", uiWaterBaseWaterLevel, 0.5f, Constants.VIEWPORT_HEIGHT)) {
+            water.setBaseWaterLevel(uiWaterBaseWaterLevel[0]);
         }
         ImGui.text("Water waves");
-        if (ImGui.dragInt("Waves Propagation", waterWavesPropagationPasses, 1, 1, 10)) {
-            water.setWavesPropagationPasses(waterWavesPropagationPasses[0]);
+        if (ImGui.dragInt("Waves Propagation", uiWaterWavesPropagationPasses, 1, 1, 10)) {
+            water.setWavesPropagationPasses(uiWaterWavesPropagationPasses[0]);
         }
-        if (ImGui.sliderFloat("Waves Propagation Spread Factor", waterWavesPropagationSpreadFactor, 0f, 0.4f)) {
-            water.setWavesPropagationSpreadFactor(waterWavesPropagationSpreadFactor[0]);
+        if (ImGui.sliderFloat("Waves Propagation Spread Factor", uiWaterWavesPropagationSpreadFactor, 0f, 0.4f)) {
+            water.setWavesPropagationSpreadFactor(uiWaterWavesPropagationSpreadFactor[0]);
         }
-        if (ImGui.sliderFloat("Springs Stiffness", waterSpringsStiffness, 0f, 0.1f)) {
-            water.setSpringsStiffness(waterSpringsStiffness[0]);
+        if (ImGui.sliderFloat("Springs Stiffness", uiWaterSpringsStiffness, 0f, 0.1f)) {
+            water.setSpringsStiffness(uiWaterSpringsStiffness[0]);
         }
-        if (ImGui.sliderFloat("Springs Dampening", waterSpringsDampeningFactor, 0f, 0.2f)) {
-            water.setSpringsDampeningFactor(waterSpringsDampeningFactor[0]);
+        if (ImGui.sliderFloat("Springs Dampening", uiWaterSpringsDampeningFactor, 0f, 0.2f)) {
+            water.setSpringsDampeningFactor(uiWaterSpringsDampeningFactor[0]);
         }
         ImGui.separator();
         ImGui.text("Debug");
@@ -350,7 +356,7 @@ public class CoreGame extends ApplicationAdapter {
     }
 
     public void spawnCharacter(int charIndex, float x, float y) {
-        final var spawned = new Character(world, charIndex, x, y);
+        final var spawned = new Character(world, charIndex, x, y, characterDensity, characterFriction, characterRestitution);
         characters.add(spawned);
         worldContactListener.addListener(spawned);
         CharacterResources.getInstance().getRandomSpawnSound().play(DEFAULT_AUDIO_VOLUME);

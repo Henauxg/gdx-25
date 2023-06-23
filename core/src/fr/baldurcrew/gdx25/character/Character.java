@@ -28,20 +28,16 @@ public class Character extends Actor implements Disposable, ContactHandler { // 
     private TextureRegion currentFrame;
     private MoveState moveState;
 
-    private float density = 0.6f;
-    private float friction = 0.5f;
-    private float restitution = 0.2f;
-
-    public Character(World world, int colorRow, float x, float y) {
+    public Character(World world, int colorRow, float x, float y, float density, float friction, float restitution) {
         this.animation = CharacterResources.getInstance().getAnimation(Action.IDLE, colorRow);
         this.moveState = MoveState.IDLE;
-        this.body = createBody(world, x, y);
+        this.body = createBody(world, x, y, density, friction, restitution);
 
         spriteBatch = new SpriteBatch();
         stateTime = 0f;
     }
 
-    private Body createBody(World world, float centerX, float centerY) {
+    private Body createBody(World world, float centerX, float centerY, float density, float friction, float restitution) {
         final var bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
         bodyDef.position.set(centerX, centerY);
@@ -132,15 +128,19 @@ public class Character extends Actor implements Disposable, ContactHandler { // 
 
         float desiredVelX = 0f;
         switch (moveState) {
-            case RIGHT:
+            case RIGHT: {
                 desiredVelX = MAX_X_MOVEMENT_VELOCITY;
-                break;
-            case LEFT:
+            }
+            break;
+            case LEFT: {
                 desiredVelX = -MAX_X_MOVEMENT_VELOCITY;
-                break;
-            case IDLE:
+            }
+            break;
+            case IDLE: {
                 desiredVelX = 0f;
-                break;
+                //desiredVelX = velocity.x * 0.97f;
+            }
+            break;
             default:
                 System.out.println("(╯°□°）╯︵ ┻━┻ ");
         }
@@ -156,35 +156,20 @@ public class Character extends Actor implements Disposable, ContactHandler { // 
         spriteBatch.dispose();
     }
 
-    public float getFriction() {
-        return friction;
-    }
-
     public void setFriction(float friction) {
-        this.friction = friction;
         this.body.getFixtureList().forEach(fixture -> {
             fixture.setFriction(friction);
         });
     }
 
-    public float getDensity() {
-        return density;
-    }
-
     public void setDensity(float density) {
-        this.density = density;
         this.body.getFixtureList().forEach(fixture -> {
             fixture.setDensity(density);
         });
         this.body.resetMassData();
     }
 
-    public float getRestitution() {
-        return restitution;
-    }
-
     public void setRestitution(float restitution) {
-        this.restitution = restitution;
         this.body.getFixtureList().forEach(fixture -> {
             fixture.setRestitution(restitution);
         });
@@ -192,12 +177,12 @@ public class Character extends Actor implements Disposable, ContactHandler { // 
 
     @Override
     public void handleContactBegin(FixtureContact contact) {
-        //
+        // if boat, in conact ?
     }
 
     @Override
     public void handleContactEnd(FixtureContact contact) {
-        //
+        // if boat not in contact anymore, after X sec ->
     }
 
     @Override
