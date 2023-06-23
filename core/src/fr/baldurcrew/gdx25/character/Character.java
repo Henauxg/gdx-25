@@ -19,31 +19,35 @@ import fr.baldurcrew.gdx25.physics.FixtureContact;
 public class Character extends Actor implements Disposable, ContactHandler { // TODO Remove Actor since unused
     private static final float MAX_X_MOVEMENT_VELOCITY = 5f;
     private static final float MAX_TIME_RECENT_BOAT_TOUCH = 2f;
-
-    private final Animation<TextureRegion> animation;
     private final boolean aiControlled;
+    private final int charIndex;
+
     private boolean touchingBoat;
     private boolean touchedBoatRecently;
     private float lastBoatTouchTimer;
-
     private Body body;
     private SpriteBatch spriteBatch;
-    private float stateTime;
+    private float animationTimer;
+    private Animation<TextureRegion> animation;
+    private boolean shouldFlipX;
     private TextureRegion currentFrame;
     private MoveState moveState;
+    private MoveState previousMoveState;
     private Boat boat;
     private Vector2 boatContactPoint;
 
-
-    public Character(World world, Boat boat, int colorRow, boolean aiControlled, float x, float y, float density, float friction, float restitution) {
+    public Character(World world, Boat boat, int charIndex, boolean aiControlled, float x, float y, float density, float friction, float restitution) {
         this.boat = boat;
+        this.charIndex = charIndex;
         this.aiControlled = aiControlled;
-        this.animation = CharacterResources.getInstance().getAnimation(Action.IDLE, colorRow);
+        this.animation = CharacterResources.getInstance().getAnimation(Action.IDLE, charIndex);
+        this.previousMoveState = MoveState.IDLE;
         this.moveState = MoveState.IDLE;
+        this.shouldFlipX = false;
         this.body = createBody(world, x, y, density, friction, restitution);
 
         spriteBatch = new SpriteBatch();
-        stateTime = 0f;
+        animationTimer = 0f;
         touchingBoat = false;
         touchedBoatRecently = false;
     }
@@ -93,14 +97,26 @@ public class Character extends Actor implements Disposable, ContactHandler { // 
     }
 
     public void render(Camera camera) {
-        stateTime += Gdx.graphics.getDeltaTime(); // Accumulate elapsed animation time
-        var isFlipped = false;
-        if (currentFrame != null) {
-            isFlipped = currentFrame.isFlipX();
-        }
-        currentFrame = animation.getKeyFrame(stateTime, true);
+        animationTimer += Gdx.graphics.getDeltaTime(); // Accumulate elapsed animation time
 
-        if (isFlipped && !currentFrame.isFlipX()) {
+        // Update the animation
+        if (moveState == MoveState.LEFT && previousMoveState != MoveState.LEFT) {
+            animation = CharacterResources.getInstance().getAnimation(Action.WALK, charIndex);
+            animationTimer = 0f;
+            shouldFlipX = true;
+        } else if (moveState == MoveState.RIGHT && previousMoveState != MoveState.RIGHT) {
+            animation = CharacterResources.getInstance().getAnimation(Action.WALK, charIndex);
+            animationTimer = 0f;
+            shouldFlipX = false;
+        } else if (moveState == MoveState.IDLE && previousMoveState != MoveState.IDLE) {
+            animation = CharacterResources.getInstance().getAnimation(Action.IDLE, charIndex);
+            animationTimer = 0f;
+            shouldFlipX = false;
+        }
+        previousMoveState = moveState;
+
+        currentFrame = animation.getKeyFrame(animationTimer, true);
+        if ((shouldFlipX && !currentFrame.isFlipX() || (!shouldFlipX && currentFrame.isFlipX()))) {
             currentFrame.flip(true, false);
         }
 
@@ -129,18 +145,12 @@ public class Character extends Actor implements Disposable, ContactHandler { // 
                 moveState = MoveState.IDLE;
             }
         } else {
-            moveState = MoveState.IDLE;
             if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-                if (!currentFrame.isFlipX()) {
-                    currentFrame.flip(true, false);
-                }
                 moveState = MoveState.LEFT;
-            }
-            if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-                if (currentFrame.isFlipX()) {
-                    currentFrame.flip(true, false);
-                }
+            } else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
                 moveState = MoveState.RIGHT;
+            } else {
+                moveState = MoveState.IDLE;
             }
         }
     }
@@ -153,7 +163,6 @@ public class Character extends Actor implements Disposable, ContactHandler { // 
                 touchedBoatRecently = false;
             }
         }
-
 
         var velocity = body.getLinearVelocity();
         // Here, compute the character relative velocity to its environment (boat, ..)
