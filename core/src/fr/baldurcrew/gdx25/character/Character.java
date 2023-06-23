@@ -16,12 +16,10 @@ import fr.baldurcrew.gdx25.physics.ContactHandler;
 import fr.baldurcrew.gdx25.physics.FixtureContact;
 
 public class Character extends Actor implements Disposable, ContactHandler { // TODO Remove Actor since unused
-    private static final float CHARACTER_HEIGHT = 0.75f;
-    private static final float ASPECT_RATIO = 0.76f;
-    private static final float CHARACTER_WIDTH = ASPECT_RATIO * CHARACTER_HEIGHT;
     private static final float MAX_X_MOVEMENT_VELOCITY = 5f;
 
     private final Animation<TextureRegion> animation;
+    private final boolean aiControlled;
     private boolean touchingBoat;
 
     private Body body;
@@ -32,8 +30,9 @@ public class Character extends Actor implements Disposable, ContactHandler { // 
     private Boat boat;
     private Vector2 boatContactPoint;
 
-    public Character(World world, Boat boat, int colorRow, float x, float y, float density, float friction, float restitution) {
+    public Character(World world, Boat boat, int colorRow, boolean aiControlled, float x, float y, float density, float friction, float restitution) {
         this.boat = boat;
+        this.aiControlled = aiControlled;
         this.animation = CharacterResources.getInstance().getAnimation(Action.IDLE, colorRow);
         this.moveState = MoveState.IDLE;
         this.body = createBody(world, x, y, density, friction, restitution);
@@ -57,7 +56,7 @@ public class Character extends Actor implements Disposable, ContactHandler { // 
             final var characterPolygon = new PolygonShape();
             final var collider = new FixtureDef();
 
-            characterPolygon.setAsBox(CHARACTER_WIDTH / 2f, CHARACTER_HEIGHT / 2f);
+            characterPolygon.setAsBox(CharacterResources.CHARACTER_WIDTH / 2f, CharacterResources.CHARACTER_HEIGHT / 2f);
 
             collider.shape = characterPolygon;
             collider.density = density;
@@ -71,8 +70,8 @@ public class Character extends Actor implements Disposable, ContactHandler { // 
             final var footSensorPolygon = new PolygonShape();
             final var footSensor = new FixtureDef();
 
-            final var footSensorHeight = CHARACTER_HEIGHT / 10f;
-            footSensorPolygon.setAsBox(0.9f * CHARACTER_WIDTH / 2f, footSensorHeight, new Vector2(0, -CHARACTER_HEIGHT / 2f - footSensorHeight / 2f), 0f);
+            final var footSensorHeight = CharacterResources.CHARACTER_HEIGHT / 10f;
+            footSensorPolygon.setAsBox(0.9f * CharacterResources.CHARACTER_WIDTH / 2f, footSensorHeight, new Vector2(0, -CharacterResources.CHARACTER_HEIGHT / 2f - footSensorHeight / 2f), 0f);
 
             footSensor.shape = footSensorPolygon;
             footSensor.isSensor = true;
@@ -101,31 +100,35 @@ public class Character extends Actor implements Disposable, ContactHandler { // 
         float bodyY = body.getPosition().y;
         float rotation = (float) Math.toDegrees(body.getAngle());
 
-        final var renderX = bodyX - (CHARACTER_WIDTH / 2f) * Math.cos(body.getAngle()) + (CHARACTER_WIDTH / 2f) * Math.sin(body.getAngle());
-        final var renderY = bodyY - (CHARACTER_HEIGHT / 2f) * Math.cos(body.getAngle()) - (CHARACTER_HEIGHT / 2f) * Math.sin(body.getAngle());
+        final var renderX = bodyX - (CharacterResources.CHARACTER_WIDTH / 2f) * Math.cos(body.getAngle()) + (CharacterResources.CHARACTER_WIDTH / 2f) * Math.sin(body.getAngle());
+        final var renderY = bodyY - (CharacterResources.CHARACTER_HEIGHT / 2f) * Math.cos(body.getAngle()) - (CharacterResources.CHARACTER_HEIGHT / 2f) * Math.sin(body.getAngle());
 
         affine.setToTrnRotScl((float) renderX, (float) renderY, rotation, 1, 1);
 
         spriteBatch.setProjectionMatrix(camera.combined);
 
         spriteBatch.begin();
-        spriteBatch.draw(currentFrame, CHARACTER_WIDTH, CHARACTER_HEIGHT, affine);
+        spriteBatch.draw(currentFrame, CharacterResources.CHARACTER_WIDTH, CharacterResources.CHARACTER_HEIGHT, affine);
         spriteBatch.end();
     }
 
     public void handleInputs() {
-        moveState = MoveState.IDLE;
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-            if (!currentFrame.isFlipX()) {
-                currentFrame.flip(true, false);
+        if (aiControlled) {
+
+        } else {
+            moveState = MoveState.IDLE;
+            if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+                if (!currentFrame.isFlipX()) {
+                    currentFrame.flip(true, false);
+                }
+                moveState = MoveState.LEFT;
             }
-            moveState = MoveState.LEFT;
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-            if (currentFrame.isFlipX()) {
-                currentFrame.flip(true, false);
+            if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+                if (currentFrame.isFlipX()) {
+                    currentFrame.flip(true, false);
+                }
+                moveState = MoveState.RIGHT;
             }
-            moveState = MoveState.RIGHT;
         }
     }
 

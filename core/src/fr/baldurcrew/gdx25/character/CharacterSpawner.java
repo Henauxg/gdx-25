@@ -32,7 +32,7 @@ public class CharacterSpawner {
             spawnTimer = 0f;
 
             final int charIndex = CharacterResources.getRandomCharacterIndex();
-            game.spawnCharacter(charIndex, spawnRangeX.getRandom(), spawnRangeY.getRandom());
+            game.spawnCharacter(charIndex, true, spawnRangeX.getRandom(), spawnRangeY.getRandom());
             this.nextSpawnWaitTime = spawnPeriodRange.getRandom();
         }
     }

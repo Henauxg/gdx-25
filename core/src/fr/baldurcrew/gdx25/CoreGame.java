@@ -41,7 +41,7 @@ public class CoreGame extends ApplicationAdapter {
 
     private static final Color CLEAR_COLOR = new Color(0.5f, 0.898f, 1, 1);
     private static final Color DEBUG_CLEAR_COLOR = new Color(1f, 1f, 1f, 1f);
-    private static final int INITIAL_CHARACTER_COUNT = 3;
+    private static final int INITIAL_CHARACTER_COUNT = 1;
     private static final float DEFAULT_AUDIO_VOLUME = 0.2f;
 
     public static boolean debugMode = true;
@@ -98,10 +98,6 @@ public class CoreGame extends ApplicationAdapter {
     private float[] uiWaterFakeVelocityY = new float[1];
     private float[] uiWaveEmitterAmplitudeRange = new float[2];
     private float[] uiWaveEmitterPeriodRange = new float[2];
-    ;
-
-//    private float[] uiWaterFakeVelocityX = new float[1];
-//    private float[] uiWaterFakeVelocityY = new float[1];
 
     @Override
     public void create() {
@@ -176,7 +172,7 @@ public class CoreGame extends ApplicationAdapter {
 
         characters = new ArrayList<>();
         for (int i = 0; i < INITIAL_CHARACTER_COUNT; i++) {
-            this.spawnCharacter(CharacterResources.getRandomCharacterIndex(), spawnRangeX.getRandom(), spawnRangeY.getRandom());
+            this.spawnCharacter(CharacterResources.getRandomCharacterIndex(), false, spawnRangeX.getRandom(), spawnRangeY.getRandom());
         }
         characterSpawner = new CharacterSpawner(this, spawnRangeX, spawnRangeY, Range.buildRangeEx(2.5f, 6f));
 
@@ -241,6 +237,7 @@ public class CoreGame extends ApplicationAdapter {
 
         spriteBatch.setProjectionMatrix(originalMatrix);
         font.draw(spriteBatch, Utils.secondsToDisplayString(sailingTime), Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() - 10, 0, Align.center, false);
+
         spriteBatch.end();
 
         renderImGui();
@@ -257,13 +254,13 @@ public class CoreGame extends ApplicationAdapter {
     }
 
     private void drawUI() {
+        // Limit the width of the widgets
         ImGui.pushItemWidth(ImGui.getWindowWidth() * 0.35f);
 
         ImGui.text("Characters");
-        if (ImGui.checkbox("Character Generation", debugEnableCharacterGeneration)) {
+        if (ImGui.checkbox("AI Characters Generation", debugEnableCharacterGeneration)) {
             debugEnableCharacterGeneration = !debugEnableCharacterGeneration;
         }
-
         if (ImGui.sliderFloat("Char Friction", uiCharFriction, 0, 1)) {
             characterFriction = uiCharFriction[0];
             characters.forEach(c -> c.setFriction(uiCharFriction[0]));
@@ -386,7 +383,7 @@ public class CoreGame extends ApplicationAdapter {
     private void doPhysicsStep(float deltaTime) {
         // Fixed time step.
         // Max frame time to avoid spiral of death (on slow devices)
-        float frameTime = Math.min(deltaTime, 0.25f);
+        float frameTime = Math.min(deltaTime, Constants.MIN_TIME_STEP);
         accumulator += frameTime;
         while (accumulator >= Constants.TIME_STEP) {
             characters.forEach(c -> c.update());
@@ -415,8 +412,8 @@ public class CoreGame extends ApplicationAdapter {
         ImGui.destroyContext();
     }
 
-    public void spawnCharacter(int charIndex, float x, float y) {
-        final var spawned = new Character(world, boat, charIndex, x, y, characterDensity, characterFriction, characterRestitution);
+    public void spawnCharacter(int charIndex, boolean aiControlled, float x, float y) {
+        final var spawned = new Character(world, boat, charIndex, aiControlled, x, y, characterDensity, characterFriction, characterRestitution);
         characters.add(spawned);
         worldContactListener.addListener(spawned);
         CharacterResources.getInstance().getRandomSpawnSound().play(DEFAULT_AUDIO_VOLUME);
