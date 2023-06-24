@@ -148,9 +148,9 @@ public class CoreGame extends ApplicationAdapter {
 
 //        Texture skyTexture =
         backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_00), 0.3f, 1.05f, 0.05f, true, true, 0, 0)); // far cloud
-        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_01), 0.6f, 0.9f, 0.16f, true, false, 0, 0)); // cloud
+        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_01), 0.6f, 0.9f, 0.12f, true, false, 0, 0)); // cloud
         backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_02), 0.8f, 0.9f, 0.18f, true, false, 0, 0)); // cloud
-        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_03), 0.2f, 0.8f, -0.30f, true, false, 0, 0)); // far island
+        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_03), 0.2f, 0.75f, -0.31f, true, false, 0, 0)); // far island
         backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_04), 0.4f, 0.9f, -0.35f, true, false, 1.2f, 0.15f)); // ocean
         backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_05), 0.4f, 0.4f, -0.45f, true, false, 3, 0.25f)); //sea
         backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_06), 0.7f, 0.92f, -0.30f, true, false, 0.5f, 0.01f)); // far island
