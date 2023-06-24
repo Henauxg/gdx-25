@@ -470,9 +470,9 @@ public class CoreGame extends ApplicationAdapter {
     }
 
     public void handleDebugInputs(OrthographicCamera camera) {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.F1)) {
-            debugMode = !debugMode;
-        }
+//        if (Gdx.input.isKeyJustPressed(Input.Keys.F1)) {
+//            debugMode = !debugMode;
+//        }
         if (debugMode) {
             if (Gdx.input.isKeyJustPressed(Input.Keys.F2)) {
                 debugEnableWaterRendering = !debugEnableWaterRendering;
