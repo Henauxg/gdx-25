@@ -38,10 +38,6 @@ import java.util.List;
 
 
 public class CoreGame extends ApplicationAdapter {
-    private static final Color CLEAR_COLOR = new Color(0.5f, 0.898f, 1, 1);
-    private static final Color DEBUG_CLEAR_COLOR = new Color(1f, 1f, 1f, 1f);
-    private static final int INITIAL_CHARACTER_COUNT = 1;
-    private static final float DEFAULT_AUDIO_VOLUME = 0.2f;
     public static final String LAYER_00 = "sky.png";
     public static final String LAYER_01 = "cloud_01.png";
     public static final String LAYER_02 = "cloud_02.png";
@@ -57,8 +53,10 @@ public class CoreGame extends ApplicationAdapter {
     public static final String LAYER_12 = "waves-4.png";
     public static final String LAYER_13 = "groundswell.png";
     public static final String LAYER_14 = "bedrock.png";
-
-
+    private static final Color CLEAR_COLOR = new Color(0.5f, 0.898f, 1, 1);
+    private static final Color DEBUG_CLEAR_COLOR = new Color(1f, 1f, 1f, 1f);
+    private static final int INITIAL_CHARACTER_COUNT = 1;
+    private static final float DEFAULT_AUDIO_VOLUME = 0.2f;
     public static boolean debugMode = true;
     public static boolean debugClearColor = false;
     public static boolean debugEnableCharacterGeneration = true;
@@ -91,7 +89,7 @@ public class CoreGame extends ApplicationAdapter {
     private float characterFriction = 0.5f;
     private float characterRestitution = 0.2f;
     private Range defaultWavePeriodRange = Range.buildRangeEx(0.5f, 1.5f);
-    private Range defaultWaveAmplitudeRange = Range.buildRangeEx(2.5f, 5f);
+    private Range defaultWaveAmplitudeRange = Range.buildRangeEx(Difficulty.MIN_WAVES_AMPLITUDE_AT_MIN_SCALING, Difficulty.MAX_WAVES_AMPLITUDE_AT_MIN_SCALING);
     private Range charactersSpawnRangeX;
     private Range charactersSpawnRangeY;
     private ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
@@ -189,7 +187,8 @@ public class CoreGame extends ApplicationAdapter {
         final Range waterSimulationRange = Range.buildRangeEx(-0.25f * Constants.VIEWPORT_WIDTH, 1.25f * Constants.VIEWPORT_WIDTH);
         // Only simulate physics under the boat
         final float physicSimulationMargin = Boat.BOAT_WIDTH * 0.2f;
-        final Range waterPhysicsSimulationRange = waterSimulationRange.buildSubRange(waterSimulationRange.halfExtent - Boat.BOAT_WIDTH / 2f - physicSimulationMargin, Boat.BOAT_WIDTH + 2 * physicSimulationMargin);
+//        final Range waterPhysicsSimulationRange = waterSimulationRange.buildSubRange(waterSimulationRange.halfExtent - Boat.BOAT_WIDTH / 2f - physicSimulationMargin, Boat.BOAT_WIDTH + 2 * physicSimulationMargin);
+        final Range waterPhysicsSimulationRange = waterSimulationRange.buildSubRange(0.25f * Constants.VIEWPORT_WIDTH, Constants.VIEWPORT_WIDTH);
 
         water = new WaterSimulation(world, 80, waterSimulationRange, waterPhysicsSimulationRange);
         worldContactListener.addListener(water);
@@ -204,7 +203,7 @@ public class CoreGame extends ApplicationAdapter {
 //        for (int i = 0; i < INITIAL_CHARACTER_COUNT; i++) {
         playerCharacter = this.spawnCharacter(CharacterResources.getPlayerCharacterIndex(), false, charactersSpawnRangeX.getRandom(), charactersSpawnRangeY.getRandom());
 //        }
-        characterSpawner = new CharacterSpawner(this, charactersSpawnRangeX, charactersSpawnRangeY, Range.buildRangeEx(2.5f, 6f));
+        characterSpawner = new CharacterSpawner(this, charactersSpawnRangeX, charactersSpawnRangeY, Range.buildRangeEx(Difficulty.MIN_AI_SPAWN_PERIOD_AT_MIN_SCALING, Difficulty.MAX_AI_SPAWN_PERIOD_AT_MIN_SCALING));
 
         sailingTime = 0;
         difficultyFactor = 1;
@@ -416,10 +415,14 @@ public class CoreGame extends ApplicationAdapter {
         var minWaveAmplitude = Difficulty.MIN_WAVES_AMPLITUDE_AT_MIN_SCALING + difficultyMultiplier * (Difficulty.MIN_WAVES_AMPLITUDE_AT_MAX_SCALING - Difficulty.MIN_WAVES_AMPLITUDE_AT_MIN_SCALING);
         var maxWaveAmplitude = Difficulty.MAX_WAVES_AMPLITUDE_AT_MIN_SCALING + difficultyMultiplier * (Difficulty.MAX_WAVES_AMPLITUDE_AT_MAX_SCALING - Difficulty.MAX_WAVES_AMPLITUDE_AT_MIN_SCALING);
 
+        var minAiSpawnPeriod = Difficulty.MIN_AI_SPAWN_PERIOD_AT_MIN_SCALING + difficultyMultiplier * (Difficulty.MIN_AI_SPAWN_PERIOD_AT_MAX_SCALING - Difficulty.MIN_AI_SPAWN_PERIOD_AT_MIN_SCALING);
+        var maxAiSpawnPeriod = Difficulty.MAX_AI_SPAWN_PERIOD_AT_MIN_SCALING + difficultyMultiplier * (Difficulty.MAX_AI_SPAWN_PERIOD_AT_MAX_SCALING - Difficulty.MAX_AI_SPAWN_PERIOD_AT_MIN_SCALING);
+
         water.setFakeWaterVelocityX(fakeWaterVelocityX);
         water.setFakeWaterVelocityY(fakeWaterVelocityY);
         water.setWavesPropagationSpreadFactor(waveSpreadFactor);
         waveEmitter.setAmplitudeRange(Range.buildRange(minWaveAmplitude, maxWaveAmplitude));
+        characterSpawner.setSpawnPeriod(Range.buildRange(minAiSpawnPeriod, maxAiSpawnPeriod));
     }
 
     public void handleInputs(OrthographicCamera camera) {
@@ -451,7 +454,7 @@ public class CoreGame extends ApplicationAdapter {
                 createTestLevel();
             }
             if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-                this.spawnCharacter(CharacterResources.getPlayerCharacterIndex(), false, charactersSpawnRangeX.getRandom(), charactersSpawnRangeY.getRandom());
+                playerCharacter = this.spawnCharacter(CharacterResources.getPlayerCharacterIndex(), false, charactersSpawnRangeX.getRandom(), charactersSpawnRangeY.getRandom());
             }
         }
 
@@ -503,7 +506,7 @@ public class CoreGame extends ApplicationAdapter {
     }
 
     public Character spawnCharacter(int charIndex, boolean aiControlled, float x, float y) {
-        final var spawned = new Character(world, boat, charIndex, aiControlled, x, y, characterDensity, characterFriction, characterRestitution);
+        final var spawned = new Character(world, boat, water, charIndex, aiControlled, x, y, characterDensity, characterFriction, characterRestitution);
         characters.add(spawned);
         worldContactListener.addListener(spawned);
         CharacterResources.getInstance().getRandomSpawnSound().play(DEFAULT_AUDIO_VOLUME);
