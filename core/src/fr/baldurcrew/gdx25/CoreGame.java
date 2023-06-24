@@ -4,7 +4,6 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.audio.Music;
-import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -28,11 +27,6 @@ import fr.baldurcrew.gdx25.utils.Range;
 import fr.baldurcrew.gdx25.utils.Utils;
 import fr.baldurcrew.gdx25.water.WaterSimulation;
 import fr.baldurcrew.gdx25.water.WaveEmitter;
-import imgui.ImGui;
-import imgui.ImGuiIO;
-import imgui.gl3.ImGuiImplGl3;
-import imgui.glfw.ImGuiImplGlfw;
-import org.lwjgl.opengl.GL;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,21 +34,21 @@ import java.util.List;
 
 public class CoreGame extends ApplicationAdapter {
     public static final float DEFAULT_AUDIO_VOLUME = 0.2f;
-    public static final String LAYER_00 = "sky.png";
-    public static final String LAYER_01 = "cloud_01.png";
-    public static final String LAYER_02 = "cloud_02.png";
-    public static final String LAYER_03 = "island.png";
-    public static final String LAYER_04 = "ocean.png";
-    public static final String LAYER_05 = "waves-trans.png";
-    public static final String LAYER_06 = "creek.png";
-    public static final String LAYER_07 = "waves.png";
-    public static final String LAYER_08 = "rock_03.png";
-    public static final String LAYER_09 = "waves-2.png";
-    public static final String LAYER_10 = "waves-3.png";
-    public static final String LAYER_11 = "rock_reef.png";
-    public static final String LAYER_12 = "waves-4.png";
-    public static final String LAYER_13 = "groundswell.png";
-    public static final String LAYER_14 = "bedrock.png";
+    public static final String LAYER_00 = "sky_webgl.png";
+    public static final String LAYER_01 = "cloud_01_webgl.png";
+    public static final String LAYER_02 = "cloud_02_webgl.png";
+    public static final String LAYER_03 = "island_webgl.png";
+    public static final String LAYER_04 = "ocean_webgl.png";
+    public static final String LAYER_05 = "waves-trans_webgl.png";
+    public static final String LAYER_06 = "creek_webgl.png";
+    public static final String LAYER_07 = "waves_webgl.png";
+    public static final String LAYER_08 = "rock_03_webgl.png";
+    public static final String LAYER_09 = "waves-2_webgl.png";
+    public static final String LAYER_10 = "waves-3_webgl.png";
+    public static final String LAYER_11 = "rock_reef_webgl.png";
+    public static final String LAYER_12 = "waves-4_webgl.png";
+    public static final String LAYER_13 = "groundswell_webgl.png";
+    public static final String LAYER_14 = "bedrock_webgl.png";
     private static final Color CLEAR_COLOR = new Color(0.5f, 0.898f, 1, 1);
     private static final Color DEBUG_CLEAR_COLOR = new Color(1f, 1f, 1f, 1f);
     private static final int INITIAL_CHARACTER_COUNT = 1;
@@ -96,8 +90,8 @@ public class CoreGame extends ApplicationAdapter {
     private Range defaultWaveAmplitudeRange = Range.buildRangeEx(Difficulty.MIN_WAVES_AMPLITUDE_AT_MIN_SCALING, Difficulty.MAX_WAVES_AMPLITUDE_AT_MIN_SCALING);
     private Range charactersSpawnRangeX;
     private Range charactersSpawnRangeY;
-    private ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
-    private ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
+    //    private ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
+//    private ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
     //Character
     private float[] uiCharFriction = new float[1];
     private float[] uiCharDensity = new float[1];
@@ -138,7 +132,7 @@ public class CoreGame extends ApplicationAdapter {
 
         createParallaxLayers();
 
-        createImGui();
+//        createImGui();
         createTestLevel();
     }
 
@@ -152,39 +146,39 @@ public class CoreGame extends ApplicationAdapter {
         backgroundLayers = new ArrayList<>();
         foregroundLayers = new ArrayList<>();
 
-        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_00), 0.3f, 0.8f, 0.12f, true, true, 0, 0)); // far cloud
-        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_01), 0.6f, 0.9f, 0.11f, true, false, 0, 0)); // cloud
-        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_02), 0.8f, 0.9f, 0.12f, true, false, 0, 0)); // cloud
-        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_03), 0.2f, 0.8f, -0.36f, true, false, 0, 0)); // far island
-        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_04), 0.4f, 0.9f, -0.40f, true, false, 1.2f, 0.15f)); // ocean
-        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_05), 0.4f, 0.4f, -0.22f, true, false, 3, 0.25f)); //sea
-        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_06), 0.7f, 0.9f, -0.34f, true, false, 0.5f, 0.01f)); // far island
-        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_07), 0.82f, 0.4f, -0.29f, true, false, 5, 0.2f)); //sea
-        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_08), 0.9f, 0.85f, -0.32f, true, false, 3, 0.05f)); //rock reef
-        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_09), 1f, 0.4f, -0.30f, true, false, 2, 0.1f)); //sea
-        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_10), 1.2f, 0.4f, -0.31f, true, false, 1, 0.2f)); //sea
-        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_11), 1.4f, 0.5f, -0.42f, true, false, 3, 0.05f));
-        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_12), 1.5f, 0.4f, -0.32f, true, false, 3, 0.25f)); //sea
-        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_13), 1.8f, 0.9f, -0.52f, true, false, 0, 0)); //rock reef
-        foregroundLayers.add(new ParallaxLayer(new Texture(LAYER_14), 2f, 0.3f, -0.96f, true, false, 0, 0)); //rock bottom
+//        Texture skyTexture =
+        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_00), 0.3f, 1.05f, 0.05f, true, true, 0, 0)); // far cloud
+        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_01), 0.6f, 0.9f, 0.16f, true, false, 0, 0)); // cloud
+        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_02), 0.8f, 0.9f, 0.18f, true, false, 0, 0)); // cloud
+        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_03), 0.2f, 0.8f, -0.30f, true, false, 0, 0)); // far island
+        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_04), 0.4f, 0.9f, -0.35f, true, false, 1.2f, 0.15f)); // ocean
+        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_05), 0.4f, 0.4f, -0.45f, true, false, 3, 0.25f)); //sea
+        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_06), 0.7f, 0.92f, -0.30f, true, false, 0.5f, 0.01f)); // far island
+        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_07), 0.82f, 0.4f, -0.48f, true, false, 5, 0.2f)); //sea
+        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_08), 0.9f, 0.85f, -0.30f, true, false, 3, 0.05f)); //rock reef
+        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_09), 1f, 0.4f, -0.50f, true, false, 2, 0.1f)); //sea
+        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_10), 1.2f, 0.4f, -0.55f, true, false, 1, 0.2f)); //sea
+        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_11), 1.4f, 0.46f, -0.39f, true, false, 3, 0.05f));
+        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_12), 1.5f, 0.6f, -0.53f, true, false, 3, 0.25f)); //sea
+        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_13), 1.8f, 0.9f, -0.49f, true, false, 0, 0)); //rock reef
+        foregroundLayers.add(new ParallaxLayer(new Texture(LAYER_14), 2f, 0.3f, -0.91f, true, false, 0, 0)); //rock bottom
     }
 
-    private void createImGui() {
-        long windowHandle = ((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle();
-        org.lwjgl.glfw.GLFW.glfwMakeContextCurrent(windowHandle);
-        GL.createCapabilities();
-        ImGui.createContext();
-        ImGuiIO io = ImGui.getIO();
-        io.getFonts().addFontDefault();
-        io.getFonts().build();
-
-        imGuiGlfw.init(windowHandle, true);
-        imGuiGl3.init("#version 110");
-    }
+//    private void createImGui() {
+//        long windowHandle = ((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle();
+//        org.lwjgl.glfw.GLFW.glfwMakeContextCurrent(windowHandle);
+//        GL.createCapabilities();
+//        ImGui.createContext();
+//        ImGuiIO io = ImGui.getIO();
+//        io.getFonts().addFontDefault();
+//        io.getFonts().build();
+//
+//        imGuiGlfw.init(windowHandle, true);
+//        imGuiGl3.init("#version 110");
+//    }
 
     public void createTestLevel() {
-        playMusic(waveSounds);
-        playMusic(music);
+
 
         world = new World(new Vector2(0, Constants.GRAVITY_VALUE), true);
         worldContactListener = new WorldContactListener();
@@ -284,140 +278,143 @@ public class CoreGame extends ApplicationAdapter {
 //        font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         font.getData().setScale(1.f); // TODO More is too pixelated. And FreeType is not available for web builds
         switch (gameState) {
-            case WaitingToStart -> {
+            case WaitingToStart: {
                 font.draw(spriteBatch, "Tap to begin!", Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() / 1.5f, 0, Align.center, false);
             }
-            case Playing -> {
+            break;
+            case Playing: {
                 font.draw(spriteBatch, "Sailed for " + Utils.secondsToDisplayString(sailingTime), Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() - 10, 0, Align.center, false);
             }
-            case GameOver -> {
+            break;
+            case GameOver: {
                 font.draw(spriteBatch, "Sailed for " + Utils.secondsToDisplayString(sailingTime), Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() - 10, 0, Align.center, false);
                 font.draw(spriteBatch, "You lost, tap to restart!", Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() / 1.5f, 0, Align.center, false);
             }
+            break;
         }
 
         spriteBatch.end();
 
         water.render(camera);
 
-        renderImGui();
+//        renderImGui();
     }
 
-    private void renderImGui() {
-        imGuiGlfw.newFrame();
-        ImGui.newFrame();
-        // --- ImGUI draw commands go here ---
-        drawUI();
-        // ---
-        ImGui.render();
-        imGuiGl3.renderDrawData(ImGui.getDrawData());
-    }
+//    private void renderImGui() {
+//        imGuiGlfw.newFrame();
+//        ImGui.newFrame();
+//        // --- ImGUI draw commands go here ---
+//        drawUI();
+//        // ---
+//        ImGui.render();
+//        imGuiGl3.renderDrawData(ImGui.getDrawData());
+//    }
 
-    private void drawUI() {
-        // Limit the width of the widgets
-        ImGui.pushItemWidth(ImGui.getWindowWidth() * 0.35f);
-
-        ImGui.text("Characters");
-        if (ImGui.checkbox("AI Characters Generation", debugEnableCharacterGeneration)) {
-            debugEnableCharacterGeneration = !debugEnableCharacterGeneration;
-        }
-        if (ImGui.sliderFloat("Char Friction", uiCharFriction, 0, 1)) {
-            characterFriction = uiCharFriction[0];
-            characters.forEach(c -> c.setFriction(uiCharFriction[0]));
-        }
-        if (ImGui.sliderFloat("Char Density", uiCharDensity, 0, 30f)) {
-            characterDensity = uiCharDensity[0];
-            characters.forEach(c -> c.setDensity(uiCharDensity[0]));
-        }
-        if (ImGui.sliderFloat("Char Restitution", uiCharRestitution, 0, 1)) {
-            characterRestitution = uiCharRestitution[0];
-            characters.forEach(c -> c.setRestitution(uiCharRestitution[0]));
-        }
-        ImGui.separator();
-        ImGui.text("Boat");
-        if (ImGui.checkbox("Boat rendering", debugEnableBoatRendering)) {
-            debugEnableBoatRendering = !debugEnableBoatRendering;
-        }
-        if (ImGui.sliderFloat("Boat Density", uiBoatDensity, 0.25f, 1)) {
-            boat.setDensity(uiBoatDensity[0]);
-        }
-        if (ImGui.sliderFloat("Boat Restitution", uiBoatRestitution, 0, 1)) {
-            boat.setRestitution(uiBoatRestitution[0]);
-        }
-        if (ImGui.sliderFloat("Boat Friction", uiBoatFriction, 0, 1)) {
-            boat.setFriction(uiBoatFriction[0]);
-        }
-        if (ImGui.sliderFloat("Boat Angular Damping", uiBoatAngularDamping, 0, 1)) {
-            boat.setAngularDamping(uiBoatAngularDamping[0]);
-        }
-        ImGui.separator();
-        ImGui.text("Water");
-        if (ImGui.checkbox("Water rendering", debugEnableWaterRendering)) {
-            debugEnableWaterRendering = !debugEnableWaterRendering;
-        }
-        if (ImGui.checkbox("Wave Generation", debugEnableWaveGeneration)) {
-            debugEnableWaveGeneration = !debugEnableWaveGeneration;
-        }
-        if (ImGui.checkbox("Water Drag", debugEnableWaterDrag)) {
-            debugEnableWaterDrag = !debugEnableWaterDrag;
-        }
-        if (ImGui.checkbox("Lift force", debugEnableLiftForce)) {
-            debugEnableLiftForce = !debugEnableLiftForce;
-        }
-        if (ImGui.checkbox("Fake water velocity", debugEnableFakeWaterVelocity)) {
-            debugEnableFakeWaterVelocity = !debugEnableFakeWaterVelocity;
-        }
-        if (ImGui.sliderFloat("Water Density", uiWaterDensity, 0, 1)) {
-            water.setDensity(uiWaterDensity[0]);
-        }
-        if (ImGui.sliderFloat("Base Level", uiWaterBaseWaterLevel, 0.5f, Constants.VIEWPORT_HEIGHT)) {
-            water.setBaseWaterLevel(uiWaterBaseWaterLevel[0]);
-        }
-        ImGui.text("Water waves");
-        if (ImGui.dragInt("Waves Propagation", uiWaterWavesPropagationPasses, 1, 1, 10)) {
-            water.setWavesPropagationPasses(uiWaterWavesPropagationPasses[0]);
-        }
-        uiWaterWavesPropagationSpreadFactor[0] = water.getWavesPropagationSpreadFactor();
-        if (ImGui.sliderFloat("Waves Propagation Spread Factor", uiWaterWavesPropagationSpreadFactor, 0f, 0.4f)) {
-            water.setWavesPropagationSpreadFactor(uiWaterWavesPropagationSpreadFactor[0]);
-        }
-        if (ImGui.sliderFloat("Springs Stiffness", uiWaterSpringsStiffness, 0f, 0.1f)) {
-            water.setSpringsStiffness(uiWaterSpringsStiffness[0]);
-        }
-        if (ImGui.sliderFloat("Springs Dampening", uiWaterSpringsDampeningFactor, 0f, 0.2f)) {
-            water.setSpringsDampeningFactor(uiWaterSpringsDampeningFactor[0]);
-        }
-        uiWaterFakeVelocityX[0] = water.getFakeWaterVelocityX();
-        if (ImGui.sliderFloat("Fake water velocity X", uiWaterFakeVelocityX, 0f, 25f)) {
-            water.setFakeWaterVelocityX(uiWaterFakeVelocityX[0]);
-        }
-        uiWaterFakeVelocityY[0] = water.getFakeWaterVelocityY();
-        if (ImGui.sliderFloat("Fake water velocity Y", uiWaterFakeVelocityY, -10f, 10f)) {
-            water.setFakeWaterVelocityY(uiWaterFakeVelocityY[0]);
-        }
-        uiWaveEmitterAmplitudeRange[0] = waveEmitter.getAmplitudeRangeMin();
-        uiWaveEmitterAmplitudeRange[1] = waveEmitter.getAmplitudeRangeMax();
-        if (ImGui.sliderFloat2("Wave emitter amplitude range", uiWaveEmitterAmplitudeRange, 0f, 25f)) {
-            waveEmitter.setAmplitudeRange(Range.buildRange(uiWaveEmitterAmplitudeRange[0], uiWaveEmitterAmplitudeRange[1]));
-        }
-        if (ImGui.sliderFloat2("Wave emitter period range", uiWaveEmitterPeriodRange, 0f, 6f)) {
-            waveEmitter.setPeriodRange(Range.buildRange(uiWaveEmitterPeriodRange[0], uiWaveEmitterPeriodRange[1]));
-        }
-
-        ImGui.separator();
-        ImGui.text("Debug");
-        if (ImGui.checkbox("Debug Mode", debugMode)) {
-            debugMode = !debugMode;
-        }
-        if (ImGui.checkbox("White Clear Color", debugClearColor)) {
-            debugClearColor = !debugClearColor;
-        }
-        uiSailingTime[0] = sailingTime;
-        if (ImGui.sliderFloat("Sailing time", uiSailingTime, 0, Difficulty.MAX_SAILING_TIME_SCALING)) {
-            this.setSailingTime(uiSailingTime[0]);
-        }
-        ImGui.textDisabled("Difficulty factor " + difficultyFactor);
-    }
+//    private void drawUI() {
+//        // Limit the width of the widgets
+//        ImGui.pushItemWidth(ImGui.getWindowWidth() * 0.35f);
+//
+//        ImGui.text("Characters");
+//        if (ImGui.checkbox("AI Characters Generation", debugEnableCharacterGeneration)) {
+//            debugEnableCharacterGeneration = !debugEnableCharacterGeneration;
+//        }
+//        if (ImGui.sliderFloat("Char Friction", uiCharFriction, 0, 1)) {
+//            characterFriction = uiCharFriction[0];
+//            characters.forEach(c -> c.setFriction(uiCharFriction[0]));
+//        }
+//        if (ImGui.sliderFloat("Char Density", uiCharDensity, 0, 30f)) {
+//            characterDensity = uiCharDensity[0];
+//            characters.forEach(c -> c.setDensity(uiCharDensity[0]));
+//        }
+//        if (ImGui.sliderFloat("Char Restitution", uiCharRestitution, 0, 1)) {
+//            characterRestitution = uiCharRestitution[0];
+//            characters.forEach(c -> c.setRestitution(uiCharRestitution[0]));
+//        }
+//        ImGui.separator();
+//        ImGui.text("Boat");
+//        if (ImGui.checkbox("Boat rendering", debugEnableBoatRendering)) {
+//            debugEnableBoatRendering = !debugEnableBoatRendering;
+//        }
+//        if (ImGui.sliderFloat("Boat Density", uiBoatDensity, 0.25f, 1)) {
+//            boat.setDensity(uiBoatDensity[0]);
+//        }
+//        if (ImGui.sliderFloat("Boat Restitution", uiBoatRestitution, 0, 1)) {
+//            boat.setRestitution(uiBoatRestitution[0]);
+//        }
+//        if (ImGui.sliderFloat("Boat Friction", uiBoatFriction, 0, 1)) {
+//            boat.setFriction(uiBoatFriction[0]);
+//        }
+//        if (ImGui.sliderFloat("Boat Angular Damping", uiBoatAngularDamping, 0, 1)) {
+//            boat.setAngularDamping(uiBoatAngularDamping[0]);
+//        }
+//        ImGui.separator();
+//        ImGui.text("Water");
+//        if (ImGui.checkbox("Water rendering", debugEnableWaterRendering)) {
+//            debugEnableWaterRendering = !debugEnableWaterRendering;
+//        }
+//        if (ImGui.checkbox("Wave Generation", debugEnableWaveGeneration)) {
+//            debugEnableWaveGeneration = !debugEnableWaveGeneration;
+//        }
+//        if (ImGui.checkbox("Water Drag", debugEnableWaterDrag)) {
+//            debugEnableWaterDrag = !debugEnableWaterDrag;
+//        }
+//        if (ImGui.checkbox("Lift force", debugEnableLiftForce)) {
+//            debugEnableLiftForce = !debugEnableLiftForce;
+//        }
+//        if (ImGui.checkbox("Fake water velocity", debugEnableFakeWaterVelocity)) {
+//            debugEnableFakeWaterVelocity = !debugEnableFakeWaterVelocity;
+//        }
+//        if (ImGui.sliderFloat("Water Density", uiWaterDensity, 0, 1)) {
+//            water.setDensity(uiWaterDensity[0]);
+//        }
+//        if (ImGui.sliderFloat("Base Level", uiWaterBaseWaterLevel, 0.5f, Constants.VIEWPORT_HEIGHT)) {
+//            water.setBaseWaterLevel(uiWaterBaseWaterLevel[0]);
+//        }
+//        ImGui.text("Water waves");
+//        if (ImGui.dragInt("Waves Propagation", uiWaterWavesPropagationPasses, 1, 1, 10)) {
+//            water.setWavesPropagationPasses(uiWaterWavesPropagationPasses[0]);
+//        }
+//        uiWaterWavesPropagationSpreadFactor[0] = water.getWavesPropagationSpreadFactor();
+//        if (ImGui.sliderFloat("Waves Propagation Spread Factor", uiWaterWavesPropagationSpreadFactor, 0f, 0.4f)) {
+//            water.setWavesPropagationSpreadFactor(uiWaterWavesPropagationSpreadFactor[0]);
+//        }
+//        if (ImGui.sliderFloat("Springs Stiffness", uiWaterSpringsStiffness, 0f, 0.1f)) {
+//            water.setSpringsStiffness(uiWaterSpringsStiffness[0]);
+//        }
+//        if (ImGui.sliderFloat("Springs Dampening", uiWaterSpringsDampeningFactor, 0f, 0.2f)) {
+//            water.setSpringsDampeningFactor(uiWaterSpringsDampeningFactor[0]);
+//        }
+//        uiWaterFakeVelocityX[0] = water.getFakeWaterVelocityX();
+//        if (ImGui.sliderFloat("Fake water velocity X", uiWaterFakeVelocityX, 0f, 25f)) {
+//            water.setFakeWaterVelocityX(uiWaterFakeVelocityX[0]);
+//        }
+//        uiWaterFakeVelocityY[0] = water.getFakeWaterVelocityY();
+//        if (ImGui.sliderFloat("Fake water velocity Y", uiWaterFakeVelocityY, -10f, 10f)) {
+//            water.setFakeWaterVelocityY(uiWaterFakeVelocityY[0]);
+//        }
+//        uiWaveEmitterAmplitudeRange[0] = waveEmitter.getAmplitudeRangeMin();
+//        uiWaveEmitterAmplitudeRange[1] = waveEmitter.getAmplitudeRangeMax();
+//        if (ImGui.sliderFloat2("Wave emitter amplitude range", uiWaveEmitterAmplitudeRange, 0f, 25f)) {
+//            waveEmitter.setAmplitudeRange(Range.buildRange(uiWaveEmitterAmplitudeRange[0], uiWaveEmitterAmplitudeRange[1]));
+//        }
+//        if (ImGui.sliderFloat2("Wave emitter period range", uiWaveEmitterPeriodRange, 0f, 6f)) {
+//            waveEmitter.setPeriodRange(Range.buildRange(uiWaveEmitterPeriodRange[0], uiWaveEmitterPeriodRange[1]));
+//        }
+//
+//        ImGui.separator();
+//        ImGui.text("Debug");
+//        if (ImGui.checkbox("Debug Mode", debugMode)) {
+//            debugMode = !debugMode;
+//        }
+//        if (ImGui.checkbox("White Clear Color", debugClearColor)) {
+//            debugClearColor = !debugClearColor;
+//        }
+//        uiSailingTime[0] = sailingTime;
+//        if (ImGui.sliderFloat("Sailing time", uiSailingTime, 0, Difficulty.MAX_SAILING_TIME_SCALING)) {
+//            this.setSailingTime(uiSailingTime[0]);
+//        }
+//        ImGui.textDisabled("Difficulty factor " + difficultyFactor);
+//    }
 
     private void setSailingTime(float time) {
         this.sailingTime = time;
@@ -427,16 +424,16 @@ public class CoreGame extends ApplicationAdapter {
     private void updateDifficulty(float sailingTime) {
         // Difficulty could be clamped at MAX_DIFFICULTY_FACTOR. But maybe not ?
         difficultyFactor = Difficulty.STARTING_DIFFICULTY_FACTOR + (Difficulty.MAX_DIFFICULTY_FACTOR - Difficulty.STARTING_DIFFICULTY_FACTOR) * sailingTime / Difficulty.MAX_SAILING_TIME_SCALING;
-        var difficultyMultiplier = (difficultyFactor - Difficulty.STARTING_DIFFICULTY_FACTOR) / (Difficulty.MAX_DIFFICULTY_FACTOR - Difficulty.STARTING_DIFFICULTY_FACTOR);
-        var fakeWaterVelocityX = Difficulty.FAKE_WATER_VELOCITY_X_AT_MIN_SCALING + difficultyMultiplier * (Difficulty.FAKE_WATER_VELOCITY_X_AT_MAX_SCALING - Difficulty.FAKE_WATER_VELOCITY_X_AT_MIN_SCALING);
-        var fakeWaterVelocityY = Difficulty.FAKE_WATER_VELOCITY_Y_AT_MIN_SCALING + difficultyMultiplier * (Difficulty.FAKE_WATER_VELOCITY_Y_AT_MAX_SCALING - Difficulty.FAKE_WATER_VELOCITY_Y_AT_MIN_SCALING);
-        var waveSpreadFactor = Difficulty.WAVE_SPREAD_FACTOR_AT_MIN_SCALING + difficultyMultiplier * (Difficulty.WAVE_SPREAD_FACTOR_AT_MAX_SCALING - Difficulty.WAVE_SPREAD_FACTOR_AT_MIN_SCALING);
+        float difficultyMultiplier = (difficultyFactor - Difficulty.STARTING_DIFFICULTY_FACTOR) / (Difficulty.MAX_DIFFICULTY_FACTOR - Difficulty.STARTING_DIFFICULTY_FACTOR);
+        float fakeWaterVelocityX = Difficulty.FAKE_WATER_VELOCITY_X_AT_MIN_SCALING + difficultyMultiplier * (Difficulty.FAKE_WATER_VELOCITY_X_AT_MAX_SCALING - Difficulty.FAKE_WATER_VELOCITY_X_AT_MIN_SCALING);
+        float fakeWaterVelocityY = Difficulty.FAKE_WATER_VELOCITY_Y_AT_MIN_SCALING + difficultyMultiplier * (Difficulty.FAKE_WATER_VELOCITY_Y_AT_MAX_SCALING - Difficulty.FAKE_WATER_VELOCITY_Y_AT_MIN_SCALING);
+        float waveSpreadFactor = Difficulty.WAVE_SPREAD_FACTOR_AT_MIN_SCALING + difficultyMultiplier * (Difficulty.WAVE_SPREAD_FACTOR_AT_MAX_SCALING - Difficulty.WAVE_SPREAD_FACTOR_AT_MIN_SCALING);
         // Wave period from (0.5f, 1.5f) to ? Do not increase
-        var minWaveAmplitude = Difficulty.MIN_WAVES_AMPLITUDE_AT_MIN_SCALING + difficultyMultiplier * (Difficulty.MIN_WAVES_AMPLITUDE_AT_MAX_SCALING - Difficulty.MIN_WAVES_AMPLITUDE_AT_MIN_SCALING);
-        var maxWaveAmplitude = Difficulty.MAX_WAVES_AMPLITUDE_AT_MIN_SCALING + difficultyMultiplier * (Difficulty.MAX_WAVES_AMPLITUDE_AT_MAX_SCALING - Difficulty.MAX_WAVES_AMPLITUDE_AT_MIN_SCALING);
+        float minWaveAmplitude = Difficulty.MIN_WAVES_AMPLITUDE_AT_MIN_SCALING + difficultyMultiplier * (Difficulty.MIN_WAVES_AMPLITUDE_AT_MAX_SCALING - Difficulty.MIN_WAVES_AMPLITUDE_AT_MIN_SCALING);
+        float maxWaveAmplitude = Difficulty.MAX_WAVES_AMPLITUDE_AT_MIN_SCALING + difficultyMultiplier * (Difficulty.MAX_WAVES_AMPLITUDE_AT_MAX_SCALING - Difficulty.MAX_WAVES_AMPLITUDE_AT_MIN_SCALING);
 
-        var minAiSpawnPeriod = Difficulty.MIN_AI_SPAWN_PERIOD_AT_MIN_SCALING + difficultyMultiplier * (Difficulty.MIN_AI_SPAWN_PERIOD_AT_MAX_SCALING - Difficulty.MIN_AI_SPAWN_PERIOD_AT_MIN_SCALING);
-        var maxAiSpawnPeriod = Difficulty.MAX_AI_SPAWN_PERIOD_AT_MIN_SCALING + difficultyMultiplier * (Difficulty.MAX_AI_SPAWN_PERIOD_AT_MAX_SCALING - Difficulty.MAX_AI_SPAWN_PERIOD_AT_MIN_SCALING);
+        float minAiSpawnPeriod = Difficulty.MIN_AI_SPAWN_PERIOD_AT_MIN_SCALING + difficultyMultiplier * (Difficulty.MIN_AI_SPAWN_PERIOD_AT_MAX_SCALING - Difficulty.MIN_AI_SPAWN_PERIOD_AT_MIN_SCALING);
+        float maxAiSpawnPeriod = Difficulty.MAX_AI_SPAWN_PERIOD_AT_MIN_SCALING + difficultyMultiplier * (Difficulty.MAX_AI_SPAWN_PERIOD_AT_MAX_SCALING - Difficulty.MAX_AI_SPAWN_PERIOD_AT_MIN_SCALING);
 
         water.setFakeWaterVelocityX(fakeWaterVelocityX);
         water.setFakeWaterVelocityY(fakeWaterVelocityY);
@@ -447,16 +444,20 @@ public class CoreGame extends ApplicationAdapter {
 
     public void handleInputs(OrthographicCamera camera) {
         switch (gameState) {
-            case WaitingToStart -> {
+            case WaitingToStart: {
                 if (Gdx.input.justTouched()) {
                     gameState = GameState.Playing;
                     playerCharacter = this.spawnCharacter(CharacterResources.getPlayerCharacterIndex(), false, charactersSpawnRangeX.getRandom(), charactersSpawnRangeY.getRandom());
+                    playMusic(waveSounds);
+                    playMusic(music);
                 }
             }
-            case Playing -> {
+            break;
+            case Playing: {
                 characters.forEach(character -> character.handleInputs(playerCharacter.getX()));
             }
-            case GameOver -> {
+            break;
+            case GameOver: {
                 if (Gdx.input.justTouched()) {
                     gameState = GameState.Playing;
                     disposeCurrentLevel();
@@ -464,6 +465,7 @@ public class CoreGame extends ApplicationAdapter {
                     playerCharacter = this.spawnCharacter(CharacterResources.getPlayerCharacterIndex(), false, charactersSpawnRangeX.getRandom(), charactersSpawnRangeY.getRandom());
                 }
             }
+            break;
         }
     }
 
@@ -531,22 +533,21 @@ public class CoreGame extends ApplicationAdapter {
         water.dispose();
         boat.dispose();
         characters.forEach(c -> c.dispose());
-        waveSounds.dispose();
     }
 
     @Override
     public void dispose() {
         debugRenderer.dispose();
         disposeCurrentLevel();
-        imGuiGl3.dispose();
-        imGuiGlfw.dispose();
+//        imGuiGl3.dispose();
+//        imGuiGlfw.dispose();
         waveSounds.dispose();
         music.dispose();
-        ImGui.destroyContext();
+//        ImGui.destroyContext();
     }
 
     public Character spawnCharacter(int charIndex, boolean aiControlled, float x, float y) {
-        final var spawned = new Character(world, this, boat, water, charIndex, aiControlled, x, y, characterDensity, characterFriction, characterRestitution);
+        final Character spawned = new Character(world, this, boat, water, charIndex, aiControlled, x, y, characterDensity, characterFriction, characterRestitution);
         characters.add(spawned);
         worldContactListener.addListener(spawned);
         CharacterResources.getInstance().getRandomSpawnSound().play(DEFAULT_AUDIO_VOLUME);

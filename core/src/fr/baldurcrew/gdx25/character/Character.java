@@ -98,18 +98,18 @@ public class Character implements Disposable, ContactHandler { // TODO Remove Ac
     }
 
     private Body createBody(World world, float centerX, float centerY, float density, float friction, float restitution) {
-        final var bodyDef = new BodyDef();
+        final BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
         bodyDef.position.set(centerX, centerY);
         bodyDef.linearDamping = 0f;
         //bodyDef.angularDamping = 1f;
         bodyDef.fixedRotation = true;
 
-        final var body = world.createBody(bodyDef);
+        final Body body = world.createBody(bodyDef);
         body.setUserData(this);
         {
-            final var characterPolygon = new PolygonShape();
-            final var collider = new FixtureDef();
+            final PolygonShape characterPolygon = new PolygonShape();
+            final FixtureDef collider = new FixtureDef();
 
             characterPolygon.setAsBox(CharacterResources.CHARACTER_WIDTH / 2f, CharacterResources.CHARACTER_HEIGHT / 2f);
 
@@ -125,10 +125,10 @@ public class Character implements Disposable, ContactHandler { // TODO Remove Ac
             characterPolygon.dispose();
         }
         {
-            final var footSensorPolygon = new PolygonShape();
-            final var footSensor = new FixtureDef();
+            final PolygonShape footSensorPolygon = new PolygonShape();
+            final FixtureDef footSensor = new FixtureDef();
 
-            final var footSensorHeight = CharacterResources.CHARACTER_HEIGHT / 10f;
+            final float footSensorHeight = CharacterResources.CHARACTER_HEIGHT / 10f;
             footSensorPolygon.setAsBox(0.9f * CharacterResources.CHARACTER_WIDTH / 2f, footSensorHeight, new Vector2(0, -CharacterResources.CHARACTER_HEIGHT / 2f - footSensorHeight / 2f), 0f);
 
             footSensor.shape = footSensorPolygon;
@@ -173,16 +173,16 @@ public class Character implements Disposable, ContactHandler { // TODO Remove Ac
             currentFrame.flip(true, false);
         }
 
-        var affine = new Affine2();
+        Affine2 affine = new Affine2();
         float bodyX = body.getPosition().x;
         float bodyY = body.getPosition().y;
         float rotation = (float) Math.toDegrees(body.getAngle());
 
-        final var renderX = bodyX - (CharacterResources.CHARACTER_WIDTH / 2f) * Math.cos(body.getAngle()) + (CharacterResources.CHARACTER_WIDTH / 2f) * Math.sin(body.getAngle());
-        final var renderY = bodyY - (CharacterResources.CHARACTER_HEIGHT / 2f) * Math.cos(body.getAngle()) - (CharacterResources.CHARACTER_HEIGHT / 2f) * Math.sin(body.getAngle());
+        final double renderX = bodyX - (CharacterResources.CHARACTER_WIDTH / 2f) * Math.cos(body.getAngle()) + (CharacterResources.CHARACTER_WIDTH / 2f) * Math.sin(body.getAngle());
+        final double renderY = bodyY - (CharacterResources.CHARACTER_HEIGHT / 2f) * Math.cos(body.getAngle()) - (CharacterResources.CHARACTER_HEIGHT / 2f) * Math.sin(body.getAngle());
 
 
-        var scale = aiControlled ? 1f : PLAYER_SPRITE_SCALE;
+        float scale = aiControlled ? 1f : PLAYER_SPRITE_SCALE;
         affine.setToTrnRotScl((float) renderX, (float) renderY, rotation, scale, scale);
 
         spriteBatch.draw(currentFrame, CharacterResources.CHARACTER_WIDTH, CharacterResources.CHARACTER_HEIGHT, affine);
@@ -213,7 +213,7 @@ public class Character implements Disposable, ContactHandler { // TODO Remove Ac
     public void update() {
         deathByKrakenTranslationTimer += Gdx.graphics.getDeltaTime();
         if (freezeX) {
-            var y = startingY + ((yToBeEaten - startingY) * (deathByKrakenTranslationTimer / Monster.UP_TRANSLATION_ANIMATION_DURATION));
+            float y = startingY + ((yToBeEaten - startingY) * (deathByKrakenTranslationTimer / Monster.UP_TRANSLATION_ANIMATION_DURATION));
             body.setTransform(freezeToX, y, body.getAngle());
         }
         if (freezeY) {
@@ -255,7 +255,7 @@ public class Character implements Disposable, ContactHandler { // TODO Remove Ac
             game.aiCharacterDied(this);
         }
 
-        var velocity = body.getLinearVelocity();
+        Vector2 velocity = body.getLinearVelocity();
         // Here, compute the character relative velocity to its environment (boat, ..)
         if (touchingBoat && boatContactPoint != null) {
             final float boatAngularVelocity = boat.getBody().getAngularVelocity();
@@ -282,7 +282,7 @@ public class Character implements Disposable, ContactHandler { // TODO Remove Ac
             break;
         }
 
-        var deltaVelX = desiredVelX - velocity.x;
+        float deltaVelX = desiredVelX - velocity.x;
         float impulseX = body.getMass() * deltaVelX;
 
         body.applyLinearImpulse(new Vector2(impulseX, 0f), body.getWorldCenter(), true);
@@ -299,7 +299,7 @@ public class Character implements Disposable, ContactHandler { // TODO Remove Ac
     }
 
     public void setDensity(float density) {
-        var densityValue = aiControlled ? AI_DENSITY_FACTOR * density : density;
+        float densityValue = aiControlled ? AI_DENSITY_FACTOR * density : density;
         this.body.getFixtureList().forEach(fixture -> {
             fixture.setDensity(densityValue);
         });
@@ -314,30 +314,30 @@ public class Character implements Disposable, ContactHandler { // TODO Remove Ac
 
     @Override
     public void handleContactBegin(FixtureContact contact) {
-        if (contact.otherFixture().getBody().getUserData() == boat) {
+        if (contact.otherFixture.getBody().getUserData() == boat) {
             touchingBoat = true;
             hasTouchedBoatRecently = true;
             lastBoatTouchTimer = 0;
         }
-        if (contact.otherFixture().getBody().getUserData() == water) {
-            contactWaterFixtures.add(contact.otherFixture());
+        if (contact.otherFixture.getBody().getUserData() == water) {
+            contactWaterFixtures.add(contact.otherFixture);
             touchingWater = true;
         }
     }
 
     @Override
     public void handleContactEnd(FixtureContact contact) {
-        if (contact.otherFixture().getBody().getUserData() == boat) {
+        if (contact.otherFixture.getBody().getUserData() == boat) {
             touchingBoat = false;
         }
-        if (contact.otherFixture().getBody().getUserData() == water) {
-            contactWaterFixtures.remove(contact.otherFixture());
+        if (contact.otherFixture.getBody().getUserData() == water) {
+            contactWaterFixtures.remove(contact.otherFixture);
         }
     }
 
     @Override
     public void handlePreSolve(Contact contact, FixtureContact fixtures) {
-        if (fixtures.otherFixture().getBody().getUserData() == boat) {
+        if (fixtures.otherFixture.getBody().getUserData() == boat) {
             if (contact.getWorldManifold().getNumberOfContactPoints() > 0) {
                 boatContactPoint = contact.getWorldManifold().getPoints()[0];
             }

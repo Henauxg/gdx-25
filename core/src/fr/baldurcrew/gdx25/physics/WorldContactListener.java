@@ -17,12 +17,12 @@ public class WorldContactListener implements ContactListener {
         Fixture fixtureA = contact.getFixtureA();
         Fixture fixtureB = contact.getFixtureB();
 
-        final var handlerA = contactHandlers.get(fixtureA.getBody().getUserData());
+        final ContactHandler handlerA = contactHandlers.get(fixtureA.getBody().getUserData());
         if (handlerA != null) {
             handlerA.handleContactBegin(new FixtureContact(fixtureA, fixtureB));
         }
 
-        final var handlerB = contactHandlers.get(fixtureB.getBody().getUserData());
+        final ContactHandler handlerB = contactHandlers.get(fixtureB.getBody().getUserData());
         if (handlerB != null) {
             handlerB.handleContactBegin(new FixtureContact(fixtureB, fixtureA));
         }
@@ -33,12 +33,12 @@ public class WorldContactListener implements ContactListener {
         Fixture fixtureA = contact.getFixtureA();
         Fixture fixtureB = contact.getFixtureB();
 
-        final var handlerA = contactHandlers.get(fixtureA.getBody().getUserData());
+        final ContactHandler handlerA = contactHandlers.get(fixtureA.getBody().getUserData());
         if (handlerA != null) {
             handlerA.handleContactEnd(new FixtureContact(fixtureA, fixtureB));
         }
 
-        final var handlerB = contactHandlers.get(fixtureB.getBody().getUserData());
+        final ContactHandler handlerB = contactHandlers.get(fixtureB.getBody().getUserData());
         if (handlerB != null) {
             handlerB.handleContactEnd(new FixtureContact(fixtureB, fixtureA));
         }
@@ -49,11 +49,11 @@ public class WorldContactListener implements ContactListener {
         Fixture fixtureA = contact.getFixtureA();
         Fixture fixtureB = contact.getFixtureB();
 
-        final var handlerA = contactHandlers.get(fixtureA.getBody().getUserData());
+        final ContactHandler handlerA = contactHandlers.get(fixtureA.getBody().getUserData());
         if (handlerA != null) {
             handlerA.handlePreSolve(contact, new FixtureContact(fixtureA, fixtureB));
         }
-        final var handlerB = contactHandlers.get(fixtureB.getBody().getUserData());
+        final ContactHandler handlerB = contactHandlers.get(fixtureB.getBody().getUserData());
         if (handlerB != null) {
             handlerB.handlePreSolve(contact, new FixtureContact(fixtureB, fixtureA));
         }

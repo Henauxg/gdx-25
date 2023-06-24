@@ -41,14 +41,14 @@ public class WaterRenderer implements Disposable {
     private MeshAndBuffers createWaterMeshAndBuffers(int rectCount) {
         final int verticesCount = 4 * rectCount;
         final int indicesCount = 6 * rectCount;
-        final var vertexPositionAttribute = VertexAttribute.Position();
-        final var vertexColorAttribute = VertexAttribute.ColorUnpacked();
+        final VertexAttribute vertexPositionAttribute = VertexAttribute.Position();
+        final VertexAttribute vertexColorAttribute = VertexAttribute.ColorUnpacked();
 
-        final var waterMesh = new Mesh(false, true, verticesCount, indicesCount, new VertexAttributes(vertexPositionAttribute, vertexColorAttribute));
+        final Mesh waterMesh = new Mesh(false, true, verticesCount, indicesCount, new VertexAttributes(vertexPositionAttribute, vertexColorAttribute));
 
         final int valuesPerVertex = vertexPositionAttribute.numComponents + vertexColorAttribute.numComponents;
-        final var waterVertexIndices = new short[indicesCount];
-        final var waterVerticesWithColor = new float[verticesCount * valuesPerVertex];
+        final short[] waterVertexIndices = new short[indicesCount];
+        final float[] waterVerticesWithColor = new float[verticesCount * valuesPerVertex];
 
         for (int i = 0; i < rectCount; i++) {
             waterVertexIndices[i * 6 + 0] = (short) (i * 4 + 0);
@@ -68,8 +68,8 @@ public class WaterRenderer implements Disposable {
             debugShapeBatch.setProjectionMatrix(camera.combined);
             debugShapeBatch.begin(ShapeRenderer.ShapeType.Line);
             for (int i = 0; i < springs.size() - 1; i++) {
-                final var leftSpring = springs.get(i);
-                final var rightSpring = springs.get(i + 1);
+                final Spring leftSpring = springs.get(i);
+                final Spring rightSpring = springs.get(i + 1);
                 debugShapeBatch.line(new Vector2(leftSpring.getX(), 0f), new Vector2(leftSpring.getX(), leftSpring.getHeight()));
             }
             debugShapeBatch.end();
@@ -87,13 +87,13 @@ public class WaterRenderer implements Disposable {
     }
 
     private void generateWaterMesh(MeshAndBuffers waterMeshAndBuffers, List<Spring> springs) {
-        final var verticesWithColor = waterMeshAndBuffers.verticesWithColor;
-        final var valuesPerVertex = waterMeshAndBuffers.valuesPerVertex;
+        final float[] verticesWithColor = waterMeshAndBuffers.verticesWithColor;
+        final int valuesPerVertex = waterMeshAndBuffers.valuesPerVertex;
 
         // TODO Cull springs outside of the viewport
         for (int i = 0; i < springs.size() - 1; i++) {
-            final var leftSpring = springs.get(i);
-            final var rightSpring = springs.get(i + 1);
+            final Spring leftSpring = springs.get(i);
+            final Spring rightSpring = springs.get(i + 1);
 
             int rectangleOffsetInArray = i * waterMeshAndBuffers.valuesPerVertex * 4;
 
@@ -125,9 +125,21 @@ public class WaterRenderer implements Disposable {
         waterShaderProgram.dispose();
     }
 
-    private record MeshAndBuffers(Mesh mesh,
-                                  int valuesPerVertex,
-                                  short[] vertexIndices,
-                                  float[] verticesWithColor) {
+    private class MeshAndBuffers {
+
+        public final Mesh mesh;
+        public final int valuesPerVertex;
+        public final short[] vertexIndices;
+        public final float[] verticesWithColor;
+
+        public MeshAndBuffers(Mesh mesh,
+                              int valuesPerVertex,
+                              short[] vertexIndices,
+                              float[] verticesWithColor) {
+            this.mesh = mesh;
+            this.valuesPerVertex = valuesPerVertex;
+            this.vertexIndices = vertexIndices;
+            this.verticesWithColor = verticesWithColor;
+        }
     }
 }

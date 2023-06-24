@@ -18,9 +18,9 @@ public class StalkerAiController extends AiController {
 
     @Override
     public Character.MoveState computeMoves(float playerX, float posX, boolean touchedBoatRecently) {
-        var moveState = Character.MoveState.IDLE;
+        Character.MoveState moveState = Character.MoveState.IDLE;
         switch (state) {
-            case RunningToPos -> {
+            case RunningToPos: {
                 if ((currentDirection == Character.MoveState.RIGHT && posX > targetX) || (currentDirection == Character.MoveState.LEFT && posX < targetX)) {
                     state = State.ChoosingTargetPosition;
                     moveState = Character.MoveState.IDLE;
@@ -32,7 +32,8 @@ public class StalkerAiController extends AiController {
                     }
                 }
             }
-            case ChoosingTargetPosition -> {
+            break;
+            case ChoosingTargetPosition: {
                 targetX = MathUtils.random(playerX - RANDOM_SEEK_AREA, playerX + RANDOM_SEEK_AREA);
                 if (targetX > posX) {
                     currentDirection = Character.MoveState.RIGHT;
@@ -41,6 +42,7 @@ public class StalkerAiController extends AiController {
                 }
                 state = State.RunningToPos;
             }
+            break;
         }
         return moveState;
     }

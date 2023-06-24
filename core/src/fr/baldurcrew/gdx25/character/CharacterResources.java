@@ -31,12 +31,12 @@ public class CharacterResources {
         this.characterAnimations = new HashMap<>();
 
         Stream.of(BEIGE, BLUE, GREEN, PINK, YELLOW).forEach(color -> {
-            final var actionMap = new HashMap<Action, Animation<TextureRegion>>();
+            final HashMap<Action, Animation<TextureRegion>> actionMap = new HashMap<Action, Animation<TextureRegion>>();
             characterAnimations.put(color, actionMap);
             Stream.of(Action.values())
                     .forEach(action -> {
-                        var charTextureRegions = allTextureRegions[color];
-                        var animation = new Animation<TextureRegion>(0.250f, getCharActionTextureRegions(action, charTextureRegions));
+                        TextureRegion[] charTextureRegions = allTextureRegions[color];
+                        Animation<TextureRegion> animation = new Animation<TextureRegion>(0.250f, getCharActionTextureRegions(action, charTextureRegions));
                         actionMap.put(action, animation);
                     });
         });
@@ -57,7 +57,7 @@ public class CharacterResources {
 
     private static TextureRegion[][] loadAndSplitSpriteSheet(String imagePath, int frameCols, int frameRows) {
         //load sheet
-        var charactersSheet = new Texture(Gdx.files.internal(imagePath));
+        Texture charactersSheet = new Texture(Gdx.files.internal(imagePath));
 
         //split sheet
         TextureRegion[][] frames = TextureRegion.split(charactersSheet, charactersSheet.getWidth() / frameCols, charactersSheet.getHeight() / frameRows);
@@ -84,7 +84,7 @@ public class CharacterResources {
 
     private TextureRegion[] getCharActionTextureRegions(Action action, TextureRegion[] charTextureRegions) {
         int framesCount = action.getFramesCount();
-        var actionTextureRegions = new TextureRegion[framesCount];
+        TextureRegion[] actionTextureRegions = new TextureRegion[framesCount];
         for (int i = 0; i < framesCount; i++) {
             actionTextureRegions[i] = charTextureRegions[action.getFrame(i)];
         }

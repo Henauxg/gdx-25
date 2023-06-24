@@ -9,7 +9,7 @@ public class DarwinAiController extends AiController {
 
     @Override
     public Character.MoveState computeMoves(float playerX, float posX, boolean touchedBoatRecently) {
-        var moveState = Character.MoveState.IDLE;
+        Character.MoveState moveState = Character.MoveState.IDLE;
         if (touchedBoatRecently) {
             moveState = super.currentDirection;
         }

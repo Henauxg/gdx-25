@@ -8,6 +8,7 @@ import com.badlogic.gdx.physics.box2d.Shape;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class Utils {
 
@@ -34,7 +35,7 @@ public class Utils {
         PolygonShape polygonA = (PolygonShape) fixtureA.getShape();
         PolygonShape polygonB = (PolygonShape) fixtureB.getShape();
 
-        final var intersection = new ArrayList<Vector2>();
+        final ArrayList<Vector2> intersection = new ArrayList<Vector2>();
 
         // fill subject polygon from fixtureA polygon
         for (int i = 0; i < polygonA.getVertexCount(); i++) {
@@ -45,7 +46,7 @@ public class Utils {
         }
 
         // fill clip polygon from fixtureB polygon
-        final var clipPolygon = new ArrayList<Vector2>();
+        final ArrayList<Vector2> clipPolygon = new ArrayList<Vector2>();
         for (int i = 0; i < polygonB.getVertexCount(); i++) {
             Vector2 vertex = new Vector2();
             polygonB.getVertex(i, vertex);
@@ -60,7 +61,7 @@ public class Utils {
             if (intersection.isEmpty())
                 return null;
 
-            final var inputList = new ArrayList<Vector2>(intersection);
+            final ArrayList<Vector2> inputList = new ArrayList<Vector2>(intersection);
             intersection.clear();
 
             Vector2 s = inputList.get(inputList.size() - 1);
@@ -92,13 +93,30 @@ public class Utils {
     }
 
     public static String secondsToDisplayString(float inputSeconds) {
-        final var minutes = String.format("%02d", Math.round(Math.floor(inputSeconds % 3600 / 60)));
-        final var seconds = String.format("%02d", Math.round(Math.floor(inputSeconds % 60)));
+//        final String minutes = String.format("%02i",(int) Math.round(Math.floor(inputSeconds % 3600 / 60)));
+//        final String seconds = String.format("%02d", Math.round(Math.floor(inputSeconds % 60)));
+//
+//        if (inputSeconds < 3600) return minutes + ':' + seconds;
+//
+//        final String hours = String.format("%02d", Math.round(Math.floor(inputSeconds / 3600)));
+//        return hours + ':' + minutes + ':' + seconds;
 
-        if (inputSeconds < 3600) return minutes + ':' + seconds;
+        // Quick & dirty horror, for web compat
+        long secsAsLong = (long) inputSeconds * 1000;
+        long hours = TimeUnit.MILLISECONDS
+                .toHours(secsAsLong);
+        secsAsLong -= TimeUnit.HOURS.toMillis(hours);
 
-        final var hours = String.format("%02d", Math.round(Math.floor(inputSeconds / 3600)));
-        return hours + ':' + minutes + ':' + seconds;
+        long minutes = TimeUnit.MILLISECONDS
+                .toMinutes(secsAsLong);
+        secsAsLong -= TimeUnit.MINUTES.toMillis(minutes);
+
+        long seconds = TimeUnit.MILLISECONDS
+                .toSeconds(secsAsLong);
+
+        if (inputSeconds < 3600)
+            return (minutes < 10 ? "0" : "") + String.valueOf(minutes) + ':' + (seconds < 10 ? "0" : "") + String.valueOf(seconds);
+        else
+            return String.valueOf(hours) + ':' + (minutes < 10 ? "0" : "") + String.valueOf(minutes) + ':' + (seconds < 10 ? "0" : "") + String.valueOf(seconds);
     }
-
 }

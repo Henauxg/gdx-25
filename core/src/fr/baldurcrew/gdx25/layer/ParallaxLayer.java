@@ -53,13 +53,13 @@ public class ParallaxLayer {
             textureRegion.setRegionY(textureRegionOffsetY);
             textureRegion.setRegionHeight(texture.getHeight());
         }
-        var yOffset = camera.viewportHeight * yOffsetPositionFactor;
+        float yOffset = camera.viewportHeight * yOffsetPositionFactor;
 
         if (wiggleSpeed > 0) {
             yOffset += (float) Math.cos(2 * Math.PI * textureRegionOffsetX / textureRegion.getRegionWidth() * wiggleSpeed) * wiggleAmplitude;
         }
 
-        final var layerHeight = camera.viewportWidth / textureAspectRatio * heightScalingRatio;
+        final float layerHeight = camera.viewportWidth / textureAspectRatio * heightScalingRatio;
         spriteBatch.draw(textureRegion, 0, camera.viewportHeight - layerHeight + yOffset, camera.viewportWidth, layerHeight);
     }
 }

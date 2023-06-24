@@ -66,9 +66,10 @@ public class Monster {
         TextureRegion frame = idleTentacleFrame;
         switch (state) {
 
-            case IDLE -> {
+            case IDLE: {
             }
-            case UP_TRANSLATION -> {
+            break;
+            case UP_TRANSLATION: {
                 animationTime += Gdx.graphics.getDeltaTime();
                 yTentacle = TENTACLE_LOW_POSITION_Y + animationTime * (TENTACLE_HIGH_POSITION_Y - TENTACLE_LOW_POSITION_Y) / UP_TRANSLATION_ANIMATION_DURATION;
                 if (animationTime >= UP_TRANSLATION_ANIMATION_DURATION) {
@@ -76,7 +77,8 @@ public class Monster {
                     animationTime = 0;
                 }
             }
-            case ANIMATION -> {
+            break;
+            case ANIMATION: {
                 animationTime += Gdx.graphics.getDeltaTime();
                 frame = tentacleAnimation.getKeyFrame(animationTime, false);
                 if (tentacleAnimation.isAnimationFinished(animationTime)) {
@@ -86,7 +88,8 @@ public class Monster {
                 }
 
             }
-            case DOWN_TRANSLATION -> {
+            break;
+            case DOWN_TRANSLATION: {
                 animationTime += Gdx.graphics.getDeltaTime();
                 yTentacle = TENTACLE_HIGH_POSITION_Y + animationTime * (TENTACLE_LOW_POSITION_Y - TENTACLE_HIGH_POSITION_Y) / DOWN_TRANSLATION_ANIMATION_DURATION;
                 currentMeal.freezeY(yTentacle + TENTACLE_HEIGHT * 0.95f);
@@ -95,6 +98,7 @@ public class Monster {
                     animationTime = 0;
                 }
             }
+            break;
         }
         animationTime += Gdx.graphics.getDeltaTime();
         if (state != AnimationState.IDLE) {

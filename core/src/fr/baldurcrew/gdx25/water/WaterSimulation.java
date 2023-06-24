@@ -2,6 +2,7 @@ package fr.baldurcrew.gdx25.water;
 
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.GeometryUtils;
+import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Disposable;
@@ -78,11 +79,11 @@ public class WaterSimulation implements Disposable, ContactHandler {
     }
 
     private Body createWaterBody(World world, Vector2 center) {
-        final var bodyDef = new BodyDef();
+        final BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.StaticBody;
         bodyDef.position.set(center);
 
-        final var body = world.createBody(bodyDef);
+        final Body body = world.createBody(bodyDef);
         body.setUserData(this);
 
         return body;
@@ -96,15 +97,15 @@ public class WaterSimulation implements Disposable, ContactHandler {
 
     private void generateFixtures(Fixture[] waterFixtures, Body body, List<Spring> springs, float springsSpacing) {
         for (int i = 0; i < springs.size(); i++) {
-            final var waterPolygon = new PolygonShape();
+            final PolygonShape waterPolygon = new PolygonShape();
 
             // TODO If needed, could group multiple springs together to form 1 fixture to reduce physics simulation stress
-            final var spring = springs.get(i);
-            final var halfSpringSpacing = springsSpacing / 2f;
-            final var halfSpringHeight = spring.getHeight() / 2f;
+            final Spring spring = springs.get(i);
+            final float halfSpringSpacing = springsSpacing / 2f;
+            final float halfSpringHeight = spring.getHeight() / 2f;
             waterPolygon.setAsBox(halfSpringSpacing, halfSpringHeight, new Vector2(spring.getX() + halfSpringSpacing - body.getWorldCenter().x, halfSpringHeight - body.getWorldCenter().y), 0);
 
-            final var fixtureDef = new FixtureDef();
+            final FixtureDef fixtureDef = new FixtureDef();
             fixtureDef.shape = waterPolygon;
             fixtureDef.isSensor = true;
             fixtureDef.density = waterDensity;
@@ -139,21 +140,21 @@ public class WaterSimulation implements Disposable, ContactHandler {
 
     private void updateImmersedFixtures() {
         this.fixtureContacts.forEach(contact -> {
-            final var waterFixture = contact.handledFixture();
-            final var immersedFixture = contact.otherFixture();
+            final Fixture waterFixture = contact.handledFixture;
+            final Fixture immersedFixture = contact.otherFixture;
 
             final float fluidDensity = waterFixture.getDensity();
 
-            final var intersectionVertices = Utils.getIntersection(waterFixture, immersedFixture);
+            final ArrayList<Vector2> intersectionVertices = Utils.getIntersection(waterFixture, immersedFixture);
             if (intersectionVertices != null && !intersectionVertices.isEmpty()) {
-                final var world = immersedFixture.getBody().getWorld();
+                final World world = immersedFixture.getBody().getWorld();
 
-                final var intersectionPolygon = Utils.getPolygon(intersectionVertices);
+                final Polygon intersectionPolygon = Utils.getPolygon(intersectionVertices);
                 final float intersectionArea = intersectionPolygon.area();
-                final var intersectionCentroid = GeometryUtils.polygonCentroid(intersectionPolygon.getVertices(), 0, intersectionPolygon.getVertices().length, new Vector2());
+                final Vector2 intersectionCentroid = GeometryUtils.polygonCentroid(intersectionPolygon.getVertices(), 0, intersectionPolygon.getVertices().length, new Vector2());
 
                 // Apply buoyancy
-                final var displacedMass = fluidDensity * intersectionArea;
+                final float displacedMass = fluidDensity * intersectionArea;
                 Vector2 buoyancyForce = new Vector2(displacedMass * -world.getGravity().x, displacedMass * -world.getGravity().y);
                 immersedFixture.getBody().applyForce(buoyancyForce, intersectionCentroid, true);
 
@@ -206,7 +207,7 @@ public class WaterSimulation implements Disposable, ContactHandler {
     }
 
     private void updateSprings() {
-        for (var spring : this.springs) {
+        for (Spring spring : this.springs) {
             spring.update(springsStiffness, springsDampeningFactor, baseWaterLevel);
         }
 
@@ -215,14 +216,14 @@ public class WaterSimulation implements Disposable, ContactHandler {
 
         for (int j = 0; j < wavesPropagationPasses; j++) {
             for (int i = 0; i < springs.size(); i++) {
-                final var spring = springs.get(i);
+                final Spring spring = springs.get(i);
                 if (i > 0) {
-                    final var leftSpring = springs.get(i - 1);
+                    final Spring leftSpring = springs.get(i - 1);
                     leftDeltas[i] = wavesPropagationSpreadFactor * (spring.getHeight() - leftSpring.getHeight());
                     leftSpring.addVelocity(leftDeltas[i]);
                 }
                 if (i < springs.size() - 1) {
-                    final var rightSpring = springs.get(i + 1);
+                    final Spring rightSpring = springs.get(i + 1);
                     rightDeltas[i] = wavesPropagationSpreadFactor * (spring.getHeight() - rightSpring.getHeight());
                     rightSpring.addVelocity(rightDeltas[i]);
                 }

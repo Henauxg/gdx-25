@@ -43,15 +43,15 @@ public class Boat implements Disposable {
     }
 
     private Body createBody(World world, float centerX, float centerY) {
-        final var bodyDef = new BodyDef();
+        final BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
         bodyDef.position.set(centerX, centerY);
         bodyDef.angularDamping = DEFAULT_BOAT_ANGULAR_DAMPING;
 
-        final var body = world.createBody(bodyDef);
+        final Body body = world.createBody(bodyDef);
         body.setUserData(this);
 
-        final var boatPolygon = new PolygonShape();
+        final PolygonShape boatPolygon = new PolygonShape();
         float[] vertices = new float[]{
                 -BOAT_WIDTH / 2f, 0,
                 -BOAT_WIDTH / 3f, -BOAT_HEIGHT / 3f,
@@ -60,7 +60,7 @@ public class Boat implements Disposable {
                 BOAT_WIDTH / 2.2f, 0};
         boatPolygon.set(vertices);
 
-        final var fixtureDef = new FixtureDef();
+        final FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = boatPolygon;
         fixtureDef.density = density;
         fixtureDef.friction = friction;
@@ -78,8 +78,8 @@ public class Boat implements Disposable {
         float bodyY = body.getPosition().y;
         float rotation = (float) Math.toDegrees(body.getAngle());
 
-        final var renderX = bodyX - BOAT_WIDTH / 2f;
-        final var renderY = bodyY - BOAT_HEIGHT / 2.5f; // TODO Adjust to fixture vertices
+        final float renderX = bodyX - BOAT_WIDTH / 2f;
+        final float renderY = bodyY - BOAT_HEIGHT / 2.5f; // TODO Adjust to fixture vertices
         boatSprite.setPosition(renderX, renderY);
         boatSprite.setRotation(rotation);
 
@@ -100,7 +100,7 @@ public class Boat implements Disposable {
         body.setTransform(Constants.VIEWPORT_WIDTH / 2f, body.getPosition().y, body.getAngle()); // TODO Clean
 
         // Check for Upside down boat
-        final var clampedAngle = Math.abs(Math.toDegrees(body.getAngle()) % 360);
+        final double clampedAngle = Math.abs(Math.toDegrees(body.getAngle()) % 360);
         if (clampedAngle >= MAX_ALLOWED_BOAT_ANGLE) {
             upsideDownTimer += Constants.TIME_STEP;
             if (upsideDownTimer >= BOAT_UPSIDE_DOWN_TIMER) {

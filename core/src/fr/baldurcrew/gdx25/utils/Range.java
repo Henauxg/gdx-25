@@ -61,7 +61,7 @@ public class Range {
         if (fromOffset + extent > this.to) {
             throw new IllegalArgumentException("Incorrect sub-range, fromOffset + extent > this.to");
         }
-        final var subRangeFrom = this.from + fromOffset;
+        final float subRangeFrom = this.from + fromOffset;
         return new Range(subRangeFrom, subRangeFrom + extent);
     }
 
