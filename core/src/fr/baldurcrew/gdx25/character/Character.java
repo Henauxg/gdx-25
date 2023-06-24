@@ -15,17 +15,32 @@ import fr.baldurcrew.gdx25.boat.Boat;
 import fr.baldurcrew.gdx25.character.ai.AiController;
 import fr.baldurcrew.gdx25.physics.ContactHandler;
 import fr.baldurcrew.gdx25.physics.FixtureContact;
+import fr.baldurcrew.gdx25.water.WaterSimulation;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public class Character implements Disposable, ContactHandler { // TODO Remove Actor since unused
+
     private static final float MAX_X_MOVEMENT_VELOCITY = 5f;
+    private static final float IN_WATER_FOR_A_MOMENT_DURATION = 1.5f;
     private static final float MAX_TIME_RECENT_BOAT_TOUCH = 2f;
     private static final float PLAYER_SPRITE_SCALE = 1.3f;
+    private static final float AI_DENSITY_FACTOR = 0.35f;
     private final boolean aiControlled;
     private final int charIndex;
+
     private AiController ai;
 
     private boolean touchingBoat;
-    private boolean touchedBoatRecently;
+    private boolean touchingWater;
+    private boolean hasBeenInWaterForAMoment;
+    /**
+     * Updated list of water fixtures in contact with this character
+     */
+    private Set<Fixture> contactWaterFixtures;
+    private float inWaterTimer;
+    private boolean hasTouchedBoatRecently;
     private float lastBoatTouchTimer;
     private Body body;
     private float animationTimer;
@@ -35,10 +50,14 @@ public class Character implements Disposable, ContactHandler { // TODO Remove Ac
     private MoveState moveState;
     private MoveState previousMoveState;
     private Boat boat;
+    private WaterSimulation water;
     private Vector2 boatContactPoint;
+    private boolean isAlive;
 
-    public Character(World world, Boat boat, int charIndex, boolean aiControlled, float x, float y, float density, float friction, float restitution) {
+
+    public Character(World world, Boat boat, WaterSimulation water, int charIndex, boolean aiControlled, float x, float y, float density, float friction, float restitution) {
         this.boat = boat;
+        this.water = water;
         this.charIndex = charIndex;
         this.aiControlled = aiControlled;
         if (aiControlled) {
@@ -51,8 +70,17 @@ public class Character implements Disposable, ContactHandler { // TODO Remove Ac
         this.body = createBody(world, x, y, density, friction, restitution);
 
         animationTimer = 0f;
+
         touchingBoat = false;
-        touchedBoatRecently = false;
+        hasTouchedBoatRecently = false;
+        lastBoatTouchTimer = 0f;
+
+        touchingWater = false;
+        contactWaterFixtures = new HashSet<>();
+        inWaterTimer = 0f;
+        hasBeenInWaterForAMoment = false;
+
+        isAlive = true;
     }
 
     private Body createBody(World world, float centerX, float centerY, float density, float friction, float restitution) {
@@ -72,7 +100,7 @@ public class Character implements Disposable, ContactHandler { // TODO Remove Ac
             characterPolygon.setAsBox(CharacterResources.CHARACTER_WIDTH / 2f, CharacterResources.CHARACTER_HEIGHT / 2f);
 
             collider.shape = characterPolygon;
-            collider.density = density;
+            collider.density = aiControlled ? AI_DENSITY_FACTOR * density : density;
             collider.friction = friction;
             collider.restitution = restitution;
             // Quick & dirty characters do not collide with each others
@@ -141,14 +169,14 @@ public class Character implements Disposable, ContactHandler { // TODO Remove Ac
 
 
         var scale = aiControlled ? 1f : PLAYER_SPRITE_SCALE;
-        affine.setToTrnRotScl((float) renderX, (float) renderY, rotation, 1.3f, 1.3f);
+        affine.setToTrnRotScl((float) renderX, (float) renderY, rotation, scale, scale);
 
         spriteBatch.draw(currentFrame, CharacterResources.CHARACTER_WIDTH, CharacterResources.CHARACTER_HEIGHT, affine);
     }
 
     public void handleInputs(float playerX) {
         if (aiControlled) {
-            moveState = ai.computeMoves(playerX, body.getPosition().x, touchedBoatRecently);
+            moveState = ai.computeMoves(playerX, body.getPosition().x, hasTouchedBoatRecently);
         } else {
             if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
                 moveState = MoveState.LEFT;
@@ -161,12 +189,35 @@ public class Character implements Disposable, ContactHandler { // TODO Remove Ac
     }
 
     public void update() {
-        if (touchedBoatRecently && !touchingBoat) {
+        if (hasTouchedBoatRecently && !touchingBoat) {
             lastBoatTouchTimer += Constants.TIME_STEP;
             if (lastBoatTouchTimer >= MAX_TIME_RECENT_BOAT_TOUCH) {
                 lastBoatTouchTimer = 0;
-                touchedBoatRecently = false;
+                hasTouchedBoatRecently = false;
             }
+        }
+
+        if (contactWaterFixtures.isEmpty()) {
+            touchingWater = false;
+            hasBeenInWaterForAMoment = false;
+            inWaterTimer = 0;
+        }
+
+        if (touchingWater) {
+            inWaterTimer += Constants.TIME_STEP;
+            if (inWaterTimer >= IN_WATER_FOR_A_MOMENT_DURATION) {
+                hasBeenInWaterForAMoment = true;
+            }
+        }
+        if (hasBeenInWaterForAMoment && !hasTouchedBoatRecently) {
+            // TODO Signal death
+            isAlive = false;
+            if (aiControlled) {
+                Gdx.app.log("Char", "Character died: " + this.ai.getType());
+            } else {
+                Gdx.app.log("Char", "Player character died");
+            }
+// TODO Kill threshold for aiControlled : too far from the boat = eaten or water takes him
         }
 
         var velocity = body.getLinearVelocity();
@@ -213,8 +264,9 @@ public class Character implements Disposable, ContactHandler { // TODO Remove Ac
     }
 
     public void setDensity(float density) {
+        var densityValue = aiControlled ? AI_DENSITY_FACTOR * density : density;
         this.body.getFixtureList().forEach(fixture -> {
-            fixture.setDensity(density);
+            fixture.setDensity(densityValue);
         });
         this.body.resetMassData();
     }
@@ -229,8 +281,12 @@ public class Character implements Disposable, ContactHandler { // TODO Remove Ac
     public void handleContactBegin(FixtureContact contact) {
         if (contact.otherFixture().getBody().getUserData() == boat) {
             touchingBoat = true;
-            touchedBoatRecently = true;
+            hasTouchedBoatRecently = true;
             lastBoatTouchTimer = 0;
+        }
+        if (contact.otherFixture().getBody().getUserData() == water) {
+            contactWaterFixtures.add(contact.otherFixture());
+            touchingWater = true;
         }
     }
 
@@ -238,6 +294,9 @@ public class Character implements Disposable, ContactHandler { // TODO Remove Ac
     public void handleContactEnd(FixtureContact contact) {
         if (contact.otherFixture().getBody().getUserData() == boat) {
             touchingBoat = false;
+        }
+        if (contact.otherFixture().getBody().getUserData() == water) {
+            contactWaterFixtures.remove(contact.otherFixture());
         }
     }
 
