@@ -36,4 +36,8 @@ public class CharacterSpawner {
             this.nextSpawnWaitTime = spawnPeriodRange.getRandom();
         }
     }
+
+    public void setSpawnPeriod(Range range) {
+        this.spawnPeriodRange = range;
+    }
 }
