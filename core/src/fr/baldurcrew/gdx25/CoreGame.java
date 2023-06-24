@@ -39,10 +39,7 @@ import java.util.List;
 
 
 public class CoreGame extends ApplicationAdapter {
-    private static final Color CLEAR_COLOR = new Color(0.5f, 0.898f, 1, 1);
-    private static final Color DEBUG_CLEAR_COLOR = new Color(1f, 1f, 1f, 1f);
-    private static final int INITIAL_CHARACTER_COUNT = 1;
-    private static final float DEFAULT_AUDIO_VOLUME = 0.2f;
+    public static final float DEFAULT_AUDIO_VOLUME = 0.2f;
     public static final String LAYER_00 = "sky.png";
     public static final String LAYER_01 = "cloud_01.png";
     public static final String LAYER_02 = "cloud_02.png";
@@ -58,8 +55,9 @@ public class CoreGame extends ApplicationAdapter {
     public static final String LAYER_12 = "waves-4.png";
     public static final String LAYER_13 = "groundswell.png";
     public static final String LAYER_14 = "bedrock.png";
-
-
+    private static final Color CLEAR_COLOR = new Color(0.5f, 0.898f, 1, 1);
+    private static final Color DEBUG_CLEAR_COLOR = new Color(1f, 1f, 1f, 1f);
+    private static final int INITIAL_CHARACTER_COUNT = 1;
     public static boolean debugMode = true;
     public static boolean debugClearColor = false;
     public static boolean debugEnableCharacterGeneration = true;
@@ -472,7 +470,7 @@ public class CoreGame extends ApplicationAdapter {
             float xViewportPercent = (float) Gdx.input.getX() / (float) Gdx.graphics.getWidth();
             float xWorld = xViewportPercent * Constants.VIEWPORT_WIDTH;
             //TODO: remove
-            monster.tryEat(spawnCharacter(CharacterResources.getRandomCharacterIndex(),true,xWorld, water.getWaterLevel()));
+            monster.tryEat(spawnCharacter(CharacterResources.getRandomCharacterIndex(), true, xWorld, water.getWaterLevel()));
             water.handleInput(xWorld);
         }
     }
