@@ -27,7 +27,7 @@ public class Boat implements Disposable {
     // TODO Tweak
     private float density = 0.25f;
     private float restitution = 0.3f;
-    private float friction = 0.5f;
+    private float friction = 0.25f;
 
     public Boat(World world, float centerX, float centerY) {
         boatTexture = new Texture("blue_boat.png");

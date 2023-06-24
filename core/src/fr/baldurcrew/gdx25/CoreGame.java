@@ -90,7 +90,7 @@ public class CoreGame extends ApplicationAdapter {
     //    private boolean gameOver;
     private CharacterSpawner characterSpawner;
     private float characterDensity = 3.0f;
-    private float characterFriction = 0.5f;
+    private float characterFriction = 0.25f;
     private float characterRestitution = 0.2f;
     private Range defaultWavePeriodRange = Range.buildRangeEx(0.5f, 1.5f);
     private Range defaultWaveAmplitudeRange = Range.buildRangeEx(Difficulty.MIN_WAVES_AMPLITUDE_AT_MIN_SCALING, Difficulty.MAX_WAVES_AMPLITUDE_AT_MIN_SCALING);

@@ -157,7 +157,7 @@ public class Character implements Disposable, ContactHandler { // TODO Remove Ac
             animation = CharacterResources.getInstance().getAnimation(Action.IDLE, charIndex);
             animationTimer = 0f;
             shouldFlipX = false;
-        } else if (moveState == MoveState.SWIM && previousMoveState != MoveState.IDLE) {
+        } else if (moveState == MoveState.SWIM && previousMoveState != MoveState.SWIM) {
             animation = CharacterResources.getInstance().getAnimation(Action.SWIM, charIndex);
             animationTimer = 0f;
             shouldFlipX = false;
@@ -191,7 +191,11 @@ public class Character implements Disposable, ContactHandler { // TODO Remove Ac
     public void handleInputs(float playerX) {
         moveState = MoveState.IDLE;
 
-        if (!isAlive) return;
+        if (!isAlive) {
+            moveState = MoveState.SWIM;
+            return;
+        }
+        ;
 
         if (aiControlled) {
             moveState = ai.computeMoves(playerX, body.getPosition().x, hasTouchedBoatRecently);
