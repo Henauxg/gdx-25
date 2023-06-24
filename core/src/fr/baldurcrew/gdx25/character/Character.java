@@ -27,7 +27,7 @@ public class Character implements Disposable, ContactHandler { // TODO Remove Ac
     private static final float MAX_X_MOVEMENT_VELOCITY = 5f;
     private static final float IN_WATER_FOR_A_MOMENT_DURATION = 1.5f;
     private static final float MAX_TIME_RECENT_BOAT_TOUCH = 1.5f;
-    private static final float AI_CHARACTER_DISTANCE_KILL_THRESHOLD = 1.5f;
+    private static final float AI_CHARACTER_DISTANCE_KILL_THRESHOLD = 0.5f;
     private static final float PLAYER_SPRITE_SCALE = 1.3f;
     private static final float AI_DENSITY_FACTOR = 0.35f;
     private final boolean aiControlled;
@@ -276,6 +276,10 @@ public class Character implements Disposable, ContactHandler { // TODO Remove Ac
         if (isAlive && aiControlled && Math.abs(getX() - Constants.VIEWPORT_WIDTH / 2f) >= Boat.BOAT_WIDTH / 2f + AI_CHARACTER_DISTANCE_KILL_THRESHOLD) {
             isAlive = false;
             game.aiCharacterDied(this);
+        }
+        if (isAlive && !aiControlled && Math.abs(getX() - Constants.VIEWPORT_WIDTH / 2f) >= Boat.BOAT_WIDTH) {
+            isAlive = false;
+            game.playerDied();
         }
 
         Vector2 velocity = body.getLinearVelocity();
