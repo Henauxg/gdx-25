@@ -14,23 +14,24 @@ import static fr.baldurcrew.gdx25.CoreGame.DEFAULT_AUDIO_VOLUME;
 
 public class Monster {
 
+    public static final float UP_TRANSLATION_ANIMATION_DURATION = 2f;
+    public static final float DOWN_TRANSLATION_ANIMATION_DURATION = 2f;
     private static final int FRAME_COLS = 7, FRAME_ROWS = 1;
     private static final String imagePath = "tentacle.png";
     private static final int SPAWN_SOUNDS_COUNT = 2;
+    private static final float TENTACLE_WIDTH = 4f;
+    private static final float TENTACLE_HEIGHT = 5f;
+    private static final float TENTACLE_HIGH_POSITION_Y = -1f;
+    private static final float TENTACLE_LOW_POSITION_Y = -TENTACLE_HEIGHT;
     Animation<TextureRegion> tentacleAnimation;
     Texture tentacleSheet;
     float animationTime;
     private Sound[] spawnSounds;
     private AnimationState state;
     private TextureRegion idleTentacleFrame;
-    private static final float UP_TRANSLATION_ANIMATION_DURATION = 2f;
-    private static final float DOWN_TRANSLATION_ANIMATION_DURATION = 2f;
-    private static final float TENTACLE_WIDTH = 4f;
-    private static final float TENTACLE_HEIGHT = 5f;
-    private static final float TENTACLE_HIGH_POSITION_Y = -1f;
-    private static final float TENTACLE_LOW_POSITION_Y = -TENTACLE_HEIGHT;
     private float xTentacle;
     private float yTentacle = TENTACLE_HIGH_POSITION_Y;
+    private Character currentMeal;
 
 
     public Monster() {
@@ -88,6 +89,7 @@ public class Monster {
             case DOWN_TRANSLATION -> {
                 animationTime += Gdx.graphics.getDeltaTime();
                 yTentacle = TENTACLE_HIGH_POSITION_Y + animationTime * (TENTACLE_LOW_POSITION_Y - TENTACLE_HIGH_POSITION_Y) / DOWN_TRANSLATION_ANIMATION_DURATION;
+                currentMeal.freezeY(yTentacle + TENTACLE_HEIGHT * 0.95f);
                 if (animationTime >= DOWN_TRANSLATION_ANIMATION_DURATION) {
                     state = AnimationState.IDLE;
                     animationTime = 0;
@@ -100,14 +102,12 @@ public class Monster {
         }
     }
 
-    enum AnimationState {
-        IDLE, UP_TRANSLATION, ANIMATION, DOWN_TRANSLATION;
-    }
-
-    public boolean tryEat(Character character) {
+    public boolean eat(Character character) {
         if (state != AnimationState.IDLE) {
             return false;
         }
+        currentMeal = character;
+        character.prepareToBeEaten(TENTACLE_HEIGHT + TENTACLE_HIGH_POSITION_Y);
         getRandomSpawnSound().play(DEFAULT_AUDIO_VOLUME);
         state = AnimationState.UP_TRANSLATION;
         idleTentacleFrame = tentacleAnimation.getKeyFrames()[0];
@@ -124,5 +124,9 @@ public class Monster {
 
     public void setyTentacle(float yTentacle) {
         this.yTentacle = yTentacle;
+    }
+
+    enum AnimationState {
+        IDLE, UP_TRANSLATION, ANIMATION, DOWN_TRANSLATION;
     }
 }

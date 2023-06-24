@@ -58,7 +58,7 @@ public class CoreGame extends ApplicationAdapter {
     private static final Color CLEAR_COLOR = new Color(0.5f, 0.898f, 1, 1);
     private static final Color DEBUG_CLEAR_COLOR = new Color(1f, 1f, 1f, 1f);
     private static final int INITIAL_CHARACTER_COUNT = 1;
-    public static boolean debugMode = true;
+    public static boolean debugMode = false;
     public static boolean debugClearColor = false;
     public static boolean debugEnableCharacterGeneration = true;
     public static boolean debugEnableWaterRendering = true;
@@ -87,7 +87,7 @@ public class CoreGame extends ApplicationAdapter {
     private Music music;
     private float sailingTime;
     private float difficultyFactor;
-    private boolean gameOver;
+    //    private boolean gameOver;
     private CharacterSpawner characterSpawner;
     private float characterDensity = 3.0f;
     private float characterFriction = 0.5f;
@@ -119,9 +119,12 @@ public class CoreGame extends ApplicationAdapter {
     private float[] uiWaveEmitterAmplitudeRange = new float[2];
     private float[] uiWaveEmitterPeriodRange = new float[2];
     private float[] uiSailingTime = new float[1];
+    private GameState gameState;
 
     @Override
     public void create() {
+        gameState = GameState.WaitingToStart;
+
         waveSounds = Gdx.audio.newMusic(Gdx.files.internal("nice_waves.mp3"));
         music = Gdx.audio.newMusic(Gdx.files.internal("DasLiedderSturme.mp3"));
         camera = new OrthographicCamera();
@@ -204,17 +207,12 @@ public class CoreGame extends ApplicationAdapter {
         charactersSpawnRangeY = Range.buildRangeEx(water.getWaterLevel() + Boat.BOAT_HEIGHT / 2f, water.getWaterLevel() + Boat.BOAT_HEIGHT * 1.5f);
 
         characters = new ArrayList<>();
-//        for (int i = 0; i < INITIAL_CHARACTER_COUNT; i++) {
-        playerCharacter = this.spawnCharacter(CharacterResources.getPlayerCharacterIndex(), false, charactersSpawnRangeX.getRandom(), charactersSpawnRangeY.getRandom());
-//        }
         characterSpawner = new CharacterSpawner(this, charactersSpawnRangeX, charactersSpawnRangeY, Range.buildRangeEx(Difficulty.MIN_AI_SPAWN_PERIOD_AT_MIN_SCALING, Difficulty.MAX_AI_SPAWN_PERIOD_AT_MIN_SCALING));
 
         monster = new Monster();
 
-
         sailingTime = 0;
         difficultyFactor = 1;
-        gameOver = false;
 
         initTweakingUIValues();
     }
@@ -249,12 +247,12 @@ public class CoreGame extends ApplicationAdapter {
     @Override
     public void render() {
         float deltaTime = Gdx.graphics.getDeltaTime();
-
-        if (!gameOver) {
+        if (gameState == GameState.Playing) {
             sailingTime += deltaTime;
             updateDifficulty(sailingTime);
-            handleInputs(camera);
         }
+
+        handleInputs(camera);
         handleDebugInputs(camera);
 
         doPhysicsStep(deltaTime);
@@ -282,11 +280,25 @@ public class CoreGame extends ApplicationAdapter {
         foregroundLayers.forEach(l -> l.render(camera, spriteBatch, deltaTime));
 
         spriteBatch.setProjectionMatrix(originalMatrix);
-        font.draw(spriteBatch, Utils.secondsToDisplayString(sailingTime), Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() - 10, 0, Align.center, false);
+
+//        font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        font.getData().setScale(1.f); // TODO More is too pixelated. And FreeType is not available for web builds
+        switch (gameState) {
+            case WaitingToStart -> {
+                font.draw(spriteBatch, "Tap to begin!", Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() / 1.5f, 0, Align.center, false);
+            }
+            case Playing -> {
+                font.draw(spriteBatch, "Sailed for " + Utils.secondsToDisplayString(sailingTime), Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() - 10, 0, Align.center, false);
+            }
+            case GameOver -> {
+                font.draw(spriteBatch, "Sailed for " + Utils.secondsToDisplayString(sailingTime), Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() - 10, 0, Align.center, false);
+                font.draw(spriteBatch, "You lost, tap to restart!", Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() / 1.5f, 0, Align.center, false);
+            }
+        }
+
         spriteBatch.end();
 
         water.render(camera);
-
 
         renderImGui();
     }
@@ -434,7 +446,25 @@ public class CoreGame extends ApplicationAdapter {
     }
 
     public void handleInputs(OrthographicCamera camera) {
-        characters.forEach(character -> character.handleInputs(playerCharacter.getX()));
+        switch (gameState) {
+            case WaitingToStart -> {
+                if (Gdx.input.justTouched()) {
+                    gameState = GameState.Playing;
+                    playerCharacter = this.spawnCharacter(CharacterResources.getPlayerCharacterIndex(), false, charactersSpawnRangeX.getRandom(), charactersSpawnRangeY.getRandom());
+                }
+            }
+            case Playing -> {
+                characters.forEach(character -> character.handleInputs(playerCharacter.getX()));
+            }
+            case GameOver -> {
+                if (Gdx.input.justTouched()) {
+                    gameState = GameState.Playing;
+                    disposeCurrentLevel();
+                    createTestLevel();
+                    playerCharacter = this.spawnCharacter(CharacterResources.getPlayerCharacterIndex(), false, charactersSpawnRangeX.getRandom(), charactersSpawnRangeY.getRandom());
+                }
+            }
+        }
     }
 
     public void handleDebugInputs(OrthographicCamera camera) {
@@ -464,14 +494,13 @@ public class CoreGame extends ApplicationAdapter {
             if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
                 playerCharacter = this.spawnCharacter(CharacterResources.getPlayerCharacterIndex(), false, charactersSpawnRangeX.getRandom(), charactersSpawnRangeY.getRandom());
             }
-        }
 
-        if (Gdx.input.justTouched()) {
-            float xViewportPercent = (float) Gdx.input.getX() / (float) Gdx.graphics.getWidth();
-            float xWorld = xViewportPercent * Constants.VIEWPORT_WIDTH;
-            //TODO: remove
-            monster.tryEat(spawnCharacter(CharacterResources.getRandomCharacterIndex(), true, xWorld, water.getWaterLevel()));
-            water.handleInput(xWorld);
+            if (Gdx.input.justTouched()) {
+                float xViewportPercent = (float) Gdx.input.getX() / (float) Gdx.graphics.getWidth();
+                float xWorld = xViewportPercent * Constants.VIEWPORT_WIDTH;
+                monster.eat(spawnCharacter(CharacterResources.getRandomCharacterIndex(), true, xWorld, water.getWaterLevel()));
+                water.handleInput(xWorld);
+            }
         }
     }
 
@@ -482,15 +511,17 @@ public class CoreGame extends ApplicationAdapter {
         accumulator += frameTime;
         while (accumulator >= Constants.TIME_STEP) {
             characters.forEach(c -> c.update());
-            waveEmitter.update();
-            if (!gameOver) {
+            if (gameState == GameState.Playing || gameState == GameState.GameOver) {
+                waveEmitter.update();
+            }
+            if (gameState == GameState.Playing) {
                 characterSpawner.update();
             }
             water.update();
             world.step(Constants.TIME_STEP, Constants.VELOCITY_ITERATIONS, Constants.POSITION_ITERATIONS);
             final boolean upsideDownBoat = boat.update();
             if (upsideDownBoat) {
-                gameOver = true;
+                gameState = GameState.GameOver;
             }
             accumulator -= Constants.TIME_STEP;
         }
@@ -515,11 +546,28 @@ public class CoreGame extends ApplicationAdapter {
     }
 
     public Character spawnCharacter(int charIndex, boolean aiControlled, float x, float y) {
-        final var spawned = new Character(world, boat, water, charIndex, aiControlled, x, y, characterDensity, characterFriction, characterRestitution);
+        final var spawned = new Character(world, this, boat, water, charIndex, aiControlled, x, y, characterDensity, characterFriction, characterRestitution);
         characters.add(spawned);
         worldContactListener.addListener(spawned);
         CharacterResources.getInstance().getRandomSpawnSound().play(DEFAULT_AUDIO_VOLUME);
 
         return spawned;
+    }
+
+    public void playerDied() {
+        monster.eat(playerCharacter);
+        gameState = GameState.GameOver;
+    }
+
+    public void aiCharacterDied(Character character) {
+        if (!monster.eat(character)) {
+            // TODO
+        }
+    }
+
+    enum GameState {
+        WaitingToStart,
+        Playing,
+        GameOver
     }
 }

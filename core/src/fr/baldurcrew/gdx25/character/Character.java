@@ -11,8 +11,10 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Disposable;
 import fr.baldurcrew.gdx25.Constants;
+import fr.baldurcrew.gdx25.CoreGame;
 import fr.baldurcrew.gdx25.boat.Boat;
 import fr.baldurcrew.gdx25.character.ai.AiController;
+import fr.baldurcrew.gdx25.monster.Monster;
 import fr.baldurcrew.gdx25.physics.ContactHandler;
 import fr.baldurcrew.gdx25.physics.FixtureContact;
 import fr.baldurcrew.gdx25.water.WaterSimulation;
@@ -24,7 +26,8 @@ public class Character implements Disposable, ContactHandler { // TODO Remove Ac
 
     private static final float MAX_X_MOVEMENT_VELOCITY = 5f;
     private static final float IN_WATER_FOR_A_MOMENT_DURATION = 1.5f;
-    private static final float MAX_TIME_RECENT_BOAT_TOUCH = 2f;
+    private static final float MAX_TIME_RECENT_BOAT_TOUCH = 1.5f;
+    private static final float AI_CHARACTER_DISTANCE_KILL_THRESHOLD = 1.5f;
     private static final float PLAYER_SPRITE_SCALE = 1.3f;
     private static final float AI_DENSITY_FACTOR = 0.35f;
     private final boolean aiControlled;
@@ -53,10 +56,19 @@ public class Character implements Disposable, ContactHandler { // TODO Remove Ac
     private WaterSimulation water;
     private Vector2 boatContactPoint;
     private boolean isAlive;
+    private CoreGame game;
+    private boolean freezeX;
+    private float freezeToX;
+    private float yToBeEaten;
+    private boolean freezeY;
+    private float freezeToY;
+    private float deathByKrakenTranslationTimer;
+    private float startingY;
 
 
-    public Character(World world, Boat boat, WaterSimulation water, int charIndex, boolean aiControlled, float x, float y, float density, float friction, float restitution) {
+    public Character(World world, CoreGame game, Boat boat, WaterSimulation water, int charIndex, boolean aiControlled, float x, float y, float density, float friction, float restitution) {
         this.boat = boat;
+        this.game = game;
         this.water = water;
         this.charIndex = charIndex;
         this.aiControlled = aiControlled;
@@ -81,6 +93,8 @@ public class Character implements Disposable, ContactHandler { // TODO Remove Ac
         hasBeenInWaterForAMoment = false;
 
         isAlive = true;
+        freezeX = false;
+        freezeY = false;
     }
 
     private Body createBody(World world, float centerX, float centerY, float density, float friction, float restitution) {
@@ -175,6 +189,10 @@ public class Character implements Disposable, ContactHandler { // TODO Remove Ac
     }
 
     public void handleInputs(float playerX) {
+        moveState = MoveState.IDLE;
+
+        if (!isAlive) return;
+
         if (aiControlled) {
             moveState = ai.computeMoves(playerX, body.getPosition().x, hasTouchedBoatRecently);
         } else {
@@ -189,6 +207,17 @@ public class Character implements Disposable, ContactHandler { // TODO Remove Ac
     }
 
     public void update() {
+        deathByKrakenTranslationTimer += Gdx.graphics.getDeltaTime();
+        if (freezeX) {
+            var y = startingY + ((yToBeEaten - startingY) * (deathByKrakenTranslationTimer / Monster.UP_TRANSLATION_ANIMATION_DURATION));
+            body.setTransform(freezeToX, y, body.getAngle());
+        }
+        if (freezeY) {
+            body.setTransform(getX(), freezeToY, body.getAngle());
+        }
+
+        if (!isAlive) return;
+
         if (hasTouchedBoatRecently && !touchingBoat) {
             lastBoatTouchTimer += Constants.TIME_STEP;
             if (lastBoatTouchTimer >= MAX_TIME_RECENT_BOAT_TOUCH) {
@@ -209,15 +238,17 @@ public class Character implements Disposable, ContactHandler { // TODO Remove Ac
                 hasBeenInWaterForAMoment = true;
             }
         }
-        if (hasBeenInWaterForAMoment && !hasTouchedBoatRecently) {
-            // TODO Signal death
+        if (isAlive && hasBeenInWaterForAMoment && !hasTouchedBoatRecently) {
             isAlive = false;
             if (aiControlled) {
-                Gdx.app.log("Char", "Character died: " + this.ai.getType());
+                game.aiCharacterDied(this);
             } else {
-                Gdx.app.log("Char", "Player character died");
+                game.playerDied();
             }
-// TODO Kill threshold for aiControlled : too far from the boat = eaten or water takes him
+        }
+        if (isAlive && aiControlled && Math.abs(getX() - Constants.VIEWPORT_WIDTH / 2f) >= Boat.BOAT_WIDTH / 2f + AI_CHARACTER_DISTANCE_KILL_THRESHOLD) {
+            isAlive = false;
+            game.aiCharacterDied(this);
         }
 
         var velocity = body.getLinearVelocity();
@@ -311,6 +342,23 @@ public class Character implements Disposable, ContactHandler { // TODO Remove Ac
 
     public float getX() {
         return body.getPosition().x;
+    }
+
+    public void prepareToBeEaten(float yToBeEaten) {
+        this.freezeX = true;
+        this.freezeToX = this.getX();
+        this.startingY = this.getY();
+        this.yToBeEaten = yToBeEaten;
+        this.deathByKrakenTranslationTimer = 0;
+    }
+
+    private float getY() {
+        return body.getPosition().y;
+    }
+
+    public void freezeY(float y) {
+        this.freezeY = true;
+        this.freezeToY = y;
     }
 
     enum AnimationState {
