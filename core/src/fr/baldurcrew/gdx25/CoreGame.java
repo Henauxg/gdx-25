@@ -22,6 +22,7 @@ import fr.baldurcrew.gdx25.character.Character;
 import fr.baldurcrew.gdx25.character.CharacterResources;
 import fr.baldurcrew.gdx25.character.CharacterSpawner;
 import fr.baldurcrew.gdx25.layer.ParallaxLayer;
+import fr.baldurcrew.gdx25.monster.Monster;
 import fr.baldurcrew.gdx25.physics.WorldContactListener;
 import fr.baldurcrew.gdx25.utils.Range;
 import fr.baldurcrew.gdx25.utils.Utils;
@@ -38,6 +39,10 @@ import java.util.List;
 
 
 public class CoreGame extends ApplicationAdapter {
+    private static final Color CLEAR_COLOR = new Color(0.5f, 0.898f, 1, 1);
+    private static final Color DEBUG_CLEAR_COLOR = new Color(1f, 1f, 1f, 1f);
+    private static final int INITIAL_CHARACTER_COUNT = 1;
+    private static final float DEFAULT_AUDIO_VOLUME = 0.2f;
     public static final String LAYER_00 = "sky.png";
     public static final String LAYER_01 = "cloud_01.png";
     public static final String LAYER_02 = "cloud_02.png";
@@ -53,10 +58,8 @@ public class CoreGame extends ApplicationAdapter {
     public static final String LAYER_12 = "waves-4.png";
     public static final String LAYER_13 = "groundswell.png";
     public static final String LAYER_14 = "bedrock.png";
-    private static final Color CLEAR_COLOR = new Color(0.5f, 0.898f, 1, 1);
-    private static final Color DEBUG_CLEAR_COLOR = new Color(1f, 1f, 1f, 1f);
-    private static final int INITIAL_CHARACTER_COUNT = 1;
-    private static final float DEFAULT_AUDIO_VOLUME = 0.2f;
+
+
     public static boolean debugMode = true;
     public static boolean debugClearColor = false;
     public static boolean debugEnableCharacterGeneration = true;
@@ -67,7 +70,9 @@ public class CoreGame extends ApplicationAdapter {
     public static boolean debugEnableFakeWaterVelocity = true;
     public static boolean debugEnableLiftForce = true;
     public SpriteBatch spriteBatch;
-    private List<ParallaxLayer> parallaxLayers;
+    private List<ParallaxLayer> backgroundLayers;
+    private List<ParallaxLayer> foregroundLayers;
+
     private BitmapFont font;
     private World world;
     private OrthographicCamera camera;
@@ -77,6 +82,7 @@ public class CoreGame extends ApplicationAdapter {
     private WorldContactListener worldContactListener;
     private WaterSimulation water;
     private Boat boat;
+    private Monster monster;
     private Character playerCharacter;
     private WaveEmitter waveEmitter;
     private Music waveSounds;
@@ -142,24 +148,24 @@ public class CoreGame extends ApplicationAdapter {
     }
 
     private void createParallaxLayers() {
-        parallaxLayers = new ArrayList<>();
-        //parallaxLayers.add(new ParallaxLayer(new Texture("1.png"), 0.2f, true, false)); //front rock
-        //parallaxLayers.add(new ParallaxLayer(new Texture("3.png"), 0.5f, true, false)); //back rock
-        parallaxLayers.add(new ParallaxLayer(new Texture(LAYER_00), 0.3f, 0.8f, 0.12f, true, true, 0, 0)); // far cloud
-        parallaxLayers.add(new ParallaxLayer(new Texture(LAYER_01), 0.6f, 0.9f, 0.11f, true, false, 0, 0)); // cloud
-        parallaxLayers.add(new ParallaxLayer(new Texture(LAYER_02), 0.8f, 0.9f, 0.12f, true, false, 0, 0)); // cloud
-        parallaxLayers.add(new ParallaxLayer(new Texture(LAYER_03), 0.2f, 0.8f, -0.36f, true, false, 0, 0)); // far island
-        parallaxLayers.add(new ParallaxLayer(new Texture(LAYER_04), 0.4f, 0.9f, -0.40f, true, false, 1.2f, 0.15f)); // ocean
-        parallaxLayers.add(new ParallaxLayer(new Texture(LAYER_05), 0.4f, 0.4f, -0.22f, true, false, 3, 0.25f)); //sea
-        parallaxLayers.add(new ParallaxLayer(new Texture(LAYER_06), 0.7f, 0.9f, -0.34f, true, false, 0.5f, 0.01f)); // far island
-        parallaxLayers.add(new ParallaxLayer(new Texture(LAYER_07), 0.82f, 0.4f, -0.29f, true, false, 5, 0.2f)); //sea
-        parallaxLayers.add(new ParallaxLayer(new Texture(LAYER_08), 0.9f, 0.85f, -0.32f, true, false, 3, 0.05f)); //rock reef
-        parallaxLayers.add(new ParallaxLayer(new Texture(LAYER_09), 1f, 0.4f, -0.30f, true, false, 2, 0.1f)); //sea
-        parallaxLayers.add(new ParallaxLayer(new Texture(LAYER_10), 1.2f, 0.4f, -0.31f, true, false, 1, 0.2f)); //sea
-        parallaxLayers.add(new ParallaxLayer(new Texture(LAYER_11), 1.4f, 0.5f, -0.42f, true, false, 3, 0.05f));
-        parallaxLayers.add(new ParallaxLayer(new Texture(LAYER_12), 1.5f, 0.4f, -0.32f, true, false, 3, 0.25f)); //sea
-        parallaxLayers.add(new ParallaxLayer(new Texture(LAYER_13), 1.8f, 0.9f, -0.52f, true, false, 0, 0)); //rock reef
-        parallaxLayers.add(new ParallaxLayer(new Texture(LAYER_14), 2f, 0.3f, -0.96f, true, false, 0, 0)); //rock bottom
+        backgroundLayers = new ArrayList<>();
+        foregroundLayers = new ArrayList<>();
+
+        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_00), 0.3f, 0.8f, 0.12f, true, true, 0, 0)); // far cloud
+        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_01), 0.6f, 0.9f, 0.11f, true, false, 0, 0)); // cloud
+        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_02), 0.8f, 0.9f, 0.12f, true, false, 0, 0)); // cloud
+        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_03), 0.2f, 0.8f, -0.36f, true, false, 0, 0)); // far island
+        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_04), 0.4f, 0.9f, -0.40f, true, false, 1.2f, 0.15f)); // ocean
+        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_05), 0.4f, 0.4f, -0.22f, true, false, 3, 0.25f)); //sea
+        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_06), 0.7f, 0.9f, -0.34f, true, false, 0.5f, 0.01f)); // far island
+        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_07), 0.82f, 0.4f, -0.29f, true, false, 5, 0.2f)); //sea
+        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_08), 0.9f, 0.85f, -0.32f, true, false, 3, 0.05f)); //rock reef
+        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_09), 1f, 0.4f, -0.30f, true, false, 2, 0.1f)); //sea
+        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_10), 1.2f, 0.4f, -0.31f, true, false, 1, 0.2f)); //sea
+        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_11), 1.4f, 0.5f, -0.42f, true, false, 3, 0.05f));
+        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_12), 1.5f, 0.4f, -0.32f, true, false, 3, 0.25f)); //sea
+        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_13), 1.8f, 0.9f, -0.52f, true, false, 0, 0)); //rock reef
+        foregroundLayers.add(new ParallaxLayer(new Texture(LAYER_14), 2f, 0.3f, -0.96f, true, false, 0, 0)); //rock bottom
     }
 
     private void createImGui() {
@@ -204,6 +210,9 @@ public class CoreGame extends ApplicationAdapter {
         playerCharacter = this.spawnCharacter(CharacterResources.getPlayerCharacterIndex(), false, charactersSpawnRangeX.getRandom(), charactersSpawnRangeY.getRandom());
 //        }
         characterSpawner = new CharacterSpawner(this, charactersSpawnRangeX, charactersSpawnRangeY, Range.buildRangeEx(Difficulty.MIN_AI_SPAWN_PERIOD_AT_MIN_SCALING, Difficulty.MAX_AI_SPAWN_PERIOD_AT_MIN_SCALING));
+
+        monster = new Monster();
+
 
         sailingTime = 0;
         difficultyFactor = 1;
@@ -268,10 +277,11 @@ public class CoreGame extends ApplicationAdapter {
 
         Matrix4 originalMatrix = spriteBatch.getProjectionMatrix().cpy();
         spriteBatch.setProjectionMatrix(camera.combined);
-        parallaxLayers.forEach(l -> l.render(camera, spriteBatch, deltaTime));
-
+        backgroundLayers.forEach(l -> l.render(camera, spriteBatch, deltaTime));
         boat.render(camera, spriteBatch);
         characters.forEach(character -> character.render(camera, spriteBatch));
+        monster.render(camera, spriteBatch);
+        foregroundLayers.forEach(l -> l.render(camera, spriteBatch, deltaTime));
 
         spriteBatch.setProjectionMatrix(originalMatrix);
         font.draw(spriteBatch, Utils.secondsToDisplayString(sailingTime), Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() - 10, 0, Align.center, false);
@@ -461,7 +471,8 @@ public class CoreGame extends ApplicationAdapter {
         if (Gdx.input.justTouched()) {
             float xViewportPercent = (float) Gdx.input.getX() / (float) Gdx.graphics.getWidth();
             float xWorld = xViewportPercent * Constants.VIEWPORT_WIDTH;
-
+            //TODO: remove
+            monster.tryEat(spawnCharacter(CharacterResources.getRandomCharacterIndex(),true,xWorld, water.getWaterLevel()));
             water.handleInput(xWorld);
         }
     }
