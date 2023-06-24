@@ -16,7 +16,7 @@ public class Monster {
 
     private static final int FRAME_COLS = 7, FRAME_ROWS = 1;
     private static final String imagePath = "tentacle.png";
-    private static final int SPAWN_SOUNDS_COUNT = 3;
+    private static final int SPAWN_SOUNDS_COUNT = 2;
     Animation<TextureRegion> tentacleAnimation;
     Texture tentacleSheet;
     float animationTime;
