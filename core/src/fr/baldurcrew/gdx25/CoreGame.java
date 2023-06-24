@@ -561,7 +561,7 @@ public class CoreGame extends ApplicationAdapter {
 
     public void aiCharacterDied(Character character) {
         if (!monster.eat(character)) {
-            // TODO
+            // TODO Faudrait les despawn un jour :)
         }
     }
 
