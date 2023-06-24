@@ -42,7 +42,7 @@ public class CharacterResources {
         });
 
         spawnSounds = new Sound[SPAWN_SOUNDS_COUNT];
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < SPAWN_SOUNDS_COUNT; i++) {
             spawnSounds[i] = Gdx.audio.newSound(Gdx.files.internal("weee_" + i + ".mp3"));
         }
     }
