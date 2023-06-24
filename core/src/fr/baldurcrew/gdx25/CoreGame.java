@@ -67,6 +67,7 @@ public class CoreGame extends ApplicationAdapter {
     public static boolean debugEnableWaterDrag = true;
     public static boolean debugEnableFakeWaterVelocity = true;
     public static boolean debugEnableLiftForce = true;
+    public static boolean debugEnableImGui = false;
     public SpriteBatch spriteBatch;
     private List<ParallaxLayer> backgroundLayers;
     private List<ParallaxLayer> foregroundLayers;
@@ -120,6 +121,7 @@ public class CoreGame extends ApplicationAdapter {
     private float[] uiWaveEmitterPeriodRange = new float[2];
     private float[] uiSailingTime = new float[1];
     private GameState gameState;
+
 
     @Override
     public void create() {
@@ -307,7 +309,9 @@ public class CoreGame extends ApplicationAdapter {
         imGuiGlfw.newFrame();
         ImGui.newFrame();
         // --- ImGUI draw commands go here ---
-        drawUI();
+        if (debugEnableImGui) {
+            drawUI();
+        }
         // ---
         ImGui.render();
         imGuiGl3.renderDrawData(ImGui.getDrawData());
@@ -471,36 +475,15 @@ public class CoreGame extends ApplicationAdapter {
         if (Gdx.input.isKeyJustPressed(Input.Keys.F1)) {
             debugMode = !debugMode;
         }
-        if (debugMode) {
-            if (Gdx.input.isKeyJustPressed(Input.Keys.F2)) {
-                debugEnableWaterRendering = !debugEnableWaterRendering;
-            }
-            if (Gdx.input.isKeyJustPressed(Input.Keys.F3)) {
-                debugEnableBoatRendering = !debugEnableBoatRendering;
-            }
-            if (Gdx.input.isKeyJustPressed(Input.Keys.F4)) {
-                debugClearColor = !debugClearColor;
-            }
-            if (Gdx.input.isKeyJustPressed(Input.Keys.F5)) {
-                debugEnableWaveGeneration = !debugEnableWaveGeneration;
-            }
-            if (Gdx.input.isKeyJustPressed(Input.Keys.F6)) {
-                debugEnableCharacterGeneration = !debugEnableCharacterGeneration;
-            }
-            if (Gdx.input.isKeyJustPressed(Input.Keys.F12)) {
-                disposeCurrentLevel();
-                createTestLevel();
-            }
-            if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-                playerCharacter = this.spawnCharacter(CharacterResources.getPlayerCharacterIndex(), false, charactersSpawnRangeX.getRandom(), charactersSpawnRangeY.getRandom());
-            }
-
-            if (Gdx.input.justTouched()) {
-                float xViewportPercent = (float) Gdx.input.getX() / (float) Gdx.graphics.getWidth();
-                float xWorld = xViewportPercent * Constants.VIEWPORT_WIDTH;
-                monster.eat(spawnCharacter(CharacterResources.getRandomCharacterIndex(), true, xWorld, water.getWaterLevel()));
-                water.handleInput(xWorld);
-            }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F2)) {
+            debugEnableImGui = !debugEnableImGui;
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F3)) {
+            disposeCurrentLevel();
+            createTestLevel();
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F4)) {
+            playerCharacter = this.spawnCharacter(CharacterResources.getPlayerCharacterIndex(), false, charactersSpawnRangeX.getRandom(), charactersSpawnRangeY.getRandom());
         }
     }
 
