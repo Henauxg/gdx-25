@@ -6,6 +6,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Disposable;
 import fr.baldurcrew.gdx25.CoreGame;
+import fr.baldurcrew.gdx25.Difficulty;
 import fr.baldurcrew.gdx25.physics.ContactHandler;
 import fr.baldurcrew.gdx25.physics.FixtureContact;
 import fr.baldurcrew.gdx25.utils.Range;
@@ -41,13 +42,13 @@ public class WaterSimulation implements Disposable, ContactHandler {
 
     // TODO Tweak
     private int wavesPropagationPasses = 4; // 8
-    private float wavesPropagationSpreadFactor = 0.2f;
-    private float springsStiffness = 0.005f; // TODO Reduce
+    private float wavesPropagationSpreadFactor = Difficulty.WAVE_SPREAD_FACTOR_AT_MIN_SCALING;
+    private float springsStiffness = 0.005f;
     private float springsDampeningFactor = 0.025f;
     private float baseWaterLevel = 5f;
     private float waterDensity = 1.0f;
-    private float fakeWaterVelocityX = 15;
-    private float fakeWaterVelocityY = 0;
+    private float fakeWaterVelocityX = Difficulty.FAKE_WATER_VELOCITY_X_AT_MIN_SCALING;
+    private float fakeWaterVelocityY = Difficulty.FAKE_WATER_VELOCITY_Y_AT_MIN_SCALING;
 
 
     /**
