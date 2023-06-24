@@ -1,5 +1,6 @@
 package fr.baldurcrew.gdx25.character.ai;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
 import fr.baldurcrew.gdx25.character.Character;
 
@@ -9,6 +10,8 @@ public class StalkerAiController extends AiController {
 
     private State state;
     private float targetX;
+    private float waitingTimer;
+    private float waitDuration;
 
     public StalkerAiController(CharacterAiType aiType) {
         super(aiType);
@@ -22,7 +25,9 @@ public class StalkerAiController extends AiController {
         switch (state) {
             case RunningToPos: {
                 if ((currentDirection == Character.MoveState.RIGHT && posX > targetX) || (currentDirection == Character.MoveState.LEFT && posX < targetX)) {
-                    state = State.ChoosingTargetPosition;
+                    state = State.Waiting;
+                    waitingTimer = 0f;
+                    waitDuration = MathUtils.random(0.2f, 1.4f);
                     moveState = Character.MoveState.IDLE;
                 } else {
                     if (targetX > posX) {
@@ -30,6 +35,14 @@ public class StalkerAiController extends AiController {
                     } else {
                         moveState = Character.MoveState.LEFT;
                     }
+                }
+            }
+            break;
+            case Waiting: {
+                moveState = Character.MoveState.IDLE;
+                waitingTimer += Gdx.graphics.getDeltaTime();
+                if (waitingTimer >= waitDuration) {
+                    state = State.ChoosingTargetPosition;
                 }
             }
             break;
@@ -49,6 +62,7 @@ public class StalkerAiController extends AiController {
 
     enum State {
         RunningToPos,
+        Waiting,
         ChoosingTargetPosition
     }
 }
