@@ -43,4 +43,8 @@ public abstract class AiController {
     }
 
     public abstract Character.MoveState computeMoves(float playerX, float posX, boolean touchedBoatRecently);
+
+    public CharacterAiType getType() {
+        return aiType;
+    }
 }
