@@ -1,5 +1,6 @@
 package fr.baldurcrew.gdx25.character.ai;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
 import fr.baldurcrew.gdx25.character.Character;
 
@@ -9,6 +10,8 @@ public class StalkerAiController extends AiController {
 
     private State state;
     private float targetX;
+    private float waitingTimer;
+    private float waitDuration;
 
     public StalkerAiController(CharacterAiType aiType) {
         super(aiType);
@@ -18,11 +21,13 @@ public class StalkerAiController extends AiController {
 
     @Override
     public Character.MoveState computeMoves(float playerX, float posX, boolean touchedBoatRecently) {
-        var moveState = Character.MoveState.IDLE;
+        Character.MoveState moveState = Character.MoveState.IDLE;
         switch (state) {
-            case RunningToPos -> {
+            case RunningToPos: {
                 if ((currentDirection == Character.MoveState.RIGHT && posX > targetX) || (currentDirection == Character.MoveState.LEFT && posX < targetX)) {
-                    state = State.ChoosingTargetPosition;
+                    state = State.Waiting;
+                    waitingTimer = 0f;
+                    waitDuration = MathUtils.random(0.2f, 1.4f);
                     moveState = Character.MoveState.IDLE;
                 } else {
                     if (targetX > posX) {
@@ -32,7 +37,16 @@ public class StalkerAiController extends AiController {
                     }
                 }
             }
-            case ChoosingTargetPosition -> {
+            break;
+            case Waiting: {
+                moveState = Character.MoveState.IDLE;
+                waitingTimer += Gdx.graphics.getDeltaTime();
+                if (waitingTimer >= waitDuration) {
+                    state = State.ChoosingTargetPosition;
+                }
+            }
+            break;
+            case ChoosingTargetPosition: {
                 targetX = MathUtils.random(playerX - RANDOM_SEEK_AREA, playerX + RANDOM_SEEK_AREA);
                 if (targetX > posX) {
                     currentDirection = Character.MoveState.RIGHT;
@@ -41,12 +55,14 @@ public class StalkerAiController extends AiController {
                 }
                 state = State.RunningToPos;
             }
+            break;
         }
         return moveState;
     }
 
     enum State {
         RunningToPos,
+        Waiting,
         ChoosingTargetPosition
     }
 }
