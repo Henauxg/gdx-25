@@ -57,6 +57,7 @@ public class Character implements Disposable, ContactHandler { // TODO Remove Ac
     private Vector2 boatContactPoint;
     private boolean isAlive;
     private CoreGame game;
+    private MoveState brainOverride;
     private boolean freezeX;
     private float freezeToX;
     private float yToBeEaten;
@@ -134,8 +135,37 @@ public class Character implements Disposable, ContactHandler { // TODO Remove Ac
             footSensor.shape = footSensorPolygon;
             footSensor.isSensor = true;
 
-            body.createFixture(footSensor);
+            Fixture footSensorsFixture = body.createFixture(footSensor);
+            footSensorsFixture.setUserData(CharacterSensors.Foot);
             footSensorPolygon.dispose();
+        }
+        final float sideSensorWidth = CharacterResources.CHARACTER_WIDTH / 10f;
+        final float sideSensorHeight = CharacterResources.CHARACTER_HEIGHT / 2f * 0.5f;
+        {
+            final PolygonShape leftSideSensorPolygon = new PolygonShape();
+            final FixtureDef leftSideSensor = new FixtureDef();
+
+            leftSideSensorPolygon.setAsBox(sideSensorWidth, sideSensorHeight, new Vector2(-CharacterResources.CHARACTER_WIDTH / 2f, CharacterResources.CHARACTER_HEIGHT / 4f), 0f);
+
+            leftSideSensor.shape = leftSideSensorPolygon;
+            leftSideSensor.isSensor = true;
+
+            Fixture leftSideSensorFixture = body.createFixture(leftSideSensor);
+            leftSideSensorFixture.setUserData(CharacterSensors.Left);
+            leftSideSensorPolygon.dispose();
+        }
+        {
+            final PolygonShape rightSideSensorPolygon = new PolygonShape();
+            final FixtureDef rightSideSensor = new FixtureDef();
+
+            rightSideSensorPolygon.setAsBox(sideSensorWidth, sideSensorHeight, new Vector2(CharacterResources.CHARACTER_WIDTH / 2f, CharacterResources.CHARACTER_HEIGHT / 4f), 0f);
+
+            rightSideSensor.shape = rightSideSensorPolygon;
+            rightSideSensor.isSensor = true;
+
+            Fixture rigthSideSensorFixture = body.createFixture(rightSideSensor);
+            rigthSideSensorFixture.setUserData(CharacterSensors.Right);
+            rightSideSensorPolygon.dispose();
         }
 
         return body;
@@ -195,10 +225,14 @@ public class Character implements Disposable, ContactHandler { // TODO Remove Ac
             moveState = MoveState.SWIM;
             return;
         }
-        ;
 
         if (aiControlled) {
             moveState = ai.computeMoves(playerX, body.getPosition().x, hasTouchedBoatRecently);
+            if (brainOverride != null) {
+                moveState = brainOverride;
+            } else {
+                moveState = ai.computeMoves(playerX, body.getPosition().x, hasTouchedBoatRecently);
+            }
         } else {
             moveState = MoveState.IDLE;
             if (Gdx.input.isTouched()) {
@@ -342,11 +376,18 @@ public class Character implements Disposable, ContactHandler { // TODO Remove Ac
     @Override
     public void handleContactBegin(FixtureContact contact) {
         if (contact.otherFixture.getBody().getUserData() == boat) {
-            touchingBoat = true;
-            hasTouchedBoatRecently = true;
-            lastBoatTouchTimer = 0;
+            if (contact.handledFixture.isSensor() && contact.handledFixture.getUserData() == CharacterSensors.Foot) {
+                touchingBoat = true;
+                hasTouchedBoatRecently = true;
+                lastBoatTouchTimer = 0;
+            } else if (contact.handledFixture.isSensor() && contact.handledFixture.getUserData() == CharacterSensors.Left) {
+                // Quick & dirty hack : disable AI when it's on the boat's sides to prevent the AI physics from flipping it instantly
+                brainOverride = MoveState.RIGHT;
+            } else if (contact.handledFixture.isSensor() && contact.handledFixture.getUserData() == CharacterSensors.Right) {
+                brainOverride = MoveState.IDLE;
+            }
         }
-        if (contact.otherFixture.getBody().getUserData() == water) {
+        if (!contact.handledFixture.isSensor() && contact.otherFixture.getBody().getUserData() == water) {
             contactWaterFixtures.add(contact.otherFixture);
             touchingWater = true;
         }
@@ -354,17 +395,17 @@ public class Character implements Disposable, ContactHandler { // TODO Remove Ac
 
     @Override
     public void handleContactEnd(FixtureContact contact) {
-        if (contact.otherFixture.getBody().getUserData() == boat) {
+        if (!contact.handledFixture.isSensor() && contact.otherFixture.getBody().getUserData() == boat) {
             touchingBoat = false;
         }
-        if (contact.otherFixture.getBody().getUserData() == water) {
+        if (!contact.handledFixture.isSensor() && contact.otherFixture.getBody().getUserData() == water) {
             contactWaterFixtures.remove(contact.otherFixture);
         }
     }
 
     @Override
     public void handlePreSolve(Contact contact, FixtureContact fixtures) {
-        if (fixtures.otherFixture.getBody().getUserData() == boat) {
+        if (!fixtures.handledFixture.isSensor() && fixtures.otherFixture.getBody().getUserData() == boat) {
             if (contact.getWorldManifold().getNumberOfContactPoints() > 0) {
                 boatContactPoint = contact.getWorldManifold().getPoints()[0];
             }
@@ -390,6 +431,10 @@ public class Character implements Disposable, ContactHandler { // TODO Remove Ac
     public void freezeY(float y) {
         this.freezeY = true;
         this.freezeToY = y;
+    }
+
+    enum CharacterSensors {
+        Left, Right, Foot
     }
 
     enum AnimationState {
