@@ -23,7 +23,7 @@ public class Monster {
     private static final float TENTACLE_HEIGHT = 5f;
     private static final float TENTACLE_HIGH_POSITION_Y = -1f;
     private static final float TENTACLE_LOW_POSITION_Y = -TENTACLE_HEIGHT;
-    private static final float TENTACLE_GRAB_Y_FACTOR = 0.8f;
+    private static final float TENTACLE_GRAB_Y_FACTOR = 0.85f;
     Animation<TextureRegion> tentacleAnimation;
     Texture tentacleSheet;
     float animationTime;
