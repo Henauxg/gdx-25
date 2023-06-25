@@ -121,6 +121,8 @@ public class CoreGame extends ApplicationAdapter {
     private float[] uiWaveEmitterPeriodRange = new float[2];
     private float[] uiSailingTime = new float[1];
     private GameState gameState;
+    private Texture lostText;
+    private Texture beginText;
 
 
     @Override
@@ -129,6 +131,9 @@ public class CoreGame extends ApplicationAdapter {
 
         waveSounds = Gdx.audio.newMusic(Gdx.files.internal("nice_waves.mp3"));
         music = Gdx.audio.newMusic(Gdx.files.internal("DasLiedderSturme.mp3"));
+        lostText = new Texture("lost.png");
+        beginText = new Texture("begin.png");
+
         camera = new OrthographicCamera();
         camera.setToOrtho(false, Constants.VIEWPORT_WIDTH, Constants.VIEWPORT_HEIGHT);
 
@@ -272,35 +277,33 @@ public class CoreGame extends ApplicationAdapter {
         }
 
         spriteBatch.begin();
-
-        Matrix4 originalMatrix = spriteBatch.getProjectionMatrix().cpy();
         spriteBatch.setProjectionMatrix(camera.combined);
         backgroundLayers.forEach(l -> l.render(camera, spriteBatch, deltaTime));
         boat.render(camera, spriteBatch);
         characters.forEach(character -> character.render(camera, spriteBatch));
         monster.render(camera, spriteBatch);
         foregroundLayers.forEach(l -> l.render(camera, spriteBatch, deltaTime));
-
-        spriteBatch.setProjectionMatrix(originalMatrix);
-
-//        font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-        font.getData().setScale(1.f); // TODO More is too pixelated. And FreeType is not available for web builds
-        switch (gameState) {
-            case WaitingToStart -> {
-                font.draw(spriteBatch, "Tap to begin!", Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() / 1.5f, 0, Align.center, false);
-            }
-            case Playing -> {
-                font.draw(spriteBatch, "Sailed for " + Utils.secondsToDisplayString(sailingTime), Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() - 10, 0, Align.center, false);
-            }
-            case GameOver -> {
-                font.draw(spriteBatch, "Sailed for " + Utils.secondsToDisplayString(sailingTime), Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() - 10, 0, Align.center, false);
-                font.draw(spriteBatch, "You lost, tap to restart!", Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() / 1.5f, 0, Align.center, false);
-            }
-        }
-
         spriteBatch.end();
 
         water.render(camera);
+
+        spriteBatch.begin();
+        var textAsTextureRenderWidth = 8f;
+        var textAsTextureRenderHeight = textAsTextureRenderWidth / 4f;
+        switch (gameState) {
+            case WaitingToStart -> {
+                spriteBatch.draw(beginText, camera.viewportWidth / 2f - textAsTextureRenderWidth / 2f, camera.viewportHeight / 4f, textAsTextureRenderWidth, textAsTextureRenderHeight);
+            }
+            case Playing -> {
+                // TODO Timer as texture
+//                font.draw(spriteBatch, "Sailed for " + Utils.secondsToDisplayString(sailingTime), Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() - 10, 0, Align.center, false);
+            }
+            case GameOver -> {
+                font.draw(spriteBatch, "Sailed for " + Utils.secondsToDisplayString(sailingTime), Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() - 10, 0, Align.center, false);
+                spriteBatch.draw(lostText, camera.viewportWidth / 2f - textAsTextureRenderWidth / 2f, camera.viewportHeight / 4f, textAsTextureRenderWidth, textAsTextureRenderHeight);
+            }
+        }
+        spriteBatch.end();
 
         renderImGui();
     }
