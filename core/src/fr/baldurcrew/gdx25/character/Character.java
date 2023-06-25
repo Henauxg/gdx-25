@@ -311,7 +311,7 @@ public class Character implements Disposable, ContactHandler { // TODO Remove Ac
             isAlive = false;
             game.aiCharacterDied(this);
         }
-        if (isAlive && !aiControlled && Math.abs(getX() - Constants.VIEWPORT_WIDTH / 2f) >= Boat.BOAT_WIDTH) {
+        if (isAlive && !aiControlled && Math.abs(getX() - Constants.VIEWPORT_WIDTH / 2f) >= 1.5f * Boat.BOAT_WIDTH) {
             isAlive = false;
             game.playerDied();
         }
