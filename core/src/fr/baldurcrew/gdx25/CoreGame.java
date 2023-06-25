@@ -9,12 +9,10 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Box2D;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
-import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import fr.baldurcrew.gdx25.boat.Boat;
 import fr.baldurcrew.gdx25.character.Character;
@@ -23,8 +21,8 @@ import fr.baldurcrew.gdx25.character.CharacterSpawner;
 import fr.baldurcrew.gdx25.layer.ParallaxLayer;
 import fr.baldurcrew.gdx25.monster.Monster;
 import fr.baldurcrew.gdx25.physics.WorldContactListener;
+import fr.baldurcrew.gdx25.utils.NumericRenderer;
 import fr.baldurcrew.gdx25.utils.Range;
-import fr.baldurcrew.gdx25.utils.Utils;
 import fr.baldurcrew.gdx25.water.WaterSimulation;
 import fr.baldurcrew.gdx25.water.WaveEmitter;
 
@@ -69,6 +67,9 @@ public class CoreGame extends ApplicationAdapter {
     private World world;
     private OrthographicCamera camera;
     private Box2DDebugRenderer debugRenderer;
+    private Texture lostText;
+    private Texture beginText;
+    private NumericRenderer timerRenderer;
     private List<Character> characters;
     private float accumulator = 0;
     private WorldContactListener worldContactListener;
@@ -121,6 +122,10 @@ public class CoreGame extends ApplicationAdapter {
 
         waveSounds = Gdx.audio.newMusic(Gdx.files.internal("nice_waves.mp3"));
         music = Gdx.audio.newMusic(Gdx.files.internal("DasLiedderSturme.mp3"));
+        lostText = new Texture("lost.png");
+        beginText = new Texture("begin.png");
+        timerRenderer = new NumericRenderer();
+
         camera = new OrthographicCamera();
         camera.setToOrtho(false, Constants.VIEWPORT_WIDTH, Constants.VIEWPORT_HEIGHT);
 
@@ -264,38 +269,32 @@ public class CoreGame extends ApplicationAdapter {
         }
 
         spriteBatch.begin();
-
-        Matrix4 originalMatrix = spriteBatch.getProjectionMatrix().cpy();
         spriteBatch.setProjectionMatrix(camera.combined);
         backgroundLayers.forEach(l -> l.render(camera, spriteBatch, deltaTime));
         boat.render(camera, spriteBatch);
         characters.forEach(character -> character.render(camera, spriteBatch));
         monster.render(camera, spriteBatch);
         foregroundLayers.forEach(l -> l.render(camera, spriteBatch, deltaTime));
-
-        spriteBatch.setProjectionMatrix(originalMatrix);
-
-//        font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-        font.getData().setScale(1.f); // TODO More is too pixelated. And FreeType is not available for web builds
-        switch (gameState) {
-            case WaitingToStart: {
-                font.draw(spriteBatch, "Tap to begin!", Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() / 1.5f, 0, Align.center, false);
-            }
-            break;
-            case Playing: {
-                font.draw(spriteBatch, "Sailed for " + Utils.secondsToDisplayString(sailingTime), Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() - 10, 0, Align.center, false);
-            }
-            break;
-            case GameOver: {
-                font.draw(spriteBatch, "Sailed for " + Utils.secondsToDisplayString(sailingTime), Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() - 10, 0, Align.center, false);
-                font.draw(spriteBatch, "You lost, tap to restart!", Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() / 1.5f, 0, Align.center, false);
-            }
-            break;
-        }
-
         spriteBatch.end();
 
         water.render(camera);
+
+        spriteBatch.begin();
+        var textAsTextureRenderWidth = 10f;
+        var textAsTextureRenderHeight = textAsTextureRenderWidth / 4f;
+        switch (gameState) {
+            case WaitingToStart -> {
+                spriteBatch.draw(beginText, camera.viewportWidth / 2f - textAsTextureRenderWidth / 2f, camera.viewportHeight / 4f, textAsTextureRenderWidth, textAsTextureRenderHeight);
+            }
+            case Playing -> {
+                timerRenderer.renderTimer(spriteBatch, camera.viewportWidth / 2f, camera.viewportHeight * 0.9f, 1.5f, sailingTime);
+            }
+            case GameOver -> {
+                timerRenderer.renderTimer(spriteBatch, camera.viewportWidth / 2f, camera.viewportHeight * 0.9f, 1.5f, sailingTime);
+                spriteBatch.draw(lostText, camera.viewportWidth / 2f - textAsTextureRenderWidth / 2f, camera.viewportHeight / 4f, textAsTextureRenderWidth, textAsTextureRenderHeight);
+            }
+        }
+        spriteBatch.end();
 
 //        renderImGui();
     }
@@ -538,6 +537,9 @@ public class CoreGame extends ApplicationAdapter {
     @Override
     public void dispose() {
         debugRenderer.dispose();
+        timerRenderer.dispose();
+        beginText.dispose();
+        lostText.dispose();
         disposeCurrentLevel();
 //        imGuiGl3.dispose();
 //        imGuiGlfw.dispose();
