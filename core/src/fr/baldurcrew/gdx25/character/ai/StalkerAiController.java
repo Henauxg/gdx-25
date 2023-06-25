@@ -6,7 +6,7 @@ import fr.baldurcrew.gdx25.character.Character;
 
 public class StalkerAiController extends AiController {
 
-    private static final float RANDOM_SEEK_AREA = 0.6f;
+    private static final float RANDOM_SEEK_AREA = 0.5f;
 
     private State state;
     private float targetX;
@@ -25,10 +25,14 @@ public class StalkerAiController extends AiController {
         switch (state) {
             case RunningToPos: {
                 if ((currentDirection == Character.MoveState.RIGHT && posX > targetX) || (currentDirection == Character.MoveState.LEFT && posX < targetX)) {
-                    state = State.Waiting;
-                    waitingTimer = 0f;
-                    waitDuration = MathUtils.random(0.2f, 1.4f);
                     moveState = Character.MoveState.IDLE;
+                    if (Math.abs(playerX - posX) > RANDOM_SEEK_AREA) {
+                        state = State.ChoosingTargetPosition;
+                    } else {
+                        state = State.Waiting;
+                        waitingTimer = 0f;
+                        waitDuration = MathUtils.random(0.2f, 0.5f);
+                    }
                 } else {
                     if (targetX > posX) {
                         moveState = Character.MoveState.RIGHT;
@@ -61,8 +65,6 @@ public class StalkerAiController extends AiController {
     }
 
     enum State {
-        RunningToPos,
-        Waiting,
-        ChoosingTargetPosition
+        RunningToPos, Waiting, ChoosingTargetPosition
     }
 }
