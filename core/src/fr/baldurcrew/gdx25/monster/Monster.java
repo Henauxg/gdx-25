@@ -23,6 +23,7 @@ public class Monster {
     private static final float TENTACLE_HEIGHT = 5f;
     private static final float TENTACLE_HIGH_POSITION_Y = -1f;
     private static final float TENTACLE_LOW_POSITION_Y = -TENTACLE_HEIGHT;
+    private static final float TENTACLE_GRAB_Y_FACTOR = 0.8f;
     Animation<TextureRegion> tentacleAnimation;
     Texture tentacleSheet;
     float animationTime;
@@ -89,7 +90,7 @@ public class Monster {
             case DOWN_TRANSLATION -> {
                 animationTime += Gdx.graphics.getDeltaTime();
                 yTentacle = TENTACLE_HIGH_POSITION_Y + animationTime * (TENTACLE_LOW_POSITION_Y - TENTACLE_HIGH_POSITION_Y) / DOWN_TRANSLATION_ANIMATION_DURATION;
-                currentMeal.freezeY(yTentacle + TENTACLE_HEIGHT * 0.95f);
+                currentMeal.freezeY(yTentacle + TENTACLE_HEIGHT * TENTACLE_GRAB_Y_FACTOR);
                 if (animationTime >= DOWN_TRANSLATION_ANIMATION_DURATION) {
                     state = AnimationState.IDLE;
                     animationTime = 0;
@@ -107,11 +108,10 @@ public class Monster {
             return false;
         }
         currentMeal = character;
-        character.prepareToBeEaten(TENTACLE_HEIGHT + TENTACLE_HIGH_POSITION_Y);
+        character.prepareToBeEaten(TENTACLE_GRAB_Y_FACTOR * TENTACLE_HEIGHT + TENTACLE_HIGH_POSITION_Y);
         getRandomSpawnSound().play(DEFAULT_AUDIO_VOLUME);
         state = AnimationState.UP_TRANSLATION;
         idleTentacleFrame = tentacleAnimation.getKeyFrames()[0];
-        //TODO: May need a delta
         xTentacle = character.getX() - TENTACLE_WIDTH / 2f;
         yTentacle = -TENTACLE_HEIGHT;
         animationTime = 0;
