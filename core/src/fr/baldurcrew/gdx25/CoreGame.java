@@ -154,7 +154,6 @@ public class CoreGame extends ApplicationAdapter {
 //        Texture skyTexture =
         backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_00), 0.3f, 1.05f, 0.05f, true, true, 0, 0)); // far cloud
         backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_01), 0.6f, 0.9f, 0.12f, true, false, 0, 0)); // cloud
-        backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_02), 0.8f, 0.9f, 0.18f, true, false, 0, 0)); // cloud
         backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_03), 0.2f, 0.75f, -0.31f, true, false, 0, 0)); // far island
         backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_04), 0.4f, 0.9f, -0.35f, true, false, 1.2f, 0.15f)); // ocean
         backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_05), 0.4f, 0.4f, -0.45f, true, false, 3, 0.25f)); //sea
@@ -166,6 +165,8 @@ public class CoreGame extends ApplicationAdapter {
         backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_11), 1.4f, 0.46f, -0.39f, true, false, 3, 0.05f));
         backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_12), 1.5f, 0.6f, -0.53f, true, false, 3, 0.25f)); //sea
         backgroundLayers.add(new ParallaxLayer(new Texture(LAYER_13), 1.8f, 0.9f, -0.49f, true, false, 0, 0)); //rock reef
+
+        foregroundLayers.add(new ParallaxLayer(new Texture(LAYER_02), 0.8f, 0.9f, 0.18f, true, false, 0, 0)); // cloud
         foregroundLayers.add(new ParallaxLayer(new Texture(LAYER_14), 2f, 0.3f, -0.91f, true, false, 0, 0)); //rock bottom
     }
 
@@ -203,7 +204,8 @@ public class CoreGame extends ApplicationAdapter {
 
         final float charsSpawnPadding = Boat.BOAT_WIDTH * 0.2f;
         charactersSpawnRangeX = waterSimulationRange.buildSubRange(waterSimulationRange.halfExtent - Boat.BOAT_WIDTH / 2f + charsSpawnPadding, Boat.BOAT_WIDTH - 2 * charsSpawnPadding);
-        charactersSpawnRangeY = Range.buildRangeEx(water.getWaterLevel() + Boat.BOAT_HEIGHT / 2f, water.getWaterLevel() + Boat.BOAT_HEIGHT * 1.5f);
+//        charactersSpawnRangeY = Range.buildRangeEx(water.getWaterLevel() + Boat.BOAT_HEIGHT / 2f, water.getWaterLevel() + Boat.BOAT_HEIGHT * 1.5f);
+        charactersSpawnRangeY = Range.buildRangeEx(Constants.VIEWPORT_HEIGHT * 0.9f, Constants.VIEWPORT_HEIGHT);
 
         characters = new ArrayList<>();
         characterSpawner = new CharacterSpawner(this, charactersSpawnRangeX, charactersSpawnRangeY, Range.buildRangeEx(Difficulty.MIN_AI_SPAWN_PERIOD_AT_MIN_SCALING, Difficulty.MAX_AI_SPAWN_PERIOD_AT_MIN_SCALING));
