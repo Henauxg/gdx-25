@@ -526,8 +526,11 @@ public class CoreGame extends ApplicationAdapter {
             water.update();
             world.step(Constants.TIME_STEP, Constants.VELOCITY_ITERATIONS, Constants.POSITION_ITERATIONS);
             final boolean upsideDownBoat = boat.update();
-            if (upsideDownBoat) {
+            if (upsideDownBoat && !boat.isEaten()) {
+                monster.eat(boat);
                 gameState = GameState.GameOver;
+            } else if (gameState == GameState.GameOver && !boat.isEaten()) {
+                monster.eat(boat);
             }
             accumulator -= Constants.TIME_STEP;
         }
