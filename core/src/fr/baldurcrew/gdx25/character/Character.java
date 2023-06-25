@@ -27,7 +27,7 @@ public class Character implements Disposable, ContactHandler { // TODO Remove Ac
     private static final float MAX_X_MOVEMENT_VELOCITY = 5f;
     private static final float IN_WATER_FOR_A_MOMENT_DURATION = 1.5f;
     private static final float MAX_TIME_RECENT_BOAT_TOUCH = 1.5f;
-    private static final float AI_CHARACTER_DISTANCE_KILL_THRESHOLD = 1.5f;
+    private static final float AI_CHARACTER_DISTANCE_KILL_THRESHOLD = 0.5f;
     private static final float PLAYER_SPRITE_SCALE = 1.3f;
     private static final float AI_DENSITY_FACTOR = 0.35f;
     private final boolean aiControlled;
@@ -200,12 +200,35 @@ public class Character implements Disposable, ContactHandler { // TODO Remove Ac
         if (aiControlled) {
             moveState = ai.computeMoves(playerX, body.getPosition().x, hasTouchedBoatRecently);
         } else {
+            moveState = MoveState.IDLE;
+            if (Gdx.input.isTouched()) {
+
+                float xViewportPercent = (float) Gdx.input.getX() / (float) Gdx.graphics.getWidth();
+                float xWorld = xViewportPercent * Constants.VIEWPORT_WIDTH;
+
+                // Touch controller that goes where the touch is. Way too easy to control. Could reduce TOUCH_MOVE_DIST_THRESHOLD_X to something like 0.6f, but then it feels a bit clunky (threshold is not visible on the screen.
+                /**
+                 final float TOUCH_MOVE_DIST_THRESHOLD_X = 0.12f;
+                 if (xWorld >= this.getX() + TOUCH_MOVE_DIST_THRESHOLD_X) {
+                 moveState = MoveState.RIGHT;
+                 } else if (xWorld <= this.getX() - TOUCH_MOVE_DIST_THRESHOLD_X) {
+                 moveState = MoveState.LEFT;
+                 } else {
+                 moveState = MoveState.IDLE;
+                 }
+                 **/
+                // Touch controller "mobile" like. Two zones 1/3 of the screen each.
+                final float TOUCH_AREA_WIDTH = Constants.VIEWPORT_WIDTH / 3f;
+                if (xWorld <= TOUCH_AREA_WIDTH) {
+                    moveState = MoveState.LEFT;
+                } else if (xWorld >= Constants.VIEWPORT_WIDTH - TOUCH_AREA_WIDTH) {
+                    moveState = MoveState.RIGHT;
+                }
+            }
             if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
                 moveState = MoveState.LEFT;
             } else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
                 moveState = MoveState.RIGHT;
-            } else {
-                moveState = MoveState.IDLE;
             }
         }
     }
@@ -253,6 +276,10 @@ public class Character implements Disposable, ContactHandler { // TODO Remove Ac
         if (isAlive && aiControlled && Math.abs(getX() - Constants.VIEWPORT_WIDTH / 2f) >= Boat.BOAT_WIDTH / 2f + AI_CHARACTER_DISTANCE_KILL_THRESHOLD) {
             isAlive = false;
             game.aiCharacterDied(this);
+        }
+        if (isAlive && !aiControlled && Math.abs(getX() - Constants.VIEWPORT_WIDTH / 2f) >= Boat.BOAT_WIDTH) {
+            isAlive = false;
+            game.playerDied();
         }
 
         Vector2 velocity = body.getLinearVelocity();
