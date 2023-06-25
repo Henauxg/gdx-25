@@ -522,6 +522,8 @@ public class CoreGame extends ApplicationAdapter {
     public void dispose() {
         debugRenderer.dispose();
         timerRenderer.dispose();
+        beginText.dispose();
+        lostText.dispose();
         disposeCurrentLevel();
         imGuiGl3.dispose();
         imGuiGlfw.dispose();
