@@ -201,16 +201,18 @@ public class Character implements Disposable, ContactHandler { // TODO Remove Ac
             moveState = ai.computeMoves(playerX, body.getPosition().x, hasTouchedBoatRecently);
         } else {
             moveState = MoveState.IDLE;
-            if (Gdx.input.isTouched()) {
-                float xViewportPercent = (float) Gdx.input.getX() / (float) Gdx.graphics.getWidth();
-                float xWorld = xViewportPercent * Constants.VIEWPORT_WIDTH;
+            if (CoreGame.debugEnableTouchControl) {
+                if (Gdx.input.isTouched()) {
+                    float xViewportPercent = (float) Gdx.input.getX() / (float) Gdx.graphics.getWidth();
+                    float xWorld = xViewportPercent * Constants.VIEWPORT_WIDTH;
 
-                // Touch controller "mobile" like. Two zones 1/3 of the screen each.
-                final float TOUCH_AREA_WIDTH = Constants.VIEWPORT_WIDTH / 3f;
-                if (xWorld <= TOUCH_AREA_WIDTH) {
-                    moveState = MoveState.LEFT;
-                } else if (xWorld >= Constants.VIEWPORT_WIDTH - TOUCH_AREA_WIDTH) {
-                    moveState = MoveState.RIGHT;
+                    // Touch controller "mobile" like. Two zones 1/3 of the screen each.
+                    final float TOUCH_AREA_WIDTH = Constants.VIEWPORT_WIDTH / 3f;
+                    if (xWorld <= TOUCH_AREA_WIDTH) {
+                        moveState = MoveState.LEFT;
+                    } else if (xWorld >= Constants.VIEWPORT_WIDTH - TOUCH_AREA_WIDTH) {
+                        moveState = MoveState.RIGHT;
+                    }
                 }
             }
             if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {

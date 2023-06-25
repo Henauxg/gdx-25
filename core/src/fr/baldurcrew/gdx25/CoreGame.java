@@ -66,6 +66,8 @@ public class CoreGame extends ApplicationAdapter {
     public static boolean debugEnableFakeWaterVelocity = true;
     public static boolean debugEnableLiftForce = true;
     public static boolean debugEnableImGui = false;
+    public static boolean debugEnableDifficultyScaling = true;
+    public static boolean debugEnableTouchControl = true;
     public SpriteBatch spriteBatch;
     private List<ParallaxLayer> backgroundLayers;
     private List<ParallaxLayer> foregroundLayers;
@@ -114,7 +116,7 @@ public class CoreGame extends ApplicationAdapter {
     private float[] uiWaterWavesPropagationSpreadFactor = new float[1];
     private float[] uiWaterSpringsStiffness = new float[1];
     private float[] uiWaterSpringsDampeningFactor = new float[1];
-    private float[] uiWaterBaseWaterLevel = new float[1];
+    //    private float[] uiWaterBaseWaterLevel = new float[1];
     private float[] uiWaterDensity = new float[1];
     private float[] uiWaterFakeVelocityX = new float[1];
     private float[] uiWaterFakeVelocityY = new float[1];
@@ -238,7 +240,7 @@ public class CoreGame extends ApplicationAdapter {
         uiWaterWavesPropagationSpreadFactor[0] = water.getWavesPropagationSpreadFactor();
         uiWaterSpringsStiffness[0] = water.getSpringsStiffness();
         uiWaterSpringsDampeningFactor[0] = water.getSpringsDampening();
-        uiWaterBaseWaterLevel[0] = water.getWaterLevel();
+//        uiWaterBaseWaterLevel[0] = water.getWaterLevel();
         uiWaterDensity[0] = water.getDensity();
         uiWaterFakeVelocityX[0] = water.getFakeWaterVelocityX();
         uiWaterFakeVelocityY[0] = water.getFakeWaterVelocityY();
@@ -271,10 +273,6 @@ public class CoreGame extends ApplicationAdapter {
             ScreenUtils.clear(CLEAR_COLOR);
         }
 
-        if (debugMode) {
-            debugRenderer.render(world, camera.combined);
-        }
-
         spriteBatch.begin();
         spriteBatch.setProjectionMatrix(camera.combined);
         backgroundLayers.forEach(l -> l.render(camera, spriteBatch, deltaTime));
@@ -302,6 +300,10 @@ public class CoreGame extends ApplicationAdapter {
             }
         }
         spriteBatch.end();
+
+        if (debugMode) {
+            debugRenderer.render(world, camera.combined);
+        }
 
         renderImGui();
     }
@@ -375,9 +377,9 @@ public class CoreGame extends ApplicationAdapter {
         if (ImGui.sliderFloat("Water Density", uiWaterDensity, 0, 1)) {
             water.setDensity(uiWaterDensity[0]);
         }
-        if (ImGui.sliderFloat("Base Level", uiWaterBaseWaterLevel, 0.5f, Constants.VIEWPORT_HEIGHT)) {
-            water.setBaseWaterLevel(uiWaterBaseWaterLevel[0]);
-        }
+//        if (ImGui.sliderFloat("Base Level", uiWaterBaseWaterLevel, 0.5f, Constants.VIEWPORT_HEIGHT)) {
+//            water.setBaseWaterLevel(uiWaterBaseWaterLevel[0]);
+//        }
         ImGui.text("Water waves");
         if (ImGui.dragInt("Waves Propagation", uiWaterWavesPropagationPasses, 1, 1, 10)) {
             water.setWavesPropagationPasses(uiWaterWavesPropagationPasses[0]);
@@ -417,6 +419,12 @@ public class CoreGame extends ApplicationAdapter {
         if (ImGui.checkbox("White Clear Color", debugClearColor)) {
             debugClearColor = !debugClearColor;
         }
+        if (ImGui.checkbox("Difficulty scaling", debugEnableDifficultyScaling)) {
+            debugEnableDifficultyScaling = !debugEnableDifficultyScaling;
+        }
+        if (ImGui.checkbox("Touch control", debugEnableTouchControl)) {
+            debugEnableTouchControl = !debugEnableTouchControl;
+        }
         uiSailingTime[0] = sailingTime;
         if (ImGui.sliderFloat("Sailing time", uiSailingTime, 0, Difficulty.MAX_SAILING_TIME_SCALING)) {
             this.setSailingTime(uiSailingTime[0]);
@@ -430,6 +438,8 @@ public class CoreGame extends ApplicationAdapter {
     }
 
     private void updateDifficulty(float sailingTime) {
+        if (!debugEnableDifficultyScaling) return;
+
         // Difficulty could be clamped at MAX_DIFFICULTY_FACTOR. But maybe not ?
         difficultyFactor = Difficulty.STARTING_DIFFICULTY_FACTOR + (Difficulty.MAX_DIFFICULTY_FACTOR - Difficulty.STARTING_DIFFICULTY_FACTOR) * sailingTime / Difficulty.MAX_SAILING_TIME_SCALING;
         var difficultyMultiplier = (difficultyFactor - Difficulty.STARTING_DIFFICULTY_FACTOR) / (Difficulty.MAX_DIFFICULTY_FACTOR - Difficulty.STARTING_DIFFICULTY_FACTOR);
@@ -478,10 +488,13 @@ public class CoreGame extends ApplicationAdapter {
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.F2)) {
             debugEnableImGui = !debugEnableImGui;
+            if (debugEnableImGui)
+                debugEnableTouchControl = false; // Disable touch controls when enabling ImGui since touch events are not captured.
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.F3)) {
             disposeCurrentLevel();
             createTestLevel();
+            gameState = GameState.WaitingToStart;
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.F4)) {
             playerCharacter = this.spawnCharacter(CharacterResources.getPlayerCharacterIndex(), false, charactersSpawnRangeX.getRandom(), charactersSpawnRangeY.getRandom());
