@@ -1,5 +1,6 @@
 package fr.baldurcrew.gdx25.boat;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -8,8 +9,10 @@ import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Disposable;
 import fr.baldurcrew.gdx25.Constants;
 import fr.baldurcrew.gdx25.CoreGame;
+import fr.baldurcrew.gdx25.monster.Eatable;
+import fr.baldurcrew.gdx25.monster.Monster;
 
-public class Boat implements Disposable {
+public class Boat implements Disposable, Eatable {
 
     public static final float BOAT_HEIGHT = 5f;
     public static final float ASPECT_RATIO = 1.07f;
@@ -29,6 +32,13 @@ public class Boat implements Disposable {
     private float restitution = 0.3f;
     private float friction = 0.25f;
 
+    private boolean freezeY;
+    private float freezeToY;
+    private boolean eaten;
+    private float startingY;
+    private float yToBeEaten;
+    private float deathByKrakenTranslationTimer;
+
     public Boat(World world, float centerX, float centerY) {
         boatTexture = new Texture("blue_boat.png");
         boatSprite = new Sprite(boatTexture);
@@ -40,6 +50,8 @@ public class Boat implements Disposable {
         body = createBody(world, centerX, centerY);
         upsideDownTimer = 0f;
         upsideDown = false;
+        freezeY = false;
+        eaten = false;
     }
 
     private Body createBody(World world, float centerX, float centerY) {
@@ -52,12 +64,7 @@ public class Boat implements Disposable {
         body.setUserData(this);
 
         final var boatPolygon = new PolygonShape();
-        float[] vertices = new float[]{
-                -BOAT_WIDTH / 2f, 0,
-                -BOAT_WIDTH / 3f, -BOAT_HEIGHT / 3f,
-                0, -2f,
-                BOAT_WIDTH / 3f, -BOAT_HEIGHT / 3f,
-                BOAT_WIDTH / 2.2f, 0};
+        float[] vertices = new float[]{-BOAT_WIDTH / 2f, 0, -BOAT_WIDTH / 3f, -BOAT_HEIGHT / 3f, 0, -2f, BOAT_WIDTH / 3f, -BOAT_HEIGHT / 3f, BOAT_WIDTH / 2.2f, 0};
         boatPolygon.set(vertices);
 
         final var fixtureDef = new FixtureDef();
@@ -98,6 +105,16 @@ public class Boat implements Disposable {
     public boolean update() {
         // Force the boat x position.
         body.setTransform(Constants.VIEWPORT_WIDTH / 2f, body.getPosition().y, body.getAngle()); // TODO Clean
+
+        if (eaten) {
+            deathByKrakenTranslationTimer += Gdx.graphics.getDeltaTime();
+            var y = startingY + ((yToBeEaten - startingY) * (deathByKrakenTranslationTimer / Monster.UP_TRANSLATION_ANIMATION_DURATION));
+            body.setTransform(Constants.VIEWPORT_WIDTH / 2f, y, body.getAngle());
+        }
+
+        if (freezeY) {
+            body.setTransform(Constants.VIEWPORT_WIDTH / 2f, freezeToY, body.getAngle());
+        }
 
         // Check for Upside down boat
         final var clampedAngle = Math.abs(Math.toDegrees(body.getAngle()) % 360);
@@ -153,5 +170,33 @@ public class Boat implements Disposable {
 
     public void setAngularDamping(float v) {
         this.body.setAngularDamping(v);
+    }
+
+    @Override
+    public float getX() {
+        return body.getPosition().x;
+    }
+
+    @Override
+    public void freezeY(float y) {
+        this.freezeY = true;
+        this.freezeToY = y;
+    }
+
+    @Override
+    public void prepareToBeEaten(float yToBeEaten) {
+        this.eaten = true;
+        this.startingY = body.getPosition().y;
+        this.yToBeEaten = yToBeEaten;
+        this.deathByKrakenTranslationTimer = 0f;
+    }
+
+    @Override
+    public float getMealSizeFactor() {
+        return 1.5f;
+    }
+
+    public boolean isEaten() {
+        return eaten;
     }
 }

@@ -14,6 +14,7 @@ import fr.baldurcrew.gdx25.Constants;
 import fr.baldurcrew.gdx25.CoreGame;
 import fr.baldurcrew.gdx25.boat.Boat;
 import fr.baldurcrew.gdx25.character.ai.AiController;
+import fr.baldurcrew.gdx25.monster.Eatable;
 import fr.baldurcrew.gdx25.monster.Monster;
 import fr.baldurcrew.gdx25.physics.ContactHandler;
 import fr.baldurcrew.gdx25.physics.FixtureContact;
@@ -22,7 +23,7 @@ import fr.baldurcrew.gdx25.water.WaterSimulation;
 import java.util.HashSet;
 import java.util.Set;
 
-public class Character implements Disposable, ContactHandler { // TODO Remove Actor since unused
+public class Character implements Disposable, ContactHandler, Eatable {
 
     private static final float MAX_X_MOVEMENT_VELOCITY = 5f;
     private static final float IN_WATER_FOR_A_MOMENT_DURATION = 1.5f;
@@ -414,6 +415,11 @@ public class Character implements Disposable, ContactHandler { // TODO Remove Ac
         this.startingY = this.getY();
         this.yToBeEaten = yToBeEaten;
         this.deathByKrakenTranslationTimer = 0;
+    }
+
+    @Override
+    public float getMealSizeFactor() {
+        return 1f;
     }
 
     private float getY() {

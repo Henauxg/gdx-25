@@ -8,7 +8,6 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
-import fr.baldurcrew.gdx25.character.Character;
 
 import static fr.baldurcrew.gdx25.CoreGame.DEFAULT_AUDIO_VOLUME;
 
@@ -32,7 +31,8 @@ public class Monster {
     private TextureRegion idleTentacleFrame;
     private float xTentacle;
     private float yTentacle = TENTACLE_HIGH_POSITION_Y;
-    private Character currentMeal;
+    private Eatable currentMeal;
+    private float mealSizeFactor;
 
 
     public Monster() {
@@ -89,7 +89,7 @@ public class Monster {
             }
             case DOWN_TRANSLATION -> {
                 animationTime += Gdx.graphics.getDeltaTime();
-                yTentacle = TENTACLE_HIGH_POSITION_Y + animationTime * (TENTACLE_LOW_POSITION_Y - TENTACLE_HIGH_POSITION_Y) / DOWN_TRANSLATION_ANIMATION_DURATION;
+                yTentacle = TENTACLE_HIGH_POSITION_Y + animationTime * (mealSizeFactor * TENTACLE_LOW_POSITION_Y - TENTACLE_HIGH_POSITION_Y) / DOWN_TRANSLATION_ANIMATION_DURATION;
                 currentMeal.freezeY(yTentacle + TENTACLE_HEIGHT * TENTACLE_GRAB_Y_FACTOR);
                 if (animationTime >= DOWN_TRANSLATION_ANIMATION_DURATION) {
                     state = AnimationState.IDLE;
@@ -99,20 +99,21 @@ public class Monster {
         }
         animationTime += Gdx.graphics.getDeltaTime();
         if (state != AnimationState.IDLE) {
-            spriteBatch.draw(frame, xTentacle, yTentacle, TENTACLE_WIDTH, TENTACLE_HEIGHT);
+            spriteBatch.draw(frame, xTentacle, yTentacle, TENTACLE_WIDTH * mealSizeFactor, TENTACLE_HEIGHT * mealSizeFactor);
         }
     }
 
-    public boolean eat(Character character) {
+    public boolean eat(Eatable eatable) {
         if (state != AnimationState.IDLE) {
             return false;
         }
-        currentMeal = character;
-        character.prepareToBeEaten(TENTACLE_GRAB_Y_FACTOR * TENTACLE_HEIGHT + TENTACLE_HIGH_POSITION_Y);
+        currentMeal = eatable;
+        mealSizeFactor = eatable.getMealSizeFactor();
+        eatable.prepareToBeEaten(TENTACLE_GRAB_Y_FACTOR * TENTACLE_HEIGHT + TENTACLE_HIGH_POSITION_Y);
         getRandomSpawnSound().play(DEFAULT_AUDIO_VOLUME);
         state = AnimationState.UP_TRANSLATION;
         idleTentacleFrame = tentacleAnimation.getKeyFrames()[0];
-        xTentacle = character.getX() - TENTACLE_WIDTH / 2f;
+        xTentacle = eatable.getX() - mealSizeFactor * TENTACLE_WIDTH / 2f;
         yTentacle = -TENTACLE_HEIGHT;
         animationTime = 0;
         return true;
