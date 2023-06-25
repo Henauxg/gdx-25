@@ -280,19 +280,22 @@ public class CoreGame extends ApplicationAdapter {
         water.render(camera);
 
         spriteBatch.begin();
-        var textAsTextureRenderWidth = 10f;
-        var textAsTextureRenderHeight = textAsTextureRenderWidth / 4f;
+        float textAsTextureRenderWidth = 10f;
+        float textAsTextureRenderHeight = textAsTextureRenderWidth / 4f;
         switch (gameState) {
-            case WaitingToStart -> {
+            case WaitingToStart: {
                 spriteBatch.draw(beginText, camera.viewportWidth / 2f - textAsTextureRenderWidth / 2f, camera.viewportHeight / 4f, textAsTextureRenderWidth, textAsTextureRenderHeight);
             }
-            case Playing -> {
+            break;
+            case Playing: {
                 timerRenderer.renderTimer(spriteBatch, camera.viewportWidth / 2f, camera.viewportHeight * 0.9f, 1.5f, sailingTime);
             }
-            case GameOver -> {
+            break;
+            case GameOver: {
                 timerRenderer.renderTimer(spriteBatch, camera.viewportWidth / 2f, camera.viewportHeight * 0.9f, 1.5f, sailingTime);
                 spriteBatch.draw(lostText, camera.viewportWidth / 2f - textAsTextureRenderWidth / 2f, camera.viewportHeight / 4f, textAsTextureRenderWidth, textAsTextureRenderHeight);
             }
+            break;
         }
         spriteBatch.end();
 
